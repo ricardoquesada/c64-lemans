@@ -1980,43 +1980,43 @@ _L21    LDA #$00     ;#%00000000
         STA a2D
         JSR sF227
 _L22    LDX #$03     ;#%00000011
-jF046   TXA
+_L23    TXA
         ASL A
         STA a49
         TAY
         LDA $D001,Y  ;Sprite 0 Y Pos
         CMP #$1D     ;#%00011101
-        BCC bF066
+        BCC _L26
         CMP #$32     ;#%00110010
-        BCC bF061
+        BCC _L25
         CPX a5A
-        BNE bF05E
+        BNE _L24
         LDA #$04     ;#%00000100
         STA a5A
-bF05E   JMP jF0E2
+_L24    JMP _L30
 
-bF061   STX a5A
-        JMP jF0E2
+_L25    STX a5A
+        JMP _L30
 
-bF066   LDA #$00     ;#%00000000
+_L26    LDA #$00     ;#%00000000
         STA f6B,X
         CPX a5A
-        BNE bF079
+        BNE _L28
         LDA f30,X
-        BNE jF0E2
+        BNE _L30
         LDA #$04     ;#%00000100
         STA a5A
-bF076   JMP jF10C
+_L27    JMP _L32
 
-bF079   LDA a5A
+_L28    LDA a5A
         CMP #$04     ;#%00000100
-        BNE bF076
+        BNE _L27
         LDA f30,X
-        BEQ bF076
+        BEQ _L27
         JSR sE734
         LDA a08
         AND #$1F     ;#%00011111
-        BNE bF076
+        BNE _L27
         STX a5A
         JSR sE734
         LDA a08
@@ -2026,10 +2026,10 @@ bF079   LDA a5A
         STA $D027,X  ;Sprite 0 Color
         LDA aAB
         CMP #$06     ;#%00000110
-        BEQ bF0CE
+        BEQ _L29
         LDA aC3
         CMP #$06     ;#%00000110
-        BEQ bF0CE
+        BEQ _L29
         JSR sE734
         LDA a08
         AND #$3F     ;#%00111111
@@ -2047,9 +2047,9 @@ bF079   LDA a5A
         TAY
         DEY
         STY f4E,X
-        JMP jF0E2
+        JMP _L30
 
-bF0CE   JSR sE734
+_L29    JSR sE734
         LDA a08
         AND #$03     ;#%00000011
         TAY
@@ -2058,9 +2058,9 @@ bF0CE   JSR sE734
         STA $D000,Y  ;Sprite 0 X Pos
         LDA #$01     ;#%00000001
         STA f5D,X
-jF0E2   LDY a49
+_L30    LDY a49
         LDA a4D
-        BNE bF0FA
+        BNE _L31
         LDA f34,X
         CLC
         ADC a2C
@@ -2068,59 +2068,59 @@ jF0E2   LDY a49
         LDA $D001,Y  ;Sprite 0 Y Pos
         ADC a2D
         STA $D001,Y  ;Sprite 0 Y Pos
-        JMP jF113
+        JMP _L33
 
-bF0FA   LDA f34,X
+_L31    LDA f34,X
         SEC
         SBC a2C
         STA f34,X
         LDA $D001,Y  ;Sprite 0 Y Pos
         SBC a2D
         STA $D001,Y  ;Sprite 0 Y Pos
-        JMP jF113
+        JMP _L33
 
-jF10C   LDY a49
+_L32    LDY a49
         LDA #$19     ;#%00011001
         STA $D001,Y  ;Sprite 0 Y Pos
-jF113   LDA a1A
+_L33    LDA a1A
         CMP #$04     ;#%00000100
-        BNE bF136
+        BNE _L34
         LDA a24
         CMP #$C8     ;#%11001000
-        BCC bF136
+        BCC _L34
         LDA $D000,Y  ;Sprite 0 X Pos
         CMP #$6B     ;#%01101011
-        BCC bF161
+        BCC _L36
         CMP #$B3     ;#%10110011
-        BCS bF161
+        BCS _L36
         LDA $D000,Y  ;Sprite 0 X Pos
         CLC
         ADC f4E,X
         STA $D000,Y  ;Sprite 0 X Pos
-        JMP bF161
+        JMP _L36
 
-bF136   LDA f5D,X
-        BNE bF161
+_L34    LDA f5D,X
+        BNE _L36
         LDA a1A
         CMP #$06     ;#%00000110
-        BEQ bF161
+        BEQ _L36
         LDA aC3
         CMP #$06     ;#%00000110
-        BEQ bF161
+        BEQ _L36
         LDA $D000,Y  ;Sprite 0 X Pos
         CLC
         ADC f4E,X
         STA $D000,Y  ;Sprite 0 X Pos
         CMP #$67     ;#%01100111
-        BCS bF159
+        BCS _L35
         LDA #$01     ;#%00000001
         STA f4E,X
-        BNE bF161
-bF159   CMP #$B7     ;#%10110111
-        BCC bF161
+        BNE _L36
+_L35    CMP #$B7     ;#%10110111
+        BCC _L36
         LDA #$FF     ;#%11111111
         STA f4E,X
-bF161   LDY a49
+_L36    LDY a49
         LDA $D001,Y  ;Sprite 0 Y Pos
         LSR A
         LSR A
@@ -2130,38 +2130,38 @@ bF161   LDY a49
         TAY
         LDA f00AB,Y
         CMP #$02     ;#%00000010
-        BNE bF17B
+        BNE _L37
         LDA #$FA     ;#%11111010
         STA a07F8,X
-        BNE bF180
-bF17B   LDA #$F6     ;#%11110110
+        BNE _L38
+_L37    LDA #$F6     ;#%11110110
         STA a07F8,X
-bF180   LDY a49
+_L38    LDY a49
         LDA $D001,Y  ;Sprite 0 Y Pos
         CMP #$32     ;#%00110010
-        BCC bF191
+        BCC _L39
         CMP #$3C     ;#%00111100
-        BCS bF191
+        BCS _L39
         LDA #$01     ;#%00000001
         STA f6B,X
-bF191   LDA $D001,Y  ;Sprite 0 Y Pos
+_L39    LDA $D001,Y  ;Sprite 0 Y Pos
         CMP $D00F    ;Sprite 7 Y Pos
-        BCC bF1B0
+        BCC _L40
         LDA f6B,X
-        BEQ bF1B0
+        BEQ _L40
         LDA #$00     ;#%00000000
         STA f6B,X
         INC a6F
         LDA a6F
         CMP #$0A     ;#%00001010
-        BCC bF1B0
+        BCC _L40
         LDY #$00     ;#%00000000
         STY a6F
         INY
         STY a70
-bF1B0   DEX
+_L40    DEX
         BMI bF1B6
-        JMP jF046
+        JMP _L23
 
 bF1B6   LDY a4B
         INY
