@@ -145,102 +145,43 @@ f0092 = $0092
 f0093 = $0093
 f00AB = $00AB
 f00AC = $00AC
-f0400 = $0400
-f0404 = $0404
-f0408 = $0408
-f040C = $040C
-f0410 = $0410
-f0428 = $0428
+SCREEN_RAM = $0400
 f0448 = $0448
-f0450 = $0450
-f0478 = $0478
-f04A0 = $04A0
 f04C0 = $04C0
-f04C8 = $04C8
-f04F0 = $04F0
-f0500 = $0500
-f0518 = $0518
 f0538 = $0538
-f0540 = $0540
-f0568 = $0568
-f0590 = $0590
 f05B0 = $05B0
-f05B8 = $05B8
 f05D8 = $05D8
 f05D9 = $05D9
-f05E0 = $05E0
-f0600 = $0600
 f0601 = $0601
-f0608 = $0608
-f0630 = $0630
 f0650 = $0650
-f0658 = $0658
 f0678 = $0678
-f0680 = $0680
-f06A8 = $06A8
-f06D0 = $06D0
-f06E8 = $06E8
-f06F8 = $06F8
-f0720 = $0720
-f0748 = $0748
-f0770 = $0770
-f0798 = $0798
 f07B8 = $07B8
-f07C0 = $07C0
 f07E0 = $07E0
-fD800 = $D800
-fD801 = $D801
-fD804 = $D804
-fD808 = $D808
-fD813 = $D813
-fD828 = $D828
+COLOR_RAM = $D800
 fD848 = $D848
-fD850 = $D850
 fD870 = $D870
-fD878 = $D878
-fD8A0 = $D8A0
 fD8C0 = $D8C0
-fD8C8 = $D8C8
 fD8E8 = $D8E8
-fD8F0 = $D8F0
 fD900 = $D900
-fD918 = $D918
 fD938 = $D938
-fD940 = $D940
 fD960 = $D960
-fD968 = $D968
-fD990 = $D990
 fD9B0 = $D9B0
-fD9B8 = $D9B8
 fD9D8 = $D9D8
-fD9E0 = $D9E0
 fDA00 = $DA00
-fDA08 = $DA08
-fDA30 = $DA30
 fDA34 = $DA34
 fDA50 = $DA50
-fDA58 = $DA58
 fDA5C = $DA5C
 fDA78 = $DA78
-fDA80 = $DA80
 fDAA0 = $DAA0
-fDAA8 = $DAA8
 fDAC8 = $DAC8
-fDAD0 = $DAD0
 fDAD8 = $DAD8
 fDAE8 = $DAE8
 fDAF0 = $DAF0
-fDAF8 = $DAF8
 fDB00 = $DB00
 fDB18 = $DB18
-fDB20 = $DB20
 fDB40 = $DB40
-fDB48 = $DB48
 fDB68 = $DB68
-fDB70 = $DB70
-fDB98 = $DB98
 fDBB8 = $DBB8
-fDBC0 = $DBC0
 fDBE0 = $DBE0
 ;
 ; **** ABSOLUTE ADRESSES ****
@@ -269,6 +210,7 @@ pD807 = $D807
 
         * = $E000
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 IRQ_HANDLER
         PHA
         TXA
@@ -277,22 +219,29 @@ IRQ_HANDLER
         PHA
         JMP (p0002)
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 IRQ_HANDLER_MAIN
         LDA a11
-        BEQ bE00F
+        BEQ _L00
+
         JSR sF5A9
-bE00F   INC a14
+
+_L00    INC a14
         INC a14
         LDA a14
         CMP #$3C     ;#%00111100
-        BCC bE020
+        BCC _L01
+
         LDY #$00     ;#%00000000
         STY a14
         INY
         STY a15
-bE020   LDA #$01     ;#%00000001
+
+_L01    LDA #$01     ;#%00000001
         STA a19
+
         LDA $DC0D    ;CIA1: CIA Interrupt Control Register
+
         PLA
         TAY
         PLA
@@ -516,7 +465,7 @@ bE1A4   STA $D400,Y  ;Voice 1: Frequency Control - Low-Byte
         LDX #$0F     ;#%00001111
 bE1E7   STX a23
         JSR sE889
-        JSR sE5F4
+        JSR SCROLL_DOWN
         LDY #$01     ;#%00000001
         JSR sE45B
         LDX a23
@@ -538,9 +487,9 @@ jE205   STX a23
         BNE bE26B
         LDY #$1F     ;#%00011111
 bE219   LDA fECAB,Y
-        STA f0400,Y
+        STA SCREEN_RAM,Y
         LDA #$0A     ;#%00001010
-        STA fD800,Y
+        STA COLOR_RAM,Y
         DEY
         BPL bE219
         BMI bE26E
@@ -550,9 +499,9 @@ bE22E   TYA
         AND #$01     ;#%00000001
         CLC
         ADC #$2D     ;#%00101101
-        STA f0404,Y
+        STA SCREEN_RAM+4,Y
         LDA #$08     ;#%00001000
-        STA fD804,Y
+        STA COLOR_RAM+4,Y
         DEY
         BPL bE22E
         BMI bE26E
@@ -562,22 +511,22 @@ bE246   TYA
         AND #$01     ;#%00000001
         CLC
         ADC #$2B     ;#%00101011
-        STA f0404,Y
+        STA SCREEN_RAM+4,Y
         LDA #$08     ;#%00001000
-        STA fD804,Y
+        STA COLOR_RAM+4,Y
         DEY
         BPL bE246
         BMI bE26E
 bE259   LDY #$1F     ;#%00011111
 bE25B   LDA fEC8B,Y
-        STA f0400,Y
+        STA SCREEN_RAM,Y
         LDA #$0A     ;#%00001010
-        STA fD800,Y
+        STA COLOR_RAM,Y
         DEY
         BPL bE25B
         BMI bE26E
 bE26B   JSR sE889
-bE26E   JSR sE5F4
+bE26E   JSR SCROLL_DOWN
         LDX a23
         TXA
         CLC
@@ -671,6 +620,7 @@ fE33C   .BYTE $DA,$DA,$DA,$DA
 fE340   .BYTE $0B,$0F,$0A,$0A
 fE344   .BYTE $59,$2C,$2C,$2C
 fE348   .BYTE $10,$00,$00,$00
+
 jE34C   LDA #$07     ;#%00000111
         STA a1A
         LDX #$00     ;#%00000000
@@ -680,14 +630,14 @@ bE352   STX a23
         LDY fE43D,X
         LDX #$00     ;#%00000000
 bE35E   LDA fE3AD,Y
-        STA f0408,X
+        STA SCREEN_RAM+8,X
         LDA #$03     ;#%00000011
-        STA fD808,X
+        STA COLOR_RAM+8,X
         INY
         INX
         CPX #$10     ;#%00010000
         BCC bE35E
-        JSR sE5F4
+        JSR SCROLL_DOWN
         LDY #$02     ;#%00000010
         JSR sE45B
         LDX a23
@@ -697,7 +647,7 @@ bE35E   LDA fE3AD,Y
         LDX #$03     ;#%00000011
 bE380   STX a23
         JSR sE889
-        JSR sE5F4
+        JSR SCROLL_DOWN
         LDY #$02     ;#%00000010
         JSR sE45B
         LDX a23
@@ -735,6 +685,7 @@ fE3AD   .BYTE $1B,$03,$1C,$20,$22,$2A,$29,$23
         .BYTE $20,$20,$20,$20,$20,$20,$20,$20
 fE43D   .BYTE $80,$70,$60,$50,$80,$80,$80,$40
         .BYTE $80,$30,$80,$20,$10,$80,$00,$80
+
 sE44D   LDA #$00     ;#%00000000
         STA a14
         STA a15
@@ -753,10 +704,10 @@ bE45F   LDA a19
         RTS
 
 sE467   LDY #$00     ;#%00000000
-bE469   STA f0400,Y
-        STA f0500,Y
-        STA f0600,Y
-        STA f06E8,Y
+bE469   STA SCREEN_RAM,Y
+        STA SCREEN_RAM+$0100,Y
+        STA SCREEN_RAM+$0200,Y
+        STA SCREEN_RAM+$02E8,Y
         INY
         BNE bE469
         RTS
@@ -772,7 +723,7 @@ sE479   LDA #$44     ;#%01000100
         STA $D023    ;Background Color 2, Multi-Color Register 1
         LDA #$0C     ;#%00001100
         LDY #$00     ;#%00000000
-bE494   STA fD800,Y
+bE494   STA COLOR_RAM,Y
         STA fD900,Y
         STA fDA00,Y
         STA fDAE8,Y
@@ -842,9 +793,9 @@ bE4C8   LDA fE5D4,Y
         STY a0607
         JSR sE753
         JSR sE808
-        LDA #<f0400  ;#%00000000
+        LDA #<SCREEN_RAM  ;#%00000000
         STA a04
-        LDA #>f0400  ;#%00000100
+        LDA #>SCREEN_RAM  ;#%00000100
         STA a05
         LDX #$18     ;#%00011000
 bE547   LDY #$03     ;#%00000011
@@ -928,116 +879,36 @@ fE5D4   .BYTE $20,$13,$03,$0F,$12,$05,$20,$20
 fE5DC   .BYTE $20,$20,$14,$09,$0D,$05,$20,$20
 fE5E4   .BYTE $08,$09,$1F,$13,$03,$0F,$12,$05
 fE5EC   .BYTE $20,$13,$10,$05,$05,$04,$20,$20
-sE5F4   LDY #$1F     ;#%00011111
-jE5F6   LDA f0798,Y
-        STA f07C0,Y
-        LDA f0770,Y
-        STA f0798,Y
-        LDA f0748,Y
-        STA f0770,Y
-        LDA f0720,Y
-        STA f0748,Y
-        LDA f06F8,Y
-        STA f0720,Y
-        LDA f06D0,Y
-        STA f06F8,Y
-        LDA f06A8,Y
-        STA f06D0,Y
-        LDA f0680,Y
-        STA f06A8,Y
-        LDA f0658,Y
-        STA f0680,Y
-        LDA f0630,Y
-        STA f0658,Y
-        LDA f0608,Y
-        STA f0630,Y
-        LDA f05E0,Y
-        STA f0608,Y
-        LDA f05B8,Y
-        STA f05E0,Y
-        LDA f0590,Y
-        STA f05B8,Y
-        LDA f0568,Y
-        STA f0590,Y
-        LDA f0540,Y
-        STA f0568,Y
-        LDA f0518,Y
-        STA f0540,Y
-        LDA f04F0,Y
-        STA f0518,Y
-        LDA f04C8,Y
-        STA f04F0,Y
-        LDA f04A0,Y
-        STA f04C8,Y
-        LDA f0478,Y
-        STA f04A0,Y
-        LDA f0450,Y
-        STA f0478,Y
-        LDA f0428,Y
-        STA f0450,Y
-        LDA f0400,Y
-        STA f0428,Y
-        LDA fDB98,Y
-        STA fDBC0,Y
-        LDA fDB70,Y
-        STA fDB98,Y
-        LDA fDB48,Y
-        STA fDB70,Y
-        LDA fDB20,Y
-        STA fDB48,Y
-        LDA fDAF8,Y
-        STA fDB20,Y
-        LDA fDAD0,Y
-        STA fDAF8,Y
-        LDA fDAA8,Y
-        STA fDAD0,Y
-        LDA fDA80,Y
-        STA fDAA8,Y
-        LDA fDA58,Y
-        STA fDA80,Y
-        LDA fDA30,Y
-        STA fDA58,Y
-        LDA fDA08,Y
-        STA fDA30,Y
-        LDA fD9E0,Y
-        STA fDA08,Y
-        LDA fD9B8,Y
-        STA fD9E0,Y
-        LDA fD990,Y
-        STA fD9B8,Y
-        LDA fD968,Y
-        STA fD990,Y
-        LDA fD940,Y
-        STA fD968,Y
-        LDA fD918,Y
-        STA fD940,Y
-        LDA fD8F0,Y
-        STA fD918,Y
-        LDA fD8C8,Y
-        STA fD8F0,Y
-        LDA fD8A0,Y
-        STA fD8C8,Y
-        LDA fD878,Y
-        STA fD8A0,Y
-        LDA fD850,Y
-        STA fD878,Y
-        LDA fD828,Y
-        STA fD850,Y
-        LDA fD800,Y
-        STA fD828,Y
-        DEY
-        BMI bE71C
-        JMP jE5F6
 
-bE71C   LDY #$17     ;#%00010111
-bE71E   LDA f0079,Y
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+SCROLL_DOWN
+        LDY #$1F     ;#%00011111
+_L00
+        ; Screen RAM
+        .FOR I:=23, I>=0, I-=1
+        LDA SCREEN_RAM+40*I,Y
+        STA SCREEN_RAM+40*(I+1),Y
+        .NEXT
+
+        ; Color RAM
+        .FOR I:=23, I>=0, I-=1
+        LDA COLOR_RAM+40*I,Y
+        STA COLOR_RAM+40*(I+1),Y
+        .NEXT
+
+        DEY
+        BMI _L01
+        JMP _L00
+
+_L01    LDY #$17     ;#%00010111
+_L02    LDA f0079,Y
         STA f007A,Y
         LDA f0092,Y
         STA f0093,Y
         LDA f00AB,Y
         STA f00AC,Y
         DEY
-        BPL bE71E
+        BPL _L02
         RTS
 
 sE734   STY a4A
@@ -1178,20 +1049,20 @@ sE808   LDX #$00     ;#%00000000
         DEX
         DEX
 sE831   LDA a21
-        BNE bE83D
+        BNE _L00
         LDY a0D
-        BNE bE83D
+        BNE _L00
         LDY #$0A     ;#%00001010
-        BNE bE842
-bE83D   TAY
+        BNE _L01
+_L00    TAY
         LDA #$01     ;#%00000001
         STA a0D
-bE842   LDA fE85D,Y
+_L01    LDA fE85D,Y
         STA f05D8,X
         LDA fE868,Y
         STA f05D9,X
         LDA fE873,Y
-        STA f0600,X
+        STA SCREEN_RAM+$0200,X
         LDA fE87E,Y
         STA f0601,X
         INX
@@ -1206,122 +1077,126 @@ fE873   .BYTE $5D,$6F,$63,$65,$69,$65,$63,$6F
         .BYTE $63,$65,$6F
 fE87E   .BYTE $5E,$60,$64,$66,$6A,$66,$66,$60
         .BYTE $66,$66,$70
+
 sE889   LDA a25
-        BEQ bE88F
+        BEQ _L00
         DEC a25
-bE88F   LDY #$1F     ;#%00011111
-        LDA #$44     ;#%01000100
-bE893   STA f0400,Y
+
+        ; Paint top row with "full" characters
+_L00    LDY #$1F     ;#%00011111
+        LDA #$44     ;"Full" character
+_L01    STA SCREEN_RAM,Y
         DEY
-        BPL bE893
+        BPL _L01
+
         LDY a1A
         LDA fEA9E,Y
         LDX #$1F     ;#%00011111
-bE8A0   STA fD800,X
+_L02    STA COLOR_RAM,X
         DEX
-        BPL bE8A0
+        BPL _L02
         INC a20
         LDA a20
         AND #$03     ;#%00000011
         STA a20
         LDA a1A
         CMP #$05     ;#%00000101
-        BCC bE8B7
+        BCC _L03
         JMP jE972
 
-bE8B7   LDA a1E
+_L03    LDA a1E
         CMP #$10     ;#%00010000
-        BCS bE8BF
+        BCS _L04
         INC a1E
-bE8BF   LDA a1F
+_L04    LDA a1F
         CMP #$54     ;#%01010100
-        BCS bE8CA
+        BCS _L05
         INC a1F
         JMP jE9BF
 
-bE8CA   INC a1B
+_L05    INC a1B
         LDA a1B
         CMP #$08     ;#%00001000
-        BCC bE90F
+        BCC _L09
         LDA #$00     ;#%00000000
         STA a1B
         LDA a1A
         CMP #$03     ;#%00000011
-        BCS bE92C
+        BCS _L12
         CMP #$02     ;#%00000010
-        BNE bE8E4
+        BNE _L06
         LDA #$14     ;#%00010100
         STA a25
-bE8E4   JSR sE734
+_L06    JSR sE734
         LDA a08
         AND #$03     ;#%00000011
-        BEQ bE90F
+        BEQ _L09
         CMP #$03     ;#%00000011
-        BEQ bE90F
+        BEQ _L09
         CMP #$01     ;#%00000001
-        BNE bE912
+        BNE _L10
         LDA a1E
         SEC
         SBC #$01     ;#%00000001
         CMP #$10     ;#%00010000
-        BCS bE900
+        BCS _L07
         LDA #$10     ;#%00010000
-bE900   STA a1E
+_L07    STA a1E
         LDA a1F
         CLC
         ADC #$01     ;#%00000001
         CMP #$64     ;#%01100100
-        BCC bE90D
+        BCC _L08
         LDA #$64     ;#%01100100
-bE90D   STA a1F
-bE90F   JMP jE9BF
+_L08    STA a1F
+_L09    JMP jE9BF
 
-bE912   LDA a1E
+_L10    LDA a1E
         CLC
         ADC #$01     ;#%00000001
         CMP #$20     ;#%00100000
-        BCC bE91D
+        BCC _L11
         LDA #$20     ;#%00100000
-bE91D   STA a1E
+_L11    STA a1E
         LDA a1F
         SEC
         SBC #$01     ;#%00000001
         CMP #$54     ;#%01010100
-        BCS bE90D
+        BCS _L08
         LDA #$54     ;#%01010100
-        BNE bE90D
-bE92C   CMP #$03     ;#%00000011
-        BNE bE953
+        BNE _L08
+_L12    CMP #$03     ;#%00000011
+        BNE _L16
         LDA #$00     ;#%00000000
         STA a1C
         LDA a1E
         CMP #$11     ;#%00010001
-        BCC bE93C
+        BCC _L13
         DEC a1E
-bE93C   CMP #$10     ;#%00010000
-        BCS bE942
+_L13    CMP #$10     ;#%00010000
+        BCS _L14
         INC a1E
-bE942   LDA a1F
+_L14    LDA a1F
         CMP #$54     ;#%01010100
-        BCC bE94A
+        BCC _L15
         DEC a1F
-bE94A   CMP #$53     ;#%01010011
-        BCS bE90F
+_L15    CMP #$53     ;#%01010011
+        BCS _L09
         INC a1F
         JMP jE9BF
 
-bE953   LDA a1E
+_L16    LDA a1E
         CMP #$11     ;#%00010001
-        BCC bE95B
+        BCC _L17
         DEC a1E
-bE95B   CMP #$10     ;#%00010000
-        BCS bE961
+_L17    CMP #$10     ;#%00010000
+        BCS _L18
         INC a1E
-bE961   LDA a1F
+_L18    LDA a1F
         CMP #$65     ;#%01100101
-        BCC bE969
+        BCC _L19
         DEC a1F
-bE969   CMP #$64     ;#%01100100
+_L19    CMP #$64     ;#%01100100
         BCS jE9BF
         INC a1F
         JMP jE9BF
@@ -1396,7 +1271,7 @@ jE9BF   LDA a1E
         LDY #$06     ;#%00000110
 bE9EB   LDX a1A
         LDA fEAA7,X
-bE9F0   STA fD801,Y
+bE9F0   STA COLOR_RAM+1,Y
         INY
         CPY a1D
         BCC bE9F0
@@ -1447,27 +1322,27 @@ bEA40   STA (p04),Y
 jEA49   LDY #$05     ;#%00000101
         LDA #$0E     ;#%00001110
 bEA4D   STA pD807,Y
-        STA fD813,Y
+        STA COLOR_RAM+19,Y
         DEY
         BPL bEA4D
         LDY #$03     ;#%00000011
 bEA58   LDA a20
         BNE bEA76
         LDA fEAD0,Y
-        STA f0404,Y
+        STA SCREEN_RAM+4,Y
         LDA fEAD4,Y
-        STA f0410,Y
+        STA SCREEN_RAM+16,Y
         LDA fEABC,Y
-        STA f040C,Y
+        STA SCREEN_RAM+12,Y
         LDA fEAB0,Y
         STA p0419,Y
         BNE bEA8E
 bEA76   LDA fEAE0,Y
-        STA f0404,Y
+        STA SCREEN_RAM+4,Y
         LDA fEAE4,Y
-        STA f0410,Y
+        STA SCREEN_RAM+16,Y
         LDA fEACC,Y
-        STA f040C,Y
+        STA SCREEN_RAM+12,Y
         LDA fEAC0,Y
         STA p0419,Y
 bEA8E   DEY
@@ -1531,7 +1406,7 @@ bEB5F   STY a23
         LDA fECCB,Y
         STA a1A
 bEB66   JSR sE889
-        JSR sE5F4
+        JSR SCROLL_DOWN
         JSR sEE10
         JSR sEDDF
         LDA $D00F    ;Sprite 7 Y Pos
@@ -1713,7 +1588,7 @@ bED34   STY a24
         BEQ bED3D
         JSR sF462
 bED3D   JSR sE889
-        JSR sE5F4
+        JSR SCROLL_DOWN
         JSR sEE10
         JSR sEDDF
         LDY a24
@@ -1728,7 +1603,7 @@ bED53   CPY #$32     ;#%00110010
         BPL bED53
         STY $D00E    ;Sprite 7 X Pos
         JSR sE889
-        JSR sE5F4
+        JSR SCROLL_DOWN
         JSR sEE10
         JSR sEDDF
         LDA a12
@@ -1743,7 +1618,7 @@ bED78   LDA a27
         LDA a28
         BEQ bED96
 bED80   JSR sE889
-        JSR sE5F4
+        JSR SCROLL_DOWN
         JSR sEE10
         JSR sEDDF
         LDA a12
@@ -2615,31 +2490,31 @@ _L01    INC a13
         LDY #$4B     ;#%01001011
 bF4B4   STY a24
         JSR sE889
-        JSR sE5F4
+        JSR SCROLL_DOWN
         JSR sEDDF
         LDY a24
         DEY
         BNE bF4B4
         LDY #$1F     ;#%00011111
 bF4C6   LDA fF589,Y
-        STA f0400,Y
+        STA SCREEN_RAM,Y
         LDA #$0A     ;#%00001010
-        STA fD800,Y
+        STA COLOR_RAM,Y
         DEY
         BPL bF4C6
-        JSR sE5F4
+        JSR SCROLL_DOWN
         JSR sEDDF
         LDY #$1F     ;#%00011111
 bF4DC   LDA fF569,Y
-        STA f0400,Y
+        STA SCREEN_RAM,Y
         DEY
         BPL bF4DC
-        JSR sE5F4
+        JSR SCROLL_DOWN
         JSR sEDDF
         LDY #$0A     ;#%00001010
 bF4ED   STY a24
         JSR sE889
-        JSR sE5F4
+        JSR SCROLL_DOWN
         JSR sEDDF
         LDY a24
         DEY
@@ -2672,7 +2547,7 @@ bF523   STA f07B8,Y
         LDX #$1A     ;#%00011010
 bF533   STX a23
         JSR sE889
-        JSR sE5F4
+        JSR SCROLL_DOWN
         LDA a1F
         CMP #$64     ;#%01100100
         BEQ bF54A
@@ -2705,6 +2580,7 @@ fF589   .BYTE $79,$79,$79,$79,$79,$79,$8F,$90
         .BYTE $7F,$80,$7C,$7D,$87,$88,$79,$79
         .BYTE $79,$79,$7C,$89,$8C,$8D,$87,$88
         .BYTE $8F,$90,$79,$79,$79,$79,$79,$79
+
 sF5A9   LDA a59
         BEQ bF5ED
         CMP #$01     ;#%00000001
