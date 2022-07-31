@@ -313,10 +313,10 @@ START
         TXS
         CLD
         LDX #$09     ;#%00001001
-bE046   LDA fE02D,X
+_L00    LDA fE02D,X
         STA $D011,X  ;VIC Control Register 1
         DEX
-        BPL bE046
+        BPL _L00
         LDA #$7F     ;#%01111111
         STA $DC0D    ;CIA1: CIA Interrupt Control Register
         LDA #$08     ;#%00001000
@@ -359,9 +359,9 @@ bE046   LDA fE02D,X
         STA ZP_TIME
         STA $D015    ;Sprite display Enable
         LDY #$0A     ;#%00001010
-bE0AA   STA $D000,Y  ;Sprite 0 X Pos
+_L01    STA $D000,Y  ;Sprite 0 X Pos
         DEY
-        BPL bE0AA
+        BPL _L01
         STA a1E
         LDA #$64     ;#%01100100
         STA a1F
@@ -382,26 +382,29 @@ jE0BD   SEI
         JMP jE34C
 
 IRQ_HANDLER_WAIT_BUTTON
+        ; Read button from Paddle
         LDA #$FF     ;#%11111111
         STA $DC00    ;CIA1: Data Port Register A
         LDA $DC01    ;CIA1: Data Port Register B
         AND #$04     ;#%00000100
-        BEQ bE0EB
+        BEQ _L00
+        ; Read button from Joystick
         LDA #$FE     ;#%11111110
         STA $DC00    ;CIA1: Data Port Register A
         LDA $DC01    ;CIA1: Data Port Register B
         AND #$10     ;#%00010000
-        BNE bE0F9
-bE0EB   LDA #<IRQ_HANDLER_MAIN  ;#%00001000
+        BNE _L01
+_L00    LDA #<IRQ_HANDLER_MAIN  ;#%00001000
         STA ZP_IRQ_LO
         LDA #>IRQ_HANDLER_MAIN  ;#%11100000
         STA ZP_IRQ_HI
         LDA $DC0D    ;CIA1: CIA Interrupt Control Register
-        JMP jE0FC
+        JMP INIT_GAME
 
-bE0F9   JMP IRQ_HANDLER_MAIN
+_L01    JMP IRQ_HANDLER_MAIN
 
-jE0FC   SEI
+INIT_GAME
+        SEI
         LDX #$FA     ;#%11111010
         TXS
         CLD
@@ -814,10 +817,8 @@ bE4C8   LDA fE5D4,Y
         STA fDA00,Y
         LDA #$04     ;#%00000100
         STA fDAA0,Y
-ROM_IOBASEj   =*+$02
         STA fDAC8,Y
         STA fDAF0,Y
-ROM_SCREENj   =*+$01
         STA fDB18,Y
         STA fDB40,Y
         STA fDB68,Y
@@ -1468,7 +1469,6 @@ bEA76   LDA fEAE0,Y
         LDA fEAE4,Y
         STA f0410,Y
         LDA fEACC,Y
-ROM_SCNKEYj   =*+$02
         STA f040C,Y
         LDA fEAC0,Y
         STA p0419,Y
@@ -1785,7 +1785,6 @@ bED96   LDA $D015    ;Sprite display Enable
 bEDD6   DEC a23
 bEDD8   LDA #$FA     ;#%11111010
         STA a24
-ROM_CIOUTj   =*+$01
         JMP jEB34
 
 sEDDF   LDA a3A
@@ -1796,7 +1795,6 @@ bEDE7   LDA a3D
         SEC
         SBC #$01     ;#%00000001
         STA a3D
-ROM_UNTLKj   =*+$01
         LDA a3E
         SBC #$00     ;#%00000000
         STA a3E
@@ -1805,7 +1803,6 @@ ROM_UNTLKj   =*+$01
         INY
         CPY #$02     ;#%00000010
         BCC bEE0D
-ROM_UNLSNj   =*+$01
         LDY #$00     ;#%00000000
         LDA a43
         EOR #$01     ;#%00000001
@@ -2328,7 +2325,6 @@ bF1F0   LDA $D015    ;Sprite display Enable
         STA $D01C    ;Sprites Multi-Color Mode Select
         LDA $D01D    ;Sprites Expand 2x Horizontal (X)
         ORA #$10     ;#%00010000
-ROM_CHKINj   =*+$01
         STA $D01D    ;Sprites Expand 2x Horizontal (X)
         LDA #$02     ;#%00000010
         STA $D02B    ;Sprite 4 Color
@@ -2401,7 +2397,6 @@ bF27C   LSR a2D
         STA a5B
         LDA a2C
         CLC
-ROM_CLOSEj   =*+$01
         ADC a5B
         STA a2C
         LDA a2D
@@ -2448,7 +2443,6 @@ bF2FD   TYA
         CMP $D00F    ;Sprite 7 Y Pos
         BCC bF330
         LDA #$01     ;#%00000001
-ROM_CLALLj   =*+$01
         STA a58
 bF330   LDA $D00E    ;Sprite 7 X Pos
         SEC
@@ -2583,13 +2577,13 @@ fF45A   .BYTE $20,$20,$14,$09,$0D,$05,$20,$20
 sF462   STY a56
         STX a57
         LDA a53
-        BEQ bF48B
+        BEQ _L01
         DEC a53
         LDY a54
         CPY #$05     ;#%00000101
-        BCC bF474
+        BCC _L00
         LDY #$04     ;#%00000100
-bF474   LDA fF564,Y
+_L00    LDA fF564,Y
         STA a18
         INY
         STY a54
@@ -2602,7 +2596,7 @@ bF474   LDA fF564,Y
         LDX a56
         RTS
 
-bF48B   INC a13
+_L01    INC a13
         LDA #$07     ;#%00000111
         STA a1A
         LDA $D015    ;Sprite display Enable
@@ -2610,7 +2604,6 @@ bF48B   INC a13
         STA $D015    ;Sprite display Enable
         LDA #$00     ;#%00000000
         STA a58
-ROM_LOADj   =*+$01
         STA a59
         STA a64
         STA a65
@@ -2695,18 +2688,17 @@ bF54A   LDY #$01     ;#%00000001
         LDX a23
         DEX
         BPL bF533
+
 NMI_HANDLER
         LDA #$00     ;#%00000000
         STA $D015    ;Sprite display Enable
         LDX #$0F     ;#%00001111
-bF55B   STA $D000,X  ;Sprite 0 X Pos
+_L00    STA $D000,X  ;Sprite 0 X Pos
         DEX
-        BPL bF55B
+        BPL _L00
         JMP jE0BD
 
-fF564   RTI
-
-        .BYTE $3A,$34,$2F,$22
+fF564   .BYTE $40,$3A,$34,$2F,$22
 fF569   .BYTE $79,$79,$79,$79,$79,$79,$85,$8E
         .BYTE $7A,$7E,$7A,$7B,$85,$86,$79,$79
         .BYTE $79,$79,$7A,$7E,$8A,$8B,$85,$86
@@ -2858,16 +2850,13 @@ bF6CD   LDA #$50     ;#%01010000
         STA $D412    ;Voice 3: Control Register
         LDA #$F0     ;#%11110000
         ORA a77
-ROM_RDTIMj   =*+$02
         STA $D417    ;Filter Resonance Control / Voice Input Control
         BNE jF704
 bF6E0   LDA #$82     ;#%10000010
-ROM_SETTIMj   =*+$02
         STA $D40F    ;Voice 3: Frequency Control - High-Byte
         LDA #$21     ;#%00100001
         STA $D412    ;Voice 3: Control Register
         LDA #$F0     ;#%11110000
-ROM_STOPj   =*+$01
         ORA a77
         STA $D417    ;Filter Resonance Control / Voice Input Control
         BNE jF704
