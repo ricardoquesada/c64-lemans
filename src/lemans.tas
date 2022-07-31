@@ -2830,11 +2830,16 @@ jF793   RTS
         .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$FF
         .BYTE $00,$FF,$00,$FF
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Data
+        * = $F800
         .BINARY "charset-f800-f97f.bin"
         .BINARY "sprites-f980-f9ff.bin"
         .BINARY "charset-fa00-fcbf.bin"
         .BINARY "sprites-fcc0-ffbf.bin"
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+        * = $FFC0
         ; GARBAGE
         .BYTE $00,$FF,$00
         .BYTE $00,$00,$FF
@@ -2856,6 +2861,8 @@ jF793   RTS
         .BYTE $FF,$00,$FF
         .BYTE $00,$FF,$00,$FF
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Setup NMI, IRQ, START vectors
         ; NMI ($FFFA-$FFFB)
         .ADDR NMI_HANDLER
         ; COLD RESET ($FFFC-$FFFD)
