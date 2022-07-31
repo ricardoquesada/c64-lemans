@@ -3,6 +3,7 @@
 
 D64_IMAGE = "bin/lemans.d64"
 X64 = x64
+DEBUGGER = c64debugger
 X64SC = x64sc
 C1541 = c1541
 
@@ -19,6 +20,9 @@ crt: lemans.prg
 
 run: crt
 	$(X64) -verbose -moncommands bin/labels.txt bin/lemans.crt
+
+debug: crt
+	$(DEBUGGER) -crt bin/lemans.crt
 
 clean:
 	-rm $(D64_IMAGE)

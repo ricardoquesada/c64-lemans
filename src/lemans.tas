@@ -22,9 +22,9 @@ a06 = $06
 a07 = $07
 a08 = $08
 a09 = $09
-a0A = $0A
-a0B = $0B
-a0C = $0C
+ZP_SCORE_01 = $0A
+ZP_SCORE_02 = $0B
+ZP_SCORE_03 = $0C
 a0D = $0D
 a0E = $0E
 a0F = $0F
@@ -34,7 +34,7 @@ a12 = $12
 a13 = $13
 a14 = $14
 a15 = $15
-a16 = $16
+ZP_TIME = $16
 a17 = $17
 a18 = $18
 a19 = $19
@@ -46,7 +46,7 @@ a1E = $1E
 a1F = $1F
 a20 = $20
 a21 = $21
-a22 = $22
+ZP_TMP = $22
 a23 = $23
 a24 = $24
 a25 = $25
@@ -326,9 +326,9 @@ bE046   LDA fE02D,X
         STX $DC03    ;CIA1: Data Direction Register B
         DEX
         STX $DC02    ;CIA1: Data Direction Register A
-        LDA #>pE52F  ;#%11100101
+        LDA #$E5     ;#%11100101
         STA a01
-        LDA #<pE52F  ;#%00101111
+        LDA #$2F     ;#%00101111
         STA a00
         LDA #$1A     ;#%00011010
         STA $DC04    ;CIA1: Timer A: Low-Byte
@@ -345,9 +345,9 @@ bE046   LDA fE02D,X
         CLI
         CLD
         LDA #$00     ;#%00000000
-        STA a0A
-        STA a0B
-        STA a0C
+        STA ZP_SCORE_01
+        STA ZP_SCORE_02
+        STA ZP_SCORE_03
         STA a1B
         STA a1C
         STA a23
@@ -356,7 +356,7 @@ bE046   LDA fE02D,X
         STA a28
         STA a08
         STA a09
-        STA a16
+        STA ZP_TIME
         STA $D015    ;Sprite display Enable
         LDY #$0A     ;#%00001010
 bE0AA   STA $D000,Y  ;Sprite 0 X Pos
@@ -406,9 +406,9 @@ jE0FC   SEI
         CLD
         CLI
         LDX #$00     ;#%00000000
-        STX a0A
-        STX a0B
-        STX a0C
+        STX ZP_SCORE_01
+        STX ZP_SCORE_02
+        STX ZP_SCORE_03
         STX a1B
         STX a1C
         STX a24
@@ -470,7 +470,7 @@ jE0FC   SEI
         LDA #$3C     ;#%00111100
         STA a18
         LDA #$60     ;#%01100000
-        STA a16
+        STA ZP_TIME
         LDA #$64     ;#%01100100
         STA a1F
         LDA #$70     ;#%01110000
@@ -819,9 +819,7 @@ ROM_IOBASEj   =*+$02
 ROM_SCREENj   =*+$01
         STA fDB18,Y
         STA fDB40,Y
-
-; $E50A (jmp) - read/set cursor position
-ROM_PLOTj STA fDB68,Y
+        STA fDB68,Y
         LDA #$05     ;#%00000101
         STA fD938,Y
         LDA #$07     ;#%00000111
@@ -836,7 +834,7 @@ ROM_PLOTj STA fDB68,Y
         STY a05DE
         INY
         STY a05DF
-pE52F   INY
+        INY
         STY a0606
         INY
         STY a0607
@@ -1062,17 +1060,17 @@ bE738   ASL a08
 
 sE753   LDA a0E
         SEC
-        SBC a0A
+        SBC ZP_SCORE_01
         LDA a0F
-        SBC a0B
+        SBC ZP_SCORE_02
         LDA a10
-        SBC a0C
+        SBC ZP_SCORE_03
         BCS bE76E
-        LDA a0A
+        LDA ZP_SCORE_01
         STA a0E
-        LDA a0B
+        LDA ZP_SCORE_02
         STA a0F
-        LDA a0C
+        LDA ZP_SCORE_03
         STA a10
 bE76E   LDA #<p0560  ;#%01100000
         STA a06
@@ -1082,13 +1080,13 @@ bE76E   LDA #<p0560  ;#%01100000
         STA a0D
         TAY
         LDA a10
-        STA a22
+        STA ZP_TMP
         JSR sE7D8
         LDA a0F
-        STA a22
+        STA ZP_TMP
         JSR sE7D8
         LDA a0E
-        STA a22
+        STA ZP_TMP
         JSR sE7D8
         LDA #$21     ;#%00100001
         STA (p06),Y
@@ -1099,14 +1097,14 @@ bE76E   LDA #<p0560  ;#%01100000
         LDA #$00     ;#%00000000
         STA a0D
         TAY
-        LDA a0C
-        STA a22
+        LDA ZP_SCORE_03
+        STA ZP_TMP
         JSR sE7D8
-        LDA a0B
-        STA a22
+        LDA ZP_SCORE_02
+        STA ZP_TMP
         JSR sE7D8
-        LDA a0A
-        STA a22
+        LDA ZP_SCORE_01
+        STA ZP_TMP
         JSR sE7D8
         LDA #$21     ;#%00100001
         STA (p06),Y
@@ -1117,8 +1115,8 @@ bE76E   LDA #<p0560  ;#%01100000
         LDA #$00     ;#%00000000
         STA a0D
         TAY
-        LDA a16
-        STA a22
+        LDA ZP_TIME
+        STA ZP_TMP
         JSR sE7D8
         LDA a0D
         BNE bE7D7
@@ -1127,14 +1125,14 @@ bE76E   LDA #<p0560  ;#%01100000
         STA (p06),Y
 bE7D7   RTS
 
-sE7D8   LDA a22
+sE7D8   LDA ZP_TMP
         LSR A
         LSR A
         LSR A
         LSR A
         STA a21
         JSR sE7E9
-        LDA a22
+        LDA ZP_TMP
         AND #$0F     ;#%00001111
         STA a21
 bE7EA   =*+$01
@@ -1693,12 +1691,8 @@ jECF3   LDY #$02     ;#%00000010
         STY $D017    ;Sprites Expand 2x Vertical (Y)
         STY $D01D    ;Sprites Expand 2x Horizontal (X)
         STY a25
-
-; $ED09 (jmp) - make SERIAL device talk
-ROM_TALKj LDA $D015    ;Sprite display Enable
-
-; $ED0C (jmp) - make SERIAL device listen
-ROM_LISTENj AND #$EF     ;#%11101111
+        LDA $D015    ;Sprite display Enable
+        AND #$EF     ;#%11101111
         ORA #$60     ;#%01100000
         STA $D015    ;Sprite display Enable
         LDA $D01C    ;Sprites Multi-Color Mode Select
@@ -1773,18 +1767,14 @@ bED96   LDA $D015    ;Sprite display Enable
         STA a42
         STA a59
         STA a58
-
-; $EDB9 (jmp) - send secondary addr after listen
-ROM_SECONDj STA a6F
+        STA a6F
         STA a77
         LDA #$3C     ;#%00111100
         STA a52
         LDA #$08     ;#%00001000
         STA a1A
         LDY a23
-
-; $EDC7 (jmp) - send secondary addr after talk
-ROM_TKSAj LDA fECCB,Y
+        LDA fECCB,Y
         BEQ bEDD6
         CMP #$03     ;#%00000011
         BEQ bEDD6
@@ -1827,29 +1817,27 @@ bEE0D   STY a44
         RTS
 
 sEE10   SED
-        LDA a0A
-
-; $EE13 (jmp) - input byte from SERIAL
-ROM_ACPTRj CLC
+        LDA ZP_SCORE_01
+        CLC
         ADC #$01     ;#%00000001
-        STA a0A
-        LDA a0B
+        STA ZP_SCORE_01
+        LDA ZP_SCORE_02
         ADC #$00     ;#%00000000
-        STA a0B
-        LDA a0C
+        STA ZP_SCORE_02
+        LDA ZP_SCORE_03
         ADC #$00     ;#%00000000
-        STA a0C
+        STA ZP_SCORE_03
         CLD
-        LDA a0A
+        LDA ZP_SCORE_01
         BNE bEE35
-        LDA a0B
+        LDA ZP_SCORE_02
         AND #$1F     ;#%00011111
         BNE bEE35
         INC a53
         LDA #$5F     ;#%01011111
         STA a55
 bEE35   LDY #$01     ;#%00000001
-        LDA a0B
+        LDA ZP_SCORE_02
         CMP #$40     ;#%01000000
         BEQ bEE4B
         CMP #$20     ;#%00100000
@@ -2068,7 +2056,7 @@ bEFDC   LDA $D015    ;Sprite display Enable
 bEFE8   STY a47
 bEFEA   LDA a11
         BEQ bF00B
-        LDA a16
+        LDA ZP_TIME
         BEQ bF007
         LDY a17
         INY
@@ -2076,10 +2064,10 @@ bEFEA   LDA a11
         BCC bF00B
         LDY #$00     ;#%00000000
         SED
-        LDA a16
+        LDA ZP_TIME
         SEC
         SBC #$01     ;#%00000001
-        STA a16
+        STA ZP_TIME
         CLD
         JMP bF00B
 
@@ -2239,9 +2227,7 @@ bF136   LDA f5D,X
         BNE bF161
         LDA a1A
         CMP #$06     ;#%00000110
-
-; $F13E (jmp) - get a byte from channel
-ROM_GETINj BEQ bF161
+        BEQ bF161
         LDA aC3
         CMP #$06     ;#%00000110
         BEQ bF161
@@ -2253,9 +2239,7 @@ ROM_GETINj BEQ bF161
         BCS bF159
         LDA #$01     ;#%00000001
         STA f4E,X
-
-; $F157 (jmp) - input character
-ROM_CHRINj BNE bF161
+        BNE bF161
 bF159   CMP #$B7     ;#%10110111
         BCC bF161
         LDA #$FF     ;#%11111111
@@ -2314,14 +2298,12 @@ bF1B6   LDY a4B
         CLC
         ADC #$F6     ;#%11110110
         LDY #$03     ;#%00000011
-
-; $F1CA (jmp) - output character
-ROM_CHROUTj LDX a07F8,Y
+bF1CA   LDX a07F8,Y
         CPX #$FA     ;#%11111010
         BEQ bF1D4
         STA a07F8,Y
 bF1D4   DEY
-        BPL ROM_CHROUTj
+        BPL bF1CA
 bF1D7   STY a4B
         LDA a59
         BEQ bF224
@@ -2382,9 +2364,7 @@ bF242   LDA a2C
 bF24B   LDA a2E
         CLC
         ADC #$0A     ;#%00001010
-
-; $F250 (jmp) - open channel for output
-ROM_CHKOUTj STA a2E
+        STA a2E
         LDA a2F
         ADC #$00     ;#%00000000
         STA a2F
@@ -2470,9 +2450,7 @@ bF2FD   TYA
 ROM_CLALLj   =*+$01
         STA a58
 bF330   LDA $D00E    ;Sprite 7 X Pos
-
-; $F333 (jmp) - restore default devices
-ROM_CLRCHNj SEC
+        SEC
         SBC #$03     ;#%00000011
         CMP $D000,X  ;Sprite 0 X Pos
         BCS bF360
@@ -2483,9 +2461,7 @@ ROM_CLRCHNj SEC
         BCS bF360
         LDA $D00E    ;Sprite 7 X Pos
         CLC
-
-; $F34A (jmp) - open log.file after SETLFS,SETNAM
-ROM_OPENj ADC #$11     ;#%00010001
+        ADC #$11     ;#%00010001
         CMP $D000,X  ;Sprite 0 X Pos
         BCC bF360
         LDA $D00F    ;Sprite 7 Y Pos
@@ -2527,15 +2503,15 @@ bF385   LDY fF43A,X
         LDA #<p2800  ;#%00000000
         STA a70
         SED
-        LDA a0B
+        LDA ZP_SCORE_02
         CLC
         ADC #$01     ;#%00000001
-        STA a0B
-        LDA a0C
+        STA ZP_SCORE_02
+        LDA ZP_SCORE_03
         ADC #$00     ;#%00000000
-        STA a0C
+        STA ZP_SCORE_03
         CLD
-        LDA a0B
+        LDA ZP_SCORE_02
         AND #$1F     ;#%00011111
         BNE bF3B9
         INC a53
@@ -2617,7 +2593,7 @@ bF474   LDA fF564,Y
         INY
         STY a54
         LDA #$60     ;#%01100000
-        STA a16
+        STA ZP_TIME
         LDA #$00     ;#%00000000
         STA a12
         STA a17
@@ -2761,9 +2737,7 @@ sF5A9   LDA a59
 
 bF5D9   CMP #$02     ;#%00000010
         BNE bF5EA
-
-; $F5DD (jmp) - save after call SETLFS,SETNAM
-ROM_SAVEj DEC a76
+        DEC a76
         LDA a76
         STA $D416    ;Filter Cutoff Frequency: High-Byte
         CMP #$96     ;#%10010110
@@ -2855,9 +2829,7 @@ bF68F   STY a63
         LDA a27
         BNE bF6A0
         LDA a28
-
-; $F69B (jmp) - update jiffy clock
-ROM_UDTIMj BNE bF6A0
+        BNE bF6A0
         JMP jF704
 
 bF6A0   LDA #$04     ;#%00000100
