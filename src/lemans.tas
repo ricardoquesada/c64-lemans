@@ -2160,13 +2160,13 @@ _L39    LDA $D001,Y  ;Sprite 0 Y Pos
         INY
         STY a70
 _L40    DEX
-        BMI bF1B6
+        BMI _L41
         JMP _L23
 
-bF1B6   LDY a4B
+_L41    LDY a4B
         INY
         CPY #$04     ;#%00000100
-        BCC bF1D7
+        BCC _L44
         LDY #$00     ;#%00000000
         LDA a4C
         EOR #$01     ;#%00000001
@@ -2174,25 +2174,25 @@ bF1B6   LDY a4B
         CLC
         ADC #$F6     ;#%11110110
         LDY #$03     ;#%00000011
-bF1CA   LDX a07F8,Y
+_L42    LDX a07F8,Y
         CPX #$FA     ;#%11111010
-        BEQ bF1D4
+        BEQ _L43
         STA a07F8,Y
-bF1D4   DEY
-        BPL bF1CA
-bF1D7   STY a4B
+_L43    DEY
+        BPL _L42
+_L44    STY a4B
         LDA a59
-        BEQ bF224
+        BEQ _L46
         INC a78
         LDA a78
         AND #$04     ;#%00000100
-        BNE bF1F0
+        BNE _L45
         LDA $D015    ;Sprite display Enable
         AND #$EF     ;#%11101111
         STA $D015    ;Sprite display Enable
-        JMP bF224
+        JMP _L46
 
-bF1F0   LDA $D015    ;Sprite display Enable
+_L45    LDA $D015    ;Sprite display Enable
         ORA #$10     ;#%00010000
         STA $D015    ;Sprite display Enable
         LDA $D017    ;Sprites Expand 2x Vertical (Y)
@@ -2212,7 +2212,7 @@ bF1F0   LDA $D015    ;Sprite display Enable
         STA $D008    ;Sprite 4 X Pos
         LDA #$3A     ;#%00111010
         STA $D009    ;Sprite 4 Y Pos
-bF224   JMP jF2FB
+_L46    JMP jF2FB
 
 sF227   CLD
         LDA #$00     ;#%00000000
@@ -2296,6 +2296,7 @@ fF2E3   .BYTE $00,$0A,$14,$1E,$FE,$FD,$FB,$F7
 fF2EF   .BYTE $51,$6B,$B3,$CD
 fF2F3   .BYTE $00,$00,$40,$08
 fF2F7   .BYTE $03,$01,$00,$00
+
 jF2FB   LDY #$03     ;#%00000011
 bF2FD   TYA
         ASL A
