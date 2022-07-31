@@ -1,0 +1,3379 @@
+;
+; **** ZP FIELDS **** 
+;
+f30 = $30
+f34 = $34
+f4E = $4E
+f5D = $5D
+f6B = $6B
+f79 = $79
+f92 = $92
+fAB = $AB
+;
+; **** ZP ABSOLUTE ADRESSES **** 
+;
+a00 = $00
+a01 = $01
+a02 = $02
+a03 = $03
+a04 = $04
+a05 = $05
+a06 = $06
+a07 = $07
+a08 = $08
+a09 = $09
+a0A = $0A
+a0B = $0B
+a0C = $0C
+a0D = $0D
+a0E = $0E
+a0F = $0F
+a10 = $10
+a11 = $11
+a12 = $12
+a13 = $13
+a14 = $14
+a15 = $15
+a16 = $16
+a17 = $17
+a18 = $18
+a19 = $19
+a1A = $1A
+a1B = $1B
+a1C = $1C
+a1D = $1D
+a1E = $1E
+a1F = $1F
+a20 = $20
+a21 = $21
+a22 = $22
+a23 = $23
+a24 = $24
+a25 = $25
+a26 = $26
+a27 = $27
+a28 = $28
+a29 = $29
+a2A = $2A
+a2B = $2B
+a2C = $2C
+a2D = $2D
+a2E = $2E
+a2F = $2F
+a30 = $30
+a31 = $31
+a32 = $32
+a33 = $33
+a34 = $34
+a35 = $35
+a36 = $36
+a37 = $37
+a38 = $38
+a39 = $39
+a3A = $3A
+a3B = $3B
+a3C = $3C
+a3D = $3D
+a3E = $3E
+a41 = $41
+a42 = $42
+a43 = $43
+a44 = $44
+a45 = $45
+a46 = $46
+a47 = $47
+a48 = $48
+a49 = $49
+a4A = $4A
+a4B = $4B
+a4C = $4C
+a4D = $4D
+a4E = $4E
+a4F = $4F
+a50 = $50
+a51 = $51
+a52 = $52
+a53 = $53
+a54 = $54
+a55 = $55
+a56 = $56
+a57 = $57
+a58 = $58
+a59 = $59
+a5A = $5A
+a5B = $5B
+a5C = $5C
+a61 = $61
+a62 = $62
+a63 = $63
+a64 = $64
+a65 = $65
+a66 = $66
+a67 = $67
+a68 = $68
+a69 = $69
+a6A = $6A
+a6B = $6B
+a6C = $6C
+a6D = $6D
+a6E = $6E
+a6F = $6F
+a70 = $70
+a71 = $71
+a72 = $72
+a73 = $73
+a74 = $74
+a75 = $75
+a76 = $76
+a77 = $77
+a78 = $78
+a79 = $79
+a92 = $92
+aAB = $AB
+aC3 = $C3
+;
+; **** ZP POINTERS **** 
+;
+p04 = $04
+p06 = $06
+;
+; **** FIELDS **** 
+;
+f0079 = $0079
+f007A = $007A
+f0092 = $0092
+f0093 = $0093
+f00AB = $00AB
+f00AC = $00AC
+f0400 = $0400
+f0404 = $0404
+f0408 = $0408
+f040C = $040C
+f0410 = $0410
+f0428 = $0428
+f0448 = $0448
+f0450 = $0450
+f0478 = $0478
+f04A0 = $04A0
+f04C0 = $04C0
+f04C8 = $04C8
+f04F0 = $04F0
+f0500 = $0500
+f0518 = $0518
+f0538 = $0538
+f0540 = $0540
+f0568 = $0568
+f0590 = $0590
+f05B0 = $05B0
+f05B8 = $05B8
+f05D8 = $05D8
+f05D9 = $05D9
+f05E0 = $05E0
+f0600 = $0600
+f0601 = $0601
+f0608 = $0608
+f0630 = $0630
+f0650 = $0650
+f0658 = $0658
+f0678 = $0678
+f0680 = $0680
+f06A8 = $06A8
+f06D0 = $06D0
+f06E8 = $06E8
+f06F8 = $06F8
+f0720 = $0720
+f0748 = $0748
+f0770 = $0770
+f0798 = $0798
+f07B8 = $07B8
+f07C0 = $07C0
+f07E0 = $07E0
+fD800 = $D800
+fD801 = $D801
+fD804 = $D804
+fD808 = $D808
+fD813 = $D813
+fD828 = $D828
+fD848 = $D848
+fD850 = $D850
+fD870 = $D870
+fD878 = $D878
+fD8A0 = $D8A0
+fD8C0 = $D8C0
+fD8C8 = $D8C8
+fD8E8 = $D8E8
+fD8F0 = $D8F0
+fD900 = $D900
+fD918 = $D918
+fD938 = $D938
+fD940 = $D940
+fD960 = $D960
+fD968 = $D968
+fD990 = $D990
+fD9B0 = $D9B0
+fD9B8 = $D9B8
+fD9D8 = $D9D8
+fD9E0 = $D9E0
+fDA00 = $DA00
+fDA08 = $DA08
+fDA30 = $DA30
+fDA34 = $DA34
+fDA50 = $DA50
+fDA58 = $DA58
+fDA5C = $DA5C
+fDA78 = $DA78
+fDA80 = $DA80
+fDAA0 = $DAA0
+fDAA8 = $DAA8
+fDAC8 = $DAC8
+fDAD0 = $DAD0
+fDAD8 = $DAD8
+fDAE8 = $DAE8
+fDAF0 = $DAF0
+fDAF8 = $DAF8
+fDB00 = $DB00
+fDB18 = $DB18
+fDB20 = $DB20
+fDB40 = $DB40
+fDB48 = $DB48
+fDB68 = $DB68
+fDB70 = $DB70
+fDB98 = $DB98
+fDBB8 = $DBB8
+fDBC0 = $DBC0
+fDBE0 = $DBE0
+;
+; **** ABSOLUTE ADRESSES **** 
+;
+a05DE = $05DE
+a05DF = $05DF
+a0606 = $0606
+a0607 = $0607
+a07F8 = $07F8
+a07FC = $07FC
+a07FD = $07FD
+a07FE = $07FE
+a07FF = $07FF
+aDAB0 = $DAB0
+;
+; **** POINTERS **** 
+;
+p0002 = $0002
+p05 = $0005
+p0419 = $0419
+p0420 = $0420
+p0470 = $0470
+p04EB = $04EB
+p0560 = $0560
+p2800 = $2800
+pD807 = $D807
+
+        * = $E000
+
+        PHA 
+        TXA 
+        PHA 
+        TYA 
+        PHA 
+        JMP (p0002)
+
+pE008   LDA a11
+        BEQ bE00F
+        JSR sF5A9
+bE00F   INC a14
+        INC a14
+        LDA a14
+        CMP #$3C     ;#%00111100
+        BCC bE020
+        LDY #$00     ;#%00000000
+        STY a14
+        INY 
+        STY a15
+bE020   LDA #$01     ;#%00000001
+        STA a19
+        LDA $DC0D    ;CIA1: CIA Interrupt Control Register
+        PLA 
+        TAY 
+        PLA 
+        TAX 
+        PLA 
+        RTI 
+
+fE02D   .BYTE $10,$00,$00,$00,$00,$18,$00,$1E
+        .BYTE $00,$00
+        SEI 
+        LDA #$00     ;#%00000000
+        STA a0E
+        STA a0F
+        STA a10
+        LDX #$FA     ;#%11111010
+        TXS 
+        CLD 
+        LDX #$09     ;#%00001001
+bE046   LDA fE02D,X
+        STA $D011,X  ;VIC Control Register 1
+        DEX 
+        BPL bE046
+        LDA #$7F     ;#%01111111
+        STA $DC0D    ;CIA1: CIA Interrupt Control Register
+        LDA #$08     ;#%00001000
+        STA $DC0E    ;CIA1: CIA Control Register A
+        STA $DC0F    ;CIA1: CIA Control Register B
+        LDX #$00     ;#%00000000
+        STX $DC03    ;CIA1: Data Direction Register B
+        DEX 
+        STX $DC02    ;CIA1: Data Direction Register A
+        LDA #>pE52F  ;#%11100101
+        STA a01
+        LDA #<pE52F  ;#%00101111
+        STA a00
+        LDA #$1A     ;#%00011010
+        STA $DC04    ;CIA1: Timer A: Low-Byte
+        LDA #$41     ;#%01000001
+        STA $DC05    ;CIA1: Timer A: High-Byte
+        LDA #$81     ;#%10000001
+        STA $DC0D    ;CIA1: CIA Interrupt Control Register
+        LDA #$11     ;#%00010001
+        STA $DC0E    ;CIA1: CIA Control Register A
+        LDA #<pE008  ;#%00001000
+        STA a02
+        LDA #>pE008  ;#%11100000
+        STA a03
+        CLI 
+        CLD 
+        LDA #$00     ;#%00000000
+        STA a0A
+        STA a0B
+        STA a0C
+        STA a1B
+        STA a1C
+        STA a23
+        STA a24
+        STA a27
+        STA a28
+        STA a08
+        STA a09
+        STA a16
+        STA $D015    ;Sprite display Enable
+        LDY #$0A     ;#%00001010
+bE0AA   STA $D000,Y  ;Sprite 0 X Pos
+        DEY 
+        BPL bE0AA
+        STA a1E
+        LDA #$64     ;#%01100100
+        STA a1F
+        LDA #$07     ;#%00000111
+        STA a1A
+        JSR sE479
+jE0BD   SEI 
+        LDX #$FA     ;#%11111010
+        TXS 
+        LDA #$00     ;#%00000000
+        STA $D418    ;Select Filter Mode and Volume
+        LDA #<pE0D3  ;#%11010011
+        STA a02
+        LDA #>pE0D3  ;#%11100000
+        STA a03
+        CLI 
+        CLD 
+        JMP jE34C
+
+pE0D3   LDA #$FF     ;#%11111111
+        STA $DC00    ;CIA1: Data Port Register A
+        LDA $DC01    ;CIA1: Data Port Register B
+        AND #$04     ;#%00000100
+        BEQ bE0EB
+        LDA #$FE     ;#%11111110
+        STA $DC00    ;CIA1: Data Port Register A
+        LDA $DC01    ;CIA1: Data Port Register B
+        AND #$10     ;#%00010000
+        BNE bE0F9
+bE0EB   LDA #<pE008  ;#%00001000
+        STA a02
+        LDA #>pE008  ;#%11100000
+        STA a03
+        LDA $DC0D    ;CIA1: CIA Interrupt Control Register
+        JMP jE0FC
+
+bE0F9   JMP pE008
+
+jE0FC   SEI 
+        LDX #$FA     ;#%11111010
+        TXS 
+        CLD 
+        CLI 
+        LDX #$00     ;#%00000000
+        STX a0A
+        STX a0B
+        STX a0C
+        STX a1B
+        STX a1C
+        STX a24
+        STX a26
+        STX a27
+        STX a28
+        STX a25
+        STX a20
+        STX a42
+        STX a43
+        STX a11
+        STX a12
+        STX a13
+        STX a4B
+        STX a4C
+        STX a17
+        STX a53
+        STX a54
+        STX a58
+        STX a59
+        STX a64
+        STX a65
+        STX a66
+        STX a67
+        STX a6B
+        STX a6C
+        STX a6D
+        STX a6E
+        STX a6F
+        STX a70
+        STX a71
+        STX a55
+        STX a77
+        STX a34
+        STX a35
+        STX a36
+        STX a37
+        STX a30
+        STX a31
+        STX a32
+        STX a33
+        STX $D017    ;Sprites Expand 2x Vertical (Y)
+        STX $D01B    ;Sprite to Background Display Priority
+        STX $D01D    ;Sprites Expand 2x Horizontal (X)
+        STX $D026    ;Sprite Multi-Color Register 1
+        STX a1E
+        INX 
+        STX a2B
+        STX a4E
+        STX a4F
+        LDA #$04     ;#%00000100
+        STA a5A
+        LDA #$06     ;#%00000110
+        STA a41
+        LDA #$07     ;#%00000111
+        STA a1A
+        LDA #$0F     ;#%00001111
+        STA $D025    ;Sprite Multi-Color Register 0
+        LDA #$3C     ;#%00111100
+        STA a18
+        LDA #$60     ;#%01100000
+        STA a16
+        LDA #$64     ;#%01100100
+        STA a1F
+        LDA #$70     ;#%01110000
+        STA a2A
+        LDA #$8F     ;#%10001111
+        STA $D015    ;Sprite display Enable
+        LDA #$FF     ;#%11111111
+        STA $D01C    ;Sprites Multi-Color Mode Select
+        STA a50
+        STA a51
+        LDA #$00     ;#%00000000
+        LDY #$18     ;#%00011000
+bE1A4   STA $D400,Y  ;Voice 1: Frequency Control - Low-Byte
+        DEY 
+        BPL bE1A4
+        LDA #$02     ;#%00000010
+        STA $D403    ;Voice 1: Pulse Waveform Width - High-Nybble
+        STA $D40A    ;Voice 2: Pulse Waveform Width - High-Nybble
+        LDA #$08     ;#%00001000
+        STA $D40C    ;Voice 2: Attack / Decay Cycle Control
+        LDA #$F9     ;#%11111001
+        STA $D40D    ;Voice 2: Sustain / Release Cycle Control
+        LDA #$2F     ;#%00101111
+        STA $D418    ;Select Filter Mode and Volume
+        LDA #$BE     ;#%10111110
+        STA $D416    ;Filter Cutoff Frequency: High-Byte
+        LDA #$F0     ;#%11110000
+        STA $D414    ;Voice 3: Sustain / Release Cycle Control
+        LDA #$FB     ;#%11111011
+        STA $D406    ;Voice 1: Sustain / Release Cycle Control
+        JSR sE753
+        JSR sE808
+        LDA #$0E     ;#%00001110
+        STA $D027    ;Sprite 0 Color
+        LDA #$F4     ;#%11110100
+        STA a07F8
+        LDA #$89     ;#%10001001
+        STA $D000    ;Sprite 0 X Pos
+        LDX #$0F     ;#%00001111
+bE1E7   STX a23
+        JSR sE889
+        JSR sE5F4
+        LDY #$01     ;#%00000001
+        JSR sE45B
+        LDX a23
+        DEX 
+        BPL bE1E7
+        LDA #$0A     ;#%00001010
+        STA $D401    ;Voice 1: Frequency Control - High-Byte
+        LDA #$41     ;#%01000001
+        STA $D404    ;Voice 1: Control Register
+        LDX #$FA     ;#%11111010
+jE205   STX a23
+        CPX #$CA     ;#%11001010
+        BEQ bE259
+        CPX #$C9     ;#%11001001
+        BEQ bE229
+        CPX #$C8     ;#%11001000
+        BEQ bE241
+        CPX #$CB     ;#%11001011
+        BNE bE26B
+        LDY #$1F     ;#%00011111
+bE219   LDA fECAB,Y
+        STA f0400,Y
+        LDA #$0A     ;#%00001010
+        STA fD800,Y
+        DEY 
+        BPL bE219
+        BMI bE26E
+bE229   JSR sE889
+        LDY #$07     ;#%00000111
+bE22E   TYA 
+        AND #$01     ;#%00000001
+        CLC 
+        ADC #$2D     ;#%00101101
+        STA f0404,Y
+        LDA #$08     ;#%00001000
+        STA fD804,Y
+        DEY 
+        BPL bE22E
+        BMI bE26E
+bE241   JSR sE889
+        LDY #$07     ;#%00000111
+bE246   TYA 
+        AND #$01     ;#%00000001
+        CLC 
+        ADC #$2B     ;#%00101011
+        STA f0404,Y
+        LDA #$08     ;#%00001000
+        STA fD804,Y
+        DEY 
+        BPL bE246
+        BMI bE26E
+bE259   LDY #$1F     ;#%00011111
+bE25B   LDA fEC8B,Y
+        STA f0400,Y
+        LDA #$0A     ;#%00001010
+        STA fD800,Y
+        DEY 
+        BPL bE25B
+        BMI bE26E
+bE26B   JSR sE889
+bE26E   JSR sE5F4
+        LDX a23
+        TXA 
+        CLC 
+        ADC #$08     ;#%00001000
+        STA $D001    ;Sprite 0 Y Pos
+        LDY #$01     ;#%00000001
+        JSR sE45B
+        DEX 
+        CPX #$BB     ;#%10111011
+        BCC bE287
+        JMP jE205
+
+bE287   LDA #$00     ;#%00000000
+        STA $D404    ;Voice 1: Control Register
+        LDY #$01     ;#%00000001
+        JSR sE44D
+        LDA #$05     ;#%00000101
+        STA $D401    ;Voice 1: Frequency Control - High-Byte
+        LDA #$40     ;#%01000000
+        STA $D404    ;Voice 1: Control Register
+        LDY #$01     ;#%00000001
+        JSR sE44D
+        LDA #$0E     ;#%00001110
+        STA $D02E    ;Sprite 7 Color
+        LDA #$F4     ;#%11110100
+        STA a07FF
+        LDA #$C3     ;#%11000011
+        STA $D00F    ;Sprite 7 Y Pos
+        LDA #$19     ;#%00011001
+        STA $D001    ;Sprite 0 Y Pos
+        STA $D003    ;Sprite 1 Y Pos
+        STA $D005    ;Sprite 2 Y Pos
+        STA $D007    ;Sprite 3 Y Pos
+        LDA #$89     ;#%10001001
+        STA $D00E    ;Sprite 7 X Pos
+        STA $D000    ;Sprite 0 X Pos
+        STA $D002    ;Sprite 1 X Pos
+        STA $D004    ;Sprite 2 X Pos
+        STA $D006    ;Sprite 3 X Pos
+        LDX #$03     ;#%00000011
+bE2D0   STX a23
+        LDY #$02     ;#%00000010
+        JSR sE44D
+        LDA fE344,X
+        STA $D408    ;Voice 2: Frequency Control - High-Byte
+        LDA #$11     ;#%00010001
+        STA $D40B    ;Voice 2: Control Register
+        LDA #$08     ;#%00001000
+        LDY #$07     ;#%00000111
+bE2E6   STA fDA34,Y
+        STA fDA5C,Y
+        DEY 
+        BPL bE2E6
+        LDA fE338,X
+        STA a04
+        LDA fE33C,X
+        STA a05
+        LDA fE340,X
+        LDX #$03     ;#%00000011
+bE2FE   LDY fF43A,X
+        STA (p04),Y
+        DEX 
+        BPL bE2FE
+        LDY #$0A     ;#%00001010
+        JSR sE45B
+        LDX a23
+        LDA fE348,X
+        STA $D40B    ;Voice 2: Control Register
+        DEX 
+        BPL bE2D0
+        LDA #$00     ;#%00000000
+        STA a23
+        LDA #$3C     ;#%00111100
+        STA a52
+        LDA #$08     ;#%00001000
+        STA a1A
+        LDA #$90     ;#%10010000
+        STA $D40C    ;Voice 2: Attack / Decay Cycle Control
+        SEI 
+        LDA #<pEE54  ;#%01010100
+        STA a02
+        LDA #>pEE54  ;#%11101110
+        STA a03
+        CLI 
+        LDA #$01     ;#%00000001
+        STA a11
+        JMP jEB34
+
+fE338   .BYTE $3A,$38,$36,$34
+fE33C   .BYTE $DA,$DA,$DA,$DA
+fE340   .BYTE $0B,$0F,$0A,$0A
+fE344   .BYTE $59,$2C,$2C,$2C
+fE348   .BYTE $10,$00,$00,$00
+jE34C   LDA #$07     ;#%00000111
+        STA a1A
+        LDX #$00     ;#%00000000
+bE352   STX a23
+        JSR sE889
+        LDX a23
+        LDY fE43D,X
+        LDX #$00     ;#%00000000
+bE35E   LDA fE3AD,Y
+        STA f0408,X
+        LDA #$03     ;#%00000011
+        STA fD808,X
+        INY 
+        INX 
+        CPX #$10     ;#%00010000
+        BCC bE35E
+        JSR sE5F4
+        LDY #$02     ;#%00000010
+        JSR sE45B
+        LDX a23
+        INX 
+        CPX #$10     ;#%00010000
+        BCC bE352
+        LDX #$03     ;#%00000011
+bE380   STX a23
+        JSR sE889
+        JSR sE5F4
+        LDY #$02     ;#%00000010
+        JSR sE45B
+        LDX a23
+        DEX 
+        BPL bE380
+jE392   LDY #$14     ;#%00010100
+        JSR sE45B
+        LDA aDAB0
+        EOR #$03     ;#%00000011
+        LDY #$0F     ;#%00001111
+bE39E   STA aDAB0,Y
+        STA fDAD8,Y
+        STA fDB00,Y
+        DEY 
+        BPL bE39E
+        JMP jE392
+
+fE3AD   .BYTE $1B,$03,$1C,$20,$22,$2A,$29,$23
+        .BYTE $20,$02,$19,$20,$20,$20,$20,$20
+        .BYTE $20,$20,$20,$03,$0F,$0D,$0D,$0F
+        .BYTE $04,$0F,$12,$05,$20,$20,$20,$20
+        .BYTE $05,$0C,$05,$03,$14,$12,$0F,$0E
+        .BYTE $09,$03,$13,$20,$0C,$14,$04,$1E
+        .BYTE $20,$20,$20,$20,$20,$20,$01,$0E
+        .BYTE $04,$20,$20,$20,$20,$20,$20,$20
+        .BYTE $20,$08,$01,$0C,$20,$0C,$01,$02
+        .BYTE $0F,$12,$01,$14,$0F,$12,$19,$20
+        .BYTE $20,$20,$10,$15,$13,$08,$20,$1D
+        .BYTE $06,$22,$1D,$20,$0F,$12,$20,$20
+        .BYTE $02,$15,$14,$14,$0F,$0E,$20,$0F
+        .BYTE $0E,$20,$10,$01,$04,$04,$0C,$05
+        .BYTE $20,$20,$20,$20,$14,$0F,$20,$13
+        .BYTE $14,$01,$12,$14,$20,$20,$20,$20
+        .BYTE $20,$20,$20,$20,$20,$20,$20,$20
+        .BYTE $20,$20,$20,$20,$20,$20,$20,$20
+fE43D   .BYTE $80,$70,$60,$50,$80,$80,$80,$40
+        .BYTE $80,$30,$80,$20,$10,$80,$00,$80
+sE44D   LDA #$00     ;#%00000000
+        STA a14
+        STA a15
+bE453   LDA a15
+        BEQ bE453
+        DEY 
+        BNE sE44D
+        RTS 
+
+sE45B   LDA #$00     ;#%00000000
+        STA a19
+bE45F   LDA a19
+        BEQ bE45F
+        DEY 
+        BNE sE45B
+        RTS 
+
+sE467   LDY #$00     ;#%00000000
+bE469   STA f0400,Y
+        STA f0500,Y
+        STA f0600,Y
+        STA f06E8,Y
+        INY 
+        BNE bE469
+        RTS 
+
+sE479   LDA #$44     ;#%01000100
+        JSR sE467
+        LDA #$00     ;#%00000000
+        STA $D020    ;Border Color
+        STA $D021    ;Background Color 0
+        LDA #$08     ;#%00001000
+        STA $D022    ;Background Color 1, Multi-Color Register 0
+        LDA #$0F     ;#%00001111
+        STA $D023    ;Background Color 2, Multi-Color Register 1
+        LDA #$0C     ;#%00001100
+        LDY #$00     ;#%00000000
+bE494   STA fD800,Y
+        STA fD900,Y
+        STA fDA00,Y
+        STA fDAE8,Y
+        INY 
+        BNE bE494
+        LDA #<p0420  ;#%00100000
+        STA a04
+        LDA #>p0420  ;#%00000100
+        STA a05
+        LDX #$18     ;#%00011000
+bE4AD   LDY #$07     ;#%00000111
+        LDA #$20     ;#%00100000
+bE4B1   STA (p04),Y
+        DEY 
+        BPL bE4B1
+        LDA a04
+        CLC 
+        ADC #$28     ;#%00101000
+        STA a04
+        LDA a05
+        ADC #$00     ;#%00000000
+        STA a05
+        DEX 
+        BPL bE4AD
+        LDY #$07     ;#%00000111
+bE4C8   LDA fE5D4,Y
+        STA f0448,Y
+        LDA fE5DC,Y
+        STA f04C0,Y
+        LDA fE5E4,Y
+        STA f0538,Y
+        LDA fE5EC,Y
+        STA f05B0,Y
+        LDA #$01     ;#%00000001
+        STA fD848,Y
+        STA fD9B0,Y
+        STA fDA50,Y
+        STA fDA78,Y
+        LDA #$03     ;#%00000011
+        STA fD8C0,Y
+        STA fD9D8,Y
+        STA fDA00,Y
+        LDA #$04     ;#%00000100
+        STA fDAA0,Y
+ROM_IOBASEj   =*+$02
+        STA fDAC8,Y
+        STA fDAF0,Y
+ROM_SCREENj   =*+$01
+        STA fDB18,Y
+        STA fDB40,Y
+
+; $E50A (jmp) - read/set cursor position         
+ROM_PLOTj STA fDB68,Y
+        LDA #$05     ;#%00000101
+        STA fD938,Y
+        LDA #$07     ;#%00000111
+        STA fD870,Y
+        STA fD8E8,Y
+        STA fD960,Y
+        STA fDBB8,Y
+        STA fDBE0,Y
+        DEY 
+        BPL bE4C8
+        LDY #$71     ;#%01110001
+        STY a05DE
+        INY 
+        STY a05DF
+pE52F   INY 
+        STY a0606
+        INY 
+        STY a0607
+        JSR sE753
+        JSR sE808
+        LDA #<f0400  ;#%00000000
+        STA a04
+        LDA #>f0400  ;#%00000100
+        STA a05
+        LDX #$18     ;#%00011000
+bE547   LDY #$03     ;#%00000011
+bE549   CPY #$00     ;#%00000000
+        BNE bE556
+        TXA 
+        AND #$03     ;#%00000011
+        BNE bE556
+        LDA #$57     ;#%01010111
+        BNE bE559
+bE556   LDA fEAE0,Y
+bE559   STA (p04),Y
+        DEY 
+        BPL bE549
+        LDA a04
+        CLC 
+        ADC #$28     ;#%00101000
+        STA a04
+        LDA a05
+        ADC #$00     ;#%00000000
+        STA a05
+        DEX 
+        BPL bE547
+        LDA #<p0419  ;#%00011001
+        STA a04
+        LDA #>p0419  ;#%00000100
+        STA a05
+        LDX #$18     ;#%00011000
+bE578   LDY #$03     ;#%00000011
+bE57A   CPY #$02     ;#%00000010
+        BNE bE587
+        TXA 
+        AND #$03     ;#%00000011
+        BNE bE587
+        LDA #$46     ;#%01000110
+        BNE bE58A
+bE587   LDA fEAC0,Y
+bE58A   STA (p04),Y
+        DEY 
+        BPL bE57A
+        LDA a04
+        CLC 
+        ADC #$28     ;#%00101000
+        STA a04
+        LDA a05
+        ADC #$00     ;#%00000000
+        STA a05
+        DEX 
+        BPL bE578
+        LDA #<pD807  ;#%00000111
+        STA a04
+        LDA #>pD807  ;#%11011000
+        STA a05
+        LDX #$18     ;#%00011000
+bE5A9   LDY #$13     ;#%00010011
+        LDA #$0E     ;#%00001110
+bE5AD   STA (p04),Y
+        DEY 
+        BPL bE5AD
+        LDA a04
+        CLC 
+        ADC #$28     ;#%00101000
+        STA a04
+        LDA a05
+        ADC #$00     ;#%00000000
+        STA a05
+        DEX 
+        BPL bE5A9
+        LDX #$18     ;#%00011000
+bE5C4   LDA #$1A     ;#%00011010
+        STA f79,X
+        LDA #$E0     ;#%11100000
+        STA f92,X
+        LDA #$07     ;#%00000111
+        STA fAB,X
+        DEX 
+        BPL bE5C4
+        RTS 
+
+fE5D4   .BYTE $20,$13,$03,$0F,$12,$05,$20,$20
+fE5DC   .BYTE $20,$20,$14,$09,$0D,$05,$20,$20
+fE5E4   .BYTE $08,$09,$1F,$13,$03,$0F,$12,$05
+fE5EC   .BYTE $20,$13,$10,$05,$05,$04,$20,$20
+sE5F4   LDY #$1F     ;#%00011111
+jE5F6   LDA f0798,Y
+        STA f07C0,Y
+        LDA f0770,Y
+        STA f0798,Y
+        LDA f0748,Y
+        STA f0770,Y
+        LDA f0720,Y
+        STA f0748,Y
+        LDA f06F8,Y
+        STA f0720,Y
+        LDA f06D0,Y
+        STA f06F8,Y
+        LDA f06A8,Y
+        STA f06D0,Y
+        LDA f0680,Y
+        STA f06A8,Y
+        LDA f0658,Y
+        STA f0680,Y
+        LDA f0630,Y
+        STA f0658,Y
+        LDA f0608,Y
+        STA f0630,Y
+        LDA f05E0,Y
+        STA f0608,Y
+        LDA f05B8,Y
+        STA f05E0,Y
+        LDA f0590,Y
+        STA f05B8,Y
+        LDA f0568,Y
+        STA f0590,Y
+        LDA f0540,Y
+        STA f0568,Y
+        LDA f0518,Y
+        STA f0540,Y
+        LDA f04F0,Y
+        STA f0518,Y
+        LDA f04C8,Y
+        STA f04F0,Y
+        LDA f04A0,Y
+        STA f04C8,Y
+        LDA f0478,Y
+        STA f04A0,Y
+        LDA f0450,Y
+        STA f0478,Y
+        LDA f0428,Y
+        STA f0450,Y
+        LDA f0400,Y
+        STA f0428,Y
+        LDA fDB98,Y
+        STA fDBC0,Y
+        LDA fDB70,Y
+        STA fDB98,Y
+        LDA fDB48,Y
+        STA fDB70,Y
+        LDA fDB20,Y
+        STA fDB48,Y
+        LDA fDAF8,Y
+        STA fDB20,Y
+        LDA fDAD0,Y
+        STA fDAF8,Y
+        LDA fDAA8,Y
+        STA fDAD0,Y
+        LDA fDA80,Y
+        STA fDAA8,Y
+        LDA fDA58,Y
+        STA fDA80,Y
+        LDA fDA30,Y
+        STA fDA58,Y
+        LDA fDA08,Y
+        STA fDA30,Y
+        LDA fD9E0,Y
+        STA fDA08,Y
+        LDA fD9B8,Y
+        STA fD9E0,Y
+        LDA fD990,Y
+        STA fD9B8,Y
+        LDA fD968,Y
+        STA fD990,Y
+        LDA fD940,Y
+        STA fD968,Y
+        LDA fD918,Y
+        STA fD940,Y
+        LDA fD8F0,Y
+        STA fD918,Y
+        LDA fD8C8,Y
+        STA fD8F0,Y
+        LDA fD8A0,Y
+        STA fD8C8,Y
+        LDA fD878,Y
+        STA fD8A0,Y
+        LDA fD850,Y
+        STA fD878,Y
+        LDA fD828,Y
+        STA fD850,Y
+        LDA fD800,Y
+        STA fD828,Y
+        DEY 
+        BMI bE71C
+        JMP jE5F6
+
+bE71C   LDY #$17     ;#%00010111
+bE71E   LDA f0079,Y
+        STA f007A,Y
+        LDA f0092,Y
+        STA f0093,Y
+        LDA f00AB,Y
+        STA f00AC,Y
+        DEY 
+        BPL bE71E
+        RTS 
+
+sE734   STY a4A
+        LDY #$05     ;#%00000101
+bE738   ASL a08
+        ROL a09
+        ROL 
+        ROL 
+        EOR a08
+        ROL 
+        EOR a08
+        LSR 
+        LSR 
+        EOR #$FF     ;#%11111111
+        AND #$01     ;#%00000001
+        ORA a08
+        STA a08
+        DEY 
+        BPL bE738
+        LDY a4A
+        RTS 
+
+sE753   LDA a0E
+        SEC 
+        SBC a0A
+        LDA a0F
+        SBC a0B
+        LDA a10
+        SBC a0C
+        BCS bE76E
+        LDA a0A
+        STA a0E
+        LDA a0B
+        STA a0F
+        LDA a0C
+        STA a10
+bE76E   LDA #<p0560  ;#%01100000
+        STA a06
+        LDA #>p0560  ;#%00000101
+        STA a07
+        LDA #$00     ;#%00000000
+        STA a0D
+        TAY 
+        LDA a10
+        STA a22
+        JSR sE7D8
+        LDA a0F
+        STA a22
+        JSR sE7D8
+        LDA a0E
+        STA a22
+        JSR sE7D8
+        LDA #$21     ;#%00100001
+        STA (p06),Y
+        LDA #<p0470  ;#%01110000
+        STA a06
+        LDA #>p0470  ;#%00000100
+        STA a07
+        LDA #$00     ;#%00000000
+        STA a0D
+        TAY 
+        LDA a0C
+        STA a22
+        JSR sE7D8
+        LDA a0B
+        STA a22
+        JSR sE7D8
+        LDA a0A
+        STA a22
+        JSR sE7D8
+        LDA #$21     ;#%00100001
+        STA (p06),Y
+        LDA #<p04EB  ;#%11101011
+        STA a06
+        LDA #>p04EB  ;#%00000100
+        STA a07
+        LDA #$00     ;#%00000000
+        STA a0D
+        TAY 
+        LDA a16
+        STA a22
+        JSR sE7D8
+        LDA a0D
+        BNE bE7D7
+        DEY 
+        LDA #$21     ;#%00100001
+        STA (p06),Y
+bE7D7   RTS 
+
+sE7D8   LDA a22
+        LSR 
+        LSR 
+        LSR 
+        LSR 
+        STA a21
+        JSR sE7E9
+        LDA a22
+        AND #$0F     ;#%00001111
+        STA a21
+bE7EA   =*+$01
+sE7E9   LDA a21
+        BNE bE7F7
+        LDX a0D
+        BNE bE7F7
+        LDA #$20     ;#%00100000
+        STA (p06),Y
+        BNE bE800
+bE7F7   CLC 
+        ADC #$21     ;#%00100001
+        STA (p06),Y
+        LDA #$01     ;#%00000001
+        STA a0D
+bE800   INY 
+        RTS 
+
+        BVS bE7EA
+        RTS 
+
+        .BYTE $04,$04,$05
+sE808   LDX #$00     ;#%00000000
+        STX a0D
+        LDA a28
+        AND #$0F     ;#%00001111
+        STA a21
+        JSR sE831
+        LDA a27
+        LSR 
+        LSR 
+        LSR 
+        LSR 
+        STA a21
+        JSR sE831
+        LDA a27
+        AND #$0F     ;#%00001111
+        STA a21
+        JSR sE831
+        LDA a0D
+        BNE bE85C
+        INC a0D
+        DEX 
+        DEX 
+sE831   LDA a21
+        BNE bE83D
+        LDY a0D
+        BNE bE83D
+        LDY #$0A     ;#%00001010
+        BNE bE842
+bE83D   TAY 
+        LDA #$01     ;#%00000001
+        STA a0D
+bE842   LDA fE85D,Y
+        STA f05D8,X
+        LDA fE868,Y
+        STA f05D9,X
+        LDA fE873,Y
+        STA f0600,X
+        LDA fE87E,Y
+        STA f0601,X
+        INX 
+        INX 
+bE85C   RTS 
+
+fE85D   .BYTE $5B,$6D,$61,$61,$67,$6B,$6B,$5B
+        .BYTE $6B,$6B,$6D
+fE868   .BYTE $5C,$5F,$62,$62,$68,$6C,$6C,$5C
+        .BYTE $62,$62,$6E
+fE873   .BYTE $5D,$6F,$63,$65,$69,$65,$63,$6F
+        .BYTE $63,$65,$6F
+fE87E   .BYTE $5E,$60,$64,$66,$6A,$66,$66,$60
+        .BYTE $66,$66,$70
+sE889   LDA a25
+        BEQ bE88F
+        DEC a25
+bE88F   LDY #$1F     ;#%00011111
+        LDA #$44     ;#%01000100
+bE893   STA f0400,Y
+        DEY 
+        BPL bE893
+        LDY a1A
+        LDA fEA9E,Y
+        LDX #$1F     ;#%00011111
+bE8A0   STA fD800,X
+        DEX 
+        BPL bE8A0
+        INC a20
+        LDA a20
+        AND #$03     ;#%00000011
+        STA a20
+        LDA a1A
+        CMP #$05     ;#%00000101
+        BCC bE8B7
+        JMP jE972
+
+bE8B7   LDA a1E
+        CMP #$10     ;#%00010000
+        BCS bE8BF
+        INC a1E
+bE8BF   LDA a1F
+        CMP #$54     ;#%01010100
+        BCS bE8CA
+        INC a1F
+        JMP jE9BF
+
+bE8CA   INC a1B
+        LDA a1B
+        CMP #$08     ;#%00001000
+        BCC bE90F
+        LDA #$00     ;#%00000000
+        STA a1B
+        LDA a1A
+        CMP #$03     ;#%00000011
+        BCS bE92C
+        CMP #$02     ;#%00000010
+        BNE bE8E4
+        LDA #$14     ;#%00010100
+        STA a25
+bE8E4   JSR sE734
+        LDA a08
+        AND #$03     ;#%00000011
+        BEQ bE90F
+        CMP #$03     ;#%00000011
+        BEQ bE90F
+        CMP #$01     ;#%00000001
+        BNE bE912
+        LDA a1E
+        SEC 
+        SBC #$01     ;#%00000001
+        CMP #$10     ;#%00010000
+        BCS bE900
+        LDA #$10     ;#%00010000
+bE900   STA a1E
+        LDA a1F
+        CLC 
+        ADC #$01     ;#%00000001
+        CMP #$64     ;#%01100100
+        BCC bE90D
+        LDA #$64     ;#%01100100
+bE90D   STA a1F
+bE90F   JMP jE9BF
+
+bE912   LDA a1E
+        CLC 
+        ADC #$01     ;#%00000001
+        CMP #$20     ;#%00100000
+        BCC bE91D
+        LDA #$20     ;#%00100000
+bE91D   STA a1E
+        LDA a1F
+        SEC 
+        SBC #$01     ;#%00000001
+        CMP #$54     ;#%01010100
+        BCS bE90D
+        LDA #$54     ;#%01010100
+        BNE bE90D
+bE92C   CMP #$03     ;#%00000011
+        BNE bE953
+        LDA #$00     ;#%00000000
+        STA a1C
+        LDA a1E
+        CMP #$11     ;#%00010001
+        BCC bE93C
+        DEC a1E
+bE93C   CMP #$10     ;#%00010000
+        BCS bE942
+        INC a1E
+bE942   LDA a1F
+        CMP #$54     ;#%01010100
+        BCC bE94A
+        DEC a1F
+bE94A   CMP #$53     ;#%01010011
+        BCS bE90F
+        INC a1F
+        JMP jE9BF
+
+bE953   LDA a1E
+        CMP #$11     ;#%00010001
+        BCC bE95B
+        DEC a1E
+bE95B   CMP #$10     ;#%00010000
+        BCS bE961
+        INC a1E
+bE961   LDA a1F
+        CMP #$65     ;#%01100101
+        BCC bE969
+        DEC a1F
+bE969   CMP #$64     ;#%01100100
+        BCS jE9BF
+        INC a1F
+        JMP jE9BF
+
+jE972   LDA a1A
+        CMP #$05     ;#%00000101
+        BNE bE994
+        INC a1C
+        LDA a1C
+        AND #$3F     ;#%00111111
+        STA a1C
+        TAY 
+        LDA fEAF4,Y
+        CLC 
+        ADC #$10     ;#%00010000
+        STA a1E
+        LDA fEAF4,Y
+        CLC 
+        ADC #$53     ;#%01010011
+        STA a1F
+        JMP jE9BF
+
+bE994   CMP #$06     ;#%00000110
+        BNE bE99B
+        JMP jEA49
+
+bE99B   CMP #$07     ;#%00000111
+        BNE bE9A8
+        LDA a1E
+        BEQ jE9BF
+        DEC a1E
+        JMP jE9BF
+
+bE9A8   LDA a52
+        BEQ bE9B1
+        DEC a52
+        JMP jE9BF
+
+bE9B1   LDA a1E
+        CMP #$0F     ;#%00001111
+        BCC bE9BD
+        LDA #$00     ;#%00000000
+        STA a1A
+        BNE jE9BF
+bE9BD   INC a1E
+jE9BF   LDA a1E
+        ASL 
+        CLC 
+        ADC #$18     ;#%00011000
+        STA a79
+        LDA a1F
+        ASL 
+        CLC 
+        ADC #$18     ;#%00011000
+        STA a92
+        LDA a1F
+        LSR 
+        LSR 
+        STA a1D
+        INC a1D
+        LDA a1E
+        LSR 
+        LSR 
+        TAY 
+        INY 
+        LDA a1A
+        STA aAB
+        CMP #$07     ;#%00000111
+        BCC bE9EB
+        CPY #$06     ;#%00000110
+        BCS bE9EB
+        LDY #$06     ;#%00000110
+bE9EB   LDX a1A
+        LDA fEAA7,X
+bE9F0   STA fD801,Y
+        INY 
+        CPY a1D
+        BCC bE9F0
+        LDA a1E
+        LSR 
+        LSR 
+        STA a04
+        LDA #$04     ;#%00000100
+        STA a05
+        LDA a1E
+        AND #$03     ;#%00000011
+        TAY 
+        LDX fEAF0,Y
+        LDY #$00     ;#%00000000
+bEA0C   LDA a20
+        BNE bEA15
+        LDA fEAD0,X
+        BNE bEA18
+bEA15   LDA fEAE0,X
+bEA18   STA (p04),Y
+        INX 
+        INY 
+        CPY #$04     ;#%00000100
+        BCC bEA0C
+        LDA a1F
+        LSR 
+        LSR 
+        STA a04
+        LDA #$04     ;#%00000100
+        STA a05
+        LDA a1F
+        AND #$03     ;#%00000011
+        TAY 
+        LDX fEAF0,Y
+        LDY #$00     ;#%00000000
+bEA34   LDA a20
+        BNE bEA3D
+        LDA fEAB0,X
+        BNE bEA40
+bEA3D   LDA fEAC0,X
+bEA40   STA (p04),Y
+        INX 
+        INY 
+        CPY #$04     ;#%00000100
+        BCC bEA34
+        RTS 
+
+jEA49   LDY #$05     ;#%00000101
+        LDA #$0E     ;#%00001110
+bEA4D   STA pD807,Y
+        STA fD813,Y
+        DEY 
+        BPL bEA4D
+        LDY #$03     ;#%00000011
+bEA58   LDA a20
+        BNE bEA76
+        LDA fEAD0,Y
+        STA f0404,Y
+        LDA fEAD4,Y
+        STA f0410,Y
+        LDA fEABC,Y
+        STA f040C,Y
+        LDA fEAB0,Y
+        STA p0419,Y
+        BNE bEA8E
+bEA76   LDA fEAE0,Y
+        STA f0404,Y
+        LDA fEAE4,Y
+        STA f0410,Y
+        LDA fEACC,Y
+ROM_SCNKEYj   =*+$02
+        STA f040C,Y
+        LDA fEAC0,Y
+        STA p0419,Y
+bEA8E   DEY 
+        BPL bEA58
+        LDA #$38     ;#%00111000
+        STA a79
+        LDA #$E0     ;#%11100000
+        STA a92
+        LDA #$06     ;#%00000110
+        STA aAB
+        RTS 
+
+fEA9E   .BYTE $0D,$09,$08,$0D,$0D,$0A,$0B,$0C
+        .BYTE $0C
+fEAA7   .BYTE $0E,$09,$08,$0E,$0E,$0E,$0E,$0E
+        .BYTE $0E
+fEAB0   .BYTE $40,$45,$46,$44,$41,$45,$47,$48
+        .BYTE $42,$45,$45,$49
+fEABC   .BYTE $43,$45,$45,$4A
+fEAC0   .BYTE $40,$45,$4B,$44,$41,$45,$47,$44
+        .BYTE $42,$45,$45,$4C
+fEACC   .BYTE $43,$45,$45,$4D
+fEAD0   .BYTE $57,$52,$52,$51
+fEAD4   .BYTE $56,$52,$52,$50,$55,$54,$52,$4F
+        .BYTE $44,$53,$52,$4E
+fEAE0   .BYTE $5A,$52,$52,$51
+fEAE4   .BYTE $59,$52,$52,$50,$44,$54,$52,$4F
+        .BYTE $44,$58,$52,$4E
+fEAF0   .BYTE $00,$04,$08,$0C
+fEAF4   .BYTE $00,$00,$01,$01,$01,$02,$02,$02
+        .BYTE $03,$03,$04,$04,$05,$06,$07,$08
+        .BYTE $09,$0A,$0B,$0C,$0D,$0D,$0E,$0E
+        .BYTE $0F,$0F,$0F,$10,$10,$10,$11,$11
+        .BYTE $11,$11,$10,$10,$10,$0F,$0F,$0F
+        .BYTE $0E,$0E,$0D,$0D,$0C,$0B,$0A,$09
+        .BYTE $08,$07,$06,$05,$04,$04,$03,$03
+        .BYTE $02,$02,$02,$01,$01,$01,$00,$00
+jEB34   LDA a27
+        BNE bEB44
+        LDA a28
+        BNE bEB44
+        LDA #$F4     ;#%11110100
+        STA a07FF
+        JMP jEC0E
+
+bEB44   LDA a1A
+        CMP #$08     ;#%00001000
+        BEQ bEB66
+        INC a24
+        LDA a24
+        CMP #$FA     ;#%11111010
+        BCC bEB66
+        LDA #$00     ;#%00000000
+        STA a24
+        LDY a23
+        INY 
+        CPY #$28     ;#%00101000
+        BCC bEB5F
+        LDY #$20     ;#%00100000
+bEB5F   STY a23
+        LDA fECCB,Y
+        STA a1A
+bEB66   JSR sE889
+        JSR sE5F4
+        JSR sEE10
+        JSR sEDDF
+        LDA $D00F    ;Sprite 7 Y Pos
+        LSR 
+        LSR 
+        LSR 
+        SEC 
+        SBC #$05     ;#%00000101
+        TAY 
+        LDA f0079,Y
+        CMP $D00E    ;Sprite 7 X Pos
+        BCS bEBB5
+        CLC 
+        ADC #$18     ;#%00011000
+        CMP $D00E    ;Sprite 7 X Pos
+        BCS bEBAB
+        LDA f0092,Y
+        CLC 
+        ADC #$02     ;#%00000010
+        CMP $D00E    ;Sprite 7 X Pos
+        BCC bEBB5
+        SEC 
+        SBC #$16     ;#%00010110
+        CMP $D00E    ;Sprite 7 X Pos
+        BCC bEBAB
+        LDA #<p05    ;#%00000101
+        STA a41
+        LDA #>p05    ;#%00000000
+        STA a42
+        STA a64
+        BEQ bEBB8
+bEBAB   LDA #$01     ;#%00000001
+        STA a41
+        STA a42
+        STA a64
+        BNE bEBB8
+bEBB5   JMP jECF3
+
+bEBB8   LDA f00AB,Y
+        CMP #$01     ;#%00000001
+        BNE bEBCB
+        LDA a41
+        CMP #$05     ;#%00000101
+        BNE bEBCB
+        LDA #$02     ;#%00000010
+        STA a41
+        STA a64
+bEBCB   LDA f00AB,Y
+        CMP #$06     ;#%00000110
+        BNE bEBF9
+        LDA #$6C     ;#%01101100
+        CMP $D00E    ;Sprite 7 X Pos
+        BCS bEBF9
+        LDA #$B3     ;#%10110011
+        CMP $D00E    ;Sprite 7 X Pos
+        BCC bEBF9
+        LDA #$01     ;#%00000001
+        STA a41
+        STA a42
+        STA a64
+        LDA #$81     ;#%10000001
+        CMP $D00E    ;Sprite 7 X Pos
+        BCS bEBF9
+        LDA #$9E     ;#%10011110
+        CMP $D00E    ;Sprite 7 X Pos
+        BCC bEBF9
+        JMP jECF3
+
+bEBF9   LDY a41
+bEBFB   LDA a38
+        CMP $D00E    ;Sprite 7 X Pos
+        BCS bEC08
+        DEC $D00E    ;Sprite 7 X Pos
+        JMP jEC0B
+
+bEC08   INC $D00E    ;Sprite 7 X Pos
+jEC0B   DEY 
+        BPL bEBFB
+jEC0E   LDA a25
+        BEQ bEC7A
+        CMP #$01     ;#%00000001
+        BNE bEC21
+        LDA $D015    ;Sprite display Enable
+        AND #$8F     ;#%10001111
+        STA $D015    ;Sprite display Enable
+        JMP bEC7A
+
+bEC21   LDA $D015    ;Sprite display Enable
+        ORA #$70     ;#%01110000
+        STA $D015    ;Sprite display Enable
+        LDA #$70     ;#%01110000
+        STA $D017    ;Sprites Expand 2x Vertical (Y)
+        STA $D01D    ;Sprites Expand 2x Horizontal (X)
+        LDA $D01C    ;Sprites Multi-Color Mode Select
+        AND #$8F     ;#%10001111
+        STA $D01C    ;Sprites Multi-Color Mode Select
+        LDA #$0C     ;#%00001100
+        STA $D02B    ;Sprite 4 Color
+        STA $D02C    ;Sprite 5 Color
+        LDA #$0F     ;#%00001111
+        STA $D02D    ;Sprite 6 Color
+        LDY #$FC     ;#%11111100
+        STY a07FC
+        INY 
+        STY a07FD
+        INY 
+        STY a07FE
+        LDA $D00F    ;Sprite 7 Y Pos
+        SEC 
+        SBC #$2A     ;#%00101010
+        STA $D00D    ;Sprite 6 Y Pos
+        SEC 
+        SBC #$20     ;#%00100000
+        STA $D00B    ;Sprite 5 Y Pos
+        STA $D009    ;Sprite 4 Y Pos
+        LDA $D00E    ;Sprite 7 X Pos
+        CLC 
+        ADC #$0A     ;#%00001010
+        STA $D00A    ;Sprite 5 X Pos
+        SEC 
+        SBC #$18     ;#%00011000
+        STA $D00C    ;Sprite 6 X Pos
+        SEC 
+        SBC #$18     ;#%00011000
+        STA $D008    ;Sprite 4 X Pos
+bEC7A   LDA a12
+        BEQ bEC81
+        JSR sF462
+bEC81   LDA a58
+        BEQ bEC88
+        JMP jECF3
+
+bEC88   JMP jEB34
+
+fEC8B   .BYTE $79,$79,$79,$79,$79,$79,$79,$91
+        .BYTE $92,$79,$79,$95,$96,$79,$79,$7A
+        .BYTE $7E,$79,$79,$85,$8E,$79,$79,$95
+        .BYTE $96,$79,$79,$79,$79,$79,$79,$79
+fECAB   .BYTE $79,$79,$79,$79,$79,$79,$79,$93
+        .BYTE $94,$79,$79,$97,$79,$79,$79,$7F
+        .BYTE $80,$79,$79,$8F,$90,$79,$79,$97
+        .BYTE $79,$79,$79,$79,$79,$79,$79,$79
+fECCB   .BYTE $00,$01,$02,$03,$05,$04,$06,$03
+        .BYTE $05,$00,$02,$00,$01,$00,$04,$06
+        .BYTE $00,$02,$00,$03,$05,$00,$01,$00
+        .BYTE $04,$06,$00,$01,$00,$02,$04,$06
+        .BYTE $00,$02,$03,$05,$00,$01,$04,$06
+jECF3   LDY #$02     ;#%00000010
+        STY a42
+        DEY 
+        STY a59
+        STY a77
+        DEY 
+        STY a64
+        STY a65
+        STY $D017    ;Sprites Expand 2x Vertical (Y)
+        STY $D01D    ;Sprites Expand 2x Horizontal (X)
+        STY a25
+
+; $ED09 (jmp) - make SERIAL device talk          
+ROM_TALKj LDA $D015    ;Sprite display Enable
+
+; $ED0C (jmp) - make SERIAL device listen        
+ROM_LISTENj AND #$EF     ;#%11101111
+        ORA #$60     ;#%01100000
+        STA $D015    ;Sprite display Enable
+        LDA $D01C    ;Sprites Multi-Color Mode Select
+        AND #$9F     ;#%10011111
+        STA $D01C    ;Sprites Multi-Color Mode Select
+        LDA #$0F     ;#%00001111
+        STA $D02D    ;Sprite 6 Color
+        LDA #$0C     ;#%00001100
+        STA $D02C    ;Sprite 5 Color
+        LDY #$F8     ;#%11111000
+        STY a07FE
+        INY 
+        STY a07FD
+        LDA #$07     ;#%00000111
+        STA a1A
+        LDY #$23     ;#%00100011
+bED34   STY a24
+        LDA a12
+        BEQ bED3D
+        JSR sF462
+bED3D   JSR sE889
+        JSR sE5F4
+        JSR sEE10
+        JSR sEDDF
+        LDY a24
+        DEY 
+        BPL bED34
+bED4E   LDX #$03     ;#%00000011
+        LDY $D00E    ;Sprite 7 X Pos
+bED53   CPY #$32     ;#%00110010
+        BCC bED74
+        DEY 
+        DEX 
+        BPL bED53
+        STY $D00E    ;Sprite 7 X Pos
+        JSR sE889
+        JSR sE5F4
+        JSR sEE10
+        JSR sEDDF
+        LDA a12
+        BEQ bED4E
+        JSR sF462
+        JMP bED4E
+
+bED74   LDA #$03     ;#%00000011
+        STA a42
+bED78   LDA a27
+        BNE bED80
+        LDA a28
+        BEQ bED96
+bED80   JSR sE889
+        JSR sE5F4
+        JSR sEE10
+        JSR sEDDF
+        LDA a12
+        BEQ bED78
+        JSR sF462
+        JMP bED78
+
+bED96   LDA $D015    ;Sprite display Enable
+        AND #$8F     ;#%10001111
+        STA $D015    ;Sprite display Enable
+        LDA #$2F     ;#%00101111
+        STA $D418    ;Select Filter Mode and Volume
+        LDA #$BE     ;#%10111110
+        STA $D416    ;Filter Cutoff Frequency: High-Byte
+        LDA #$F0     ;#%11110000
+        STA $D417    ;Filter Resonance Control / Voice Input Control
+        LDA #$00     ;#%00000000
+        STA a43
+        STA a44
+        STA a42
+        STA a59
+        STA a58
+
+; $EDB9 (jmp) - send secondary addr after listen 
+ROM_SECONDj STA a6F
+        STA a77
+        LDA #$3C     ;#%00111100
+        STA a52
+        LDA #$08     ;#%00001000
+        STA a1A
+        LDY a23
+
+; $EDC7 (jmp) - send secondary addr after talk   
+ROM_TKSAj LDA fECCB,Y
+        BEQ bEDD6
+        CMP #$03     ;#%00000011
+        BEQ bEDD6
+        CMP #$04     ;#%00000100
+        BEQ bEDD6
+        BNE bEDD8
+bEDD6   DEC a23
+bEDD8   LDA #$FA     ;#%11111010
+        STA a24
+ROM_CIOUTj   =*+$01
+        JMP jEB34
+
+sEDDF   LDA a3A
+        STA a3D
+        LDA a3B
+        STA a3E
+bEDE7   LDA a3D
+        SEC 
+        SBC #$01     ;#%00000001
+        STA a3D
+ROM_UNTLKj   =*+$01
+        LDA a3E
+        SBC #$00     ;#%00000000
+        STA a3E
+        BCS bEDE7
+        LDY a44
+        INY 
+        CPY #$02     ;#%00000010
+        BCC bEE0D
+ROM_UNLSNj   =*+$01
+        LDY #$00     ;#%00000000
+        LDA a43
+        EOR #$01     ;#%00000001
+        AND #$01     ;#%00000001
+        STA a43
+        CLC 
+        ADC #$F4     ;#%11110100
+        STA a07FF
+bEE0D   STY a44
+        RTS 
+
+sEE10   SED 
+        LDA a0A
+
+; $EE13 (jmp) - input byte from SERIAL           
+ROM_ACPTRj CLC 
+        ADC #$01     ;#%00000001
+        STA a0A
+        LDA a0B
+        ADC #$00     ;#%00000000
+        STA a0B
+        LDA a0C
+        ADC #$00     ;#%00000000
+        STA a0C
+        CLD 
+        LDA a0A
+        BNE bEE35
+        LDA a0B
+        AND #$1F     ;#%00011111
+        BNE bEE35
+        INC a53
+        LDA #$5F     ;#%01011111
+        STA a55
+bEE35   LDY #$01     ;#%00000001
+        LDA a0B
+        CMP #$40     ;#%01000000
+        BEQ bEE4B
+        CMP #$20     ;#%00100000
+        BEQ bEE4D
+        CMP #$05     ;#%00000101
+        BEQ bEE4F
+        CMP #$02     ;#%00000010
+        BEQ bEE51
+        BNE bEE53
+bEE4B   STY a33
+bEE4D   STY a32
+bEE4F   STY a31
+bEE51   STY a30
+bEE53   RTS 
+
+pEE54   LDA a13
+        BEQ bEE5C
+        SED 
+        JMP jEEB7
+
+bEE5C   LDA #$40     ;#%01000000
+        STA $DC00    ;CIA1: Data Port Register A
+        LDA $D419    ;Analog/Digital Converter: Game Paddle 1
+        STA a39
+        CMP #$BC     ;#%10111100
+        BCC bEE6E
+        LDA #$BC     ;#%10111100
+        STA a39
+bEE6E   LDA #$EC     ;#%11101100
+        SEC 
+        SBC a39
+        STA a38
+        LDA a42
+        CMP #$02     ;#%00000010
+        BCS bEE82
+        LDA $DC01    ;CIA1: Data Port Register B
+        AND #$04     ;#%00000100
+        BNE bEEEC
+bEE82   SED 
+        LDA a42
+        BEQ jEEB7
+        CMP #$01     ;#%00000001
+        BEQ bEE9C
+        CMP #$03     ;#%00000011
+        BEQ bEEEC
+        LDA #$50     ;#%01010000
+        SEC 
+        SBC a27
+        LDA #$00     ;#%00000000
+        SBC a28
+        BCC bEEA7
+        BCS bEF02
+bEE9C   LDA #$50     ;#%01010000
+        SEC 
+        SBC a27
+        LDA #$01     ;#%00000001
+        SBC a28
+        BCS jEEB7
+bEEA7   LDA a27
+        SEC 
+        SBC #$02     ;#%00000010
+        STA a27
+        LDA a28
+        SBC #$00     ;#%00000000
+        STA a28
+        JMP jEED6
+
+jEEB7   LDY a28
+        LDA fF2F3,Y
+        STA a68
+        LDA fF2F7,Y
+        STA a69
+        LDA a29
+        CLC 
+        ADC a68
+        STA a29
+        LDA a27
+        ADC a69
+        STA a27
+        LDA a28
+        ADC #$00     ;#%00000000
+        STA a28
+jEED6   LDA #$20     ;#%00100000
+        SEC 
+        SBC a27
+        LDA #$03     ;#%00000011
+        SBC a28
+        BCS bEF02
+        LDA #>ROM_CHKOUTi ;#%00000011
+        STA a28
+        LDA #<ROM_CHKOUTi ;#%00100000
+        STA a27
+        JMP bEF02
+
+bEEEC   LDA a28
+        BNE bEEF4
+        LDA a27
+        BEQ bEF02
+bEEF4   SED 
+        LDA a27
+        SEC 
+        SBC #$02     ;#%00000010
+        STA a27
+        LDA a28
+        SBC #$00     ;#%00000000
+        STA a28
+bEF02   LDA a28
+        CMP #$04     ;#%00000100
+        BCC bEF0E
+        LDA #$00     ;#%00000000
+        STA a27
+        STA a28
+bEF0E   CLD 
+        JSR sE753
+        INC a6A
+        LDA a6A
+        AND #$07     ;#%00000111
+        BNE bEF1D
+        JSR sE808
+bEF1D   LDA a27
+        LSR 
+        LSR 
+        LSR 
+        LSR 
+        LDX a28
+        CLC 
+        ADC fF2E3,X
+        STA a3C
+        TAY 
+        LDA fF2A3,Y
+        STA a3A
+        LDA fF2C3,Y
+        STA a3B
+        LDA a11
+        BEQ bEF42
+        LDA #$C3     ;#%11000011
+        SEC 
+        SBC a3C
+        STA $D00F    ;Sprite 7 Y Pos
+bEF42   LDA a1A
+        CMP #$07     ;#%00000111
+        BNE bEF7F
+        LDY $D00F    ;Sprite 7 Y Pos
+        INY 
+        STY $D00D    ;Sprite 6 Y Pos
+        INY 
+        STY $D00B    ;Sprite 5 Y Pos
+        LDA $D00E    ;Sprite 7 X Pos
+        STA $D00C    ;Sprite 6 X Pos
+        STA $D00A    ;Sprite 5 X Pos
+        LDY a45
+        INY 
+        CPY #$0A     ;#%00001010
+        BCC bEF7D
+        LDY #$00     ;#%00000000
+        LDA a46
+        EOR #$01     ;#%00000001
+        AND #$01     ;#%00000001
+        STA a46
+        CLC 
+        ADC #$F8     ;#%11111000
+        STA a07FE
+        AND #$01     ;#%00000001
+        EOR #$01     ;#%00000001
+        CLC 
+        ADC #$F8     ;#%11111000
+        STA a07FD
+bEF7D   STY a45
+bEF7F   LDA a1A
+        CMP #$04     ;#%00000100
+        BNE bEFEA
+        LDA a24
+        CMP #$A0     ;#%10100000
+        BCC bEFEA
+        CMP #$F0     ;#%11110000
+        BCS bEFDC
+        CMP #$A0     ;#%10100000
+        BNE bEFBD
+        LDA #$40     ;#%01000000
+        STA $D017    ;Sprites Expand 2x Vertical (Y)
+        STA $D01D    ;Sprites Expand 2x Horizontal (X)
+        LDA $D01C    ;Sprites Multi-Color Mode Select
+        ORA #$40     ;#%01000000
+        STA $D01C    ;Sprites Multi-Color Mode Select
+        LDA #$03     ;#%00000011
+        STA $D02D    ;Sprite 6 Color
+        LDA #$FB     ;#%11111011
+        STA a07FE
+        LDA #$3A     ;#%00111010
+        STA $D00D    ;Sprite 6 Y Pos
+        LDA #$81     ;#%10000001
+        STA $D00C    ;Sprite 6 X Pos
+        LDA #$00     ;#%00000000
+        STA a47
+        STA a48
+bEFBD   LDY a47
+        INY 
+        CPY #$08     ;#%00001000
+        BCC bEFE8
+        LDY #$00     ;#%00000000
+        LDA a48
+        EOR #$01     ;#%00000001
+        STA a48
+        BEQ bEFDC
+        LDA $D015    ;Sprite display Enable
+        ORA #$40     ;#%01000000
+        STA $D015    ;Sprite display Enable
+        LDA #$01     ;#%00000001
+        STA a65
+        BNE bEFE8
+bEFDC   LDA $D015    ;Sprite display Enable
+        AND #$BF     ;#%10111111
+        STA $D015    ;Sprite display Enable
+        LDA #$00     ;#%00000000
+        STA a65
+bEFE8   STY a47
+bEFEA   LDA a11
+        BEQ bF00B
+        LDA a16
+        BEQ bF007
+        LDY a17
+        INY 
+        CPY a18
+        BCC bF00B
+        LDY #$00     ;#%00000000
+        SED 
+        LDA a16
+        SEC 
+        SBC #$01     ;#%00000001
+        STA a16
+        CLD 
+        JMP bF00B
+
+bF007   LDA #$01     ;#%00000001
+        STA a12
+bF00B   STY a17
+        SED 
+        LDA a27
+        SEC 
+        SBC a2A
+        LDA a28
+        SBC a2B
+        BCS bF030
+        LDA #$01     ;#%00000001
+        STA a4D
+        LDA a2A
+        SEC 
+        SBC a27
+        STA a2C
+        LDA a2B
+        SBC a28
+        STA a2D
+        JSR sF227
+        JMP jF044
+
+bF030   LDA #$00     ;#%00000000
+        STA a4D
+        LDA a27
+        SEC 
+        SBC a2A
+        STA a2C
+        LDA a28
+        SBC a2B
+        STA a2D
+        JSR sF227
+jF044   LDX #$03     ;#%00000011
+jF046   TXA 
+        ASL 
+        STA a49
+        TAY 
+        LDA $D001,Y  ;Sprite 0 Y Pos
+        CMP #$1D     ;#%00011101
+        BCC bF066
+        CMP #$32     ;#%00110010
+        BCC bF061
+        CPX a5A
+        BNE bF05E
+        LDA #$04     ;#%00000100
+        STA a5A
+bF05E   JMP jF0E2
+
+bF061   STX a5A
+        JMP jF0E2
+
+bF066   LDA #$00     ;#%00000000
+        STA f6B,X
+        CPX a5A
+        BNE bF079
+        LDA f30,X
+        BNE jF0E2
+        LDA #$04     ;#%00000100
+        STA a5A
+bF076   JMP jF10C
+
+bF079   LDA a5A
+        CMP #$04     ;#%00000100
+        BNE bF076
+        LDA f30,X
+        BEQ bF076
+        JSR sE734
+        LDA a08
+        AND #$1F     ;#%00011111
+        BNE bF076
+        STX a5A
+        JSR sE734
+        LDA a08
+        AND #$07     ;#%00000111
+        TAY 
+        LDA fF29B,Y
+        STA $D027,X  ;Sprite 0 Color
+        LDA aAB
+        CMP #$06     ;#%00000110
+        BEQ bF0CE
+        LDA aC3
+        CMP #$06     ;#%00000110
+        BEQ bF0CE
+        JSR sE734
+        LDA a08
+        AND #$3F     ;#%00111111
+        CLC 
+        ADC #$6E     ;#%01101110
+        LDY a49
+        STA $D000,Y  ;Sprite 0 X Pos
+        JSR sE734
+        LDA a08
+        AND #$01     ;#%00000001
+        STA f5D,X
+        JSR sE734
+        LDA a08
+        AND #$02     ;#%00000010
+        TAY 
+        DEY 
+        STY f4E,X
+        JMP jF0E2
+
+bF0CE   JSR sE734
+        LDA a08
+        AND #$03     ;#%00000011
+        TAY 
+        LDA fF2EF,Y
+        LDY a49
+        STA $D000,Y  ;Sprite 0 X Pos
+        LDA #$01     ;#%00000001
+        STA f5D,X
+jF0E2   LDY a49
+        LDA a4D
+        BNE bF0FA
+        LDA f34,X
+        CLC 
+        ADC a2C
+        STA f34,X
+        LDA $D001,Y  ;Sprite 0 Y Pos
+        ADC a2D
+        STA $D001,Y  ;Sprite 0 Y Pos
+        JMP jF113
+
+bF0FA   LDA f34,X
+        SEC 
+        SBC a2C
+        STA f34,X
+        LDA $D001,Y  ;Sprite 0 Y Pos
+        SBC a2D
+        STA $D001,Y  ;Sprite 0 Y Pos
+        JMP jF113
+
+jF10C   LDY a49
+        LDA #$19     ;#%00011001
+        STA $D001,Y  ;Sprite 0 Y Pos
+jF113   LDA a1A
+        CMP #$04     ;#%00000100
+        BNE bF136
+        LDA a24
+        CMP #$C8     ;#%11001000
+        BCC bF136
+        LDA $D000,Y  ;Sprite 0 X Pos
+        CMP #$6B     ;#%01101011
+        BCC bF161
+        CMP #$B3     ;#%10110011
+        BCS bF161
+        LDA $D000,Y  ;Sprite 0 X Pos
+        CLC 
+        ADC f4E,X
+        STA $D000,Y  ;Sprite 0 X Pos
+        JMP bF161
+
+bF136   LDA f5D,X
+        BNE bF161
+        LDA a1A
+        CMP #$06     ;#%00000110
+
+; $F13E (jmp) - get a byte from channel          
+ROM_GETINj BEQ bF161
+        LDA aC3
+        CMP #$06     ;#%00000110
+        BEQ bF161
+        LDA $D000,Y  ;Sprite 0 X Pos
+        CLC 
+        ADC f4E,X
+        STA $D000,Y  ;Sprite 0 X Pos
+        CMP #$67     ;#%01100111
+        BCS bF159
+        LDA #$01     ;#%00000001
+        STA f4E,X
+
+; $F157 (jmp) - input character                  
+ROM_CHRINj BNE bF161
+bF159   CMP #$B7     ;#%10110111
+        BCC bF161
+        LDA #$FF     ;#%11111111
+        STA f4E,X
+bF161   LDY a49
+        LDA $D001,Y  ;Sprite 0 Y Pos
+        LSR 
+        LSR 
+        LSR 
+        SEC 
+        SBC #$05     ;#%00000101
+        TAY 
+        LDA f00AB,Y
+        CMP #$02     ;#%00000010
+        BNE bF17B
+        LDA #$FA     ;#%11111010
+        STA a07F8,X
+        BNE bF180
+bF17B   LDA #$F6     ;#%11110110
+        STA a07F8,X
+bF180   LDY a49
+        LDA $D001,Y  ;Sprite 0 Y Pos
+        CMP #$32     ;#%00110010
+        BCC bF191
+        CMP #$3C     ;#%00111100
+        BCS bF191
+        LDA #$01     ;#%00000001
+        STA f6B,X
+bF191   LDA $D001,Y  ;Sprite 0 Y Pos
+        CMP $D00F    ;Sprite 7 Y Pos
+        BCC bF1B0
+        LDA f6B,X
+        BEQ bF1B0
+        LDA #$00     ;#%00000000
+        STA f6B,X
+        INC a6F
+        LDA a6F
+        CMP #$0A     ;#%00001010
+        BCC bF1B0
+        LDY #$00     ;#%00000000
+        STY a6F
+        INY 
+        STY a70
+bF1B0   DEX 
+        BMI bF1B6
+        JMP jF046
+
+bF1B6   LDY a4B
+        INY 
+        CPY #$04     ;#%00000100
+        BCC bF1D7
+        LDY #$00     ;#%00000000
+        LDA a4C
+        EOR #$01     ;#%00000001
+        STA a4C
+        CLC 
+        ADC #$F6     ;#%11110110
+        LDY #$03     ;#%00000011
+
+; $F1CA (jmp) - output character                 
+ROM_CHROUTj LDX a07F8,Y
+        CPX #$FA     ;#%11111010
+        BEQ bF1D4
+        STA a07F8,Y
+bF1D4   DEY 
+        BPL ROM_CHROUTj
+bF1D7   STY a4B
+        LDA a59
+        BEQ bF224
+        INC a78
+        LDA a78
+        AND #$04     ;#%00000100
+        BNE bF1F0
+        LDA $D015    ;Sprite display Enable
+        AND #$EF     ;#%11101111
+        STA $D015    ;Sprite display Enable
+        JMP bF224
+
+bF1F0   LDA $D015    ;Sprite display Enable
+        ORA #$10     ;#%00010000
+        STA $D015    ;Sprite display Enable
+        LDA $D017    ;Sprites Expand 2x Vertical (Y)
+        ORA #$10     ;#%00010000
+        STA $D017    ;Sprites Expand 2x Vertical (Y)
+        LDA $D01C    ;Sprites Multi-Color Mode Select
+        ORA #$10     ;#%00010000
+        STA $D01C    ;Sprites Multi-Color Mode Select
+        LDA $D01D    ;Sprites Expand 2x Horizontal (X)
+        ORA #$10     ;#%00010000
+ROM_CHKINj   =*+$01
+        STA $D01D    ;Sprites Expand 2x Horizontal (X)
+        LDA #$02     ;#%00000010
+        STA $D02B    ;Sprite 4 Color
+        LDA #$F3     ;#%11110011
+        STA a07FC
+        LDA #$81     ;#%10000001
+        STA $D008    ;Sprite 4 X Pos
+        LDA #$3A     ;#%00111010
+        STA $D009    ;Sprite 4 Y Pos
+bF224   JMP jF2FB
+
+sF227   CLD 
+        LDA #$00     ;#%00000000
+        STA a2E
+        STA a2F
+        LDY a2D
+        BEQ bF242
+bF232   LDA a2E
+        CLC 
+        ADC #$64     ;#%01100100
+        STA a2E
+        LDA a2F
+        ADC #$00     ;#%00000000
+        STA a2F
+        DEY 
+        BNE bF232
+bF242   LDA a2C
+        LSR 
+        LSR 
+        LSR 
+        LSR 
+        TAY 
+        BEQ bF25B
+bF24B   LDA a2E
+        CLC 
+        ADC #$0A     ;#%00001010
+
+; $F250 (jmp) - open channel for output          
+ROM_CHKOUTj STA a2E
+        LDA a2F
+        ADC #$00     ;#%00000000
+        STA a2F
+        DEY 
+        BNE bF24B
+bF25B   LDA a2C
+        AND #$0F     ;#%00001111
+        TAY 
+        BEQ bF272
+bF262   LDA a2E
+        CLC 
+        ADC #$01     ;#%00000001
+        STA a2E
+        LDA a2F
+        ADC #$00     ;#%00000000
+        STA a2F
+        DEY 
+        BNE bF262
+bF272   LDA a2F
+        STA a2C
+        LDA a2E
+        STA a2D
+        LDY #$05     ;#%00000101
+bF27C   LSR a2D
+        ROR a2C
+        DEY 
+        BPL bF27C
+        LDA a2D
+        LSR 
+        STA a5C
+        LDA a2C
+        ROR 
+        STA a5B
+        LDA a2C
+        CLC 
+ROM_CLOSEj   =*+$01
+        ADC a5B
+        STA a2C
+        LDA a2D
+        ADC a5C
+        STA a2D
+        RTS 
+
+fF29B   .BYTE $02,$03,$05,$07,$08,$09,$0A,$0D
+fF2A3   .BYTE $00,$00,$00,$00,$00,$00,$80,$00
+        .BYTE $80,$00,$80,$00,$80,$30,$00,$A0
+        .BYTE $60,$20,$00,$D0,$98,$70,$35,$10
+        .BYTE $00,$C0,$40,$18,$08,$04,$02,$00
+fF2C3   .BYTE $10,$0C,$0A,$09,$08,$07,$06,$06
+        .BYTE $05,$05,$04,$04,$03,$03,$03,$02
+        .BYTE $02,$02,$02,$01,$01,$01,$01,$01
+        .BYTE $01,$00,$00,$00,$00,$00,$00,$00
+fF2E3   .BYTE $00,$0A,$14,$1E,$FE,$FD,$FB,$F7
+        .BYTE $01,$02,$04,$08
+fF2EF   .BYTE $51,$6B,$B3,$CD
+fF2F3   .BYTE $00,$00,$40,$08
+fF2F7   .BYTE $03,$01,$00,$00
+jF2FB   LDY #$03     ;#%00000011
+bF2FD   TYA 
+        ASL 
+        TAX 
+        LDA $D000,X  ;Sprite 0 X Pos
+        SEC 
+        SBC #$05     ;#%00000101
+        CMP $D00E    ;Sprite 7 X Pos
+        BCS bF330
+        LDA $D001,X  ;Sprite 0 Y Pos
+        SEC 
+        SBC #$04     ;#%00000100
+        CMP $D00F    ;Sprite 7 Y Pos
+        BCS bF330
+        LDA $D000,X  ;Sprite 0 X Pos
+        CLC 
+        ADC #$0F     ;#%00001111
+        CMP $D00E    ;Sprite 7 X Pos
+        BCC bF330
+        LDA $D001,X  ;Sprite 0 Y Pos
+        CLC 
+        ADC #$12     ;#%00010010
+        CMP $D00F    ;Sprite 7 Y Pos
+        BCC bF330
+        LDA #$01     ;#%00000001
+ROM_CLALLj   =*+$01
+        STA a58
+bF330   LDA $D00E    ;Sprite 7 X Pos
+
+; $F333 (jmp) - restore default devices          
+ROM_CLRCHNj SEC 
+        SBC #$03     ;#%00000011
+        CMP $D000,X  ;Sprite 0 X Pos
+        BCS bF360
+        LDA $D00F    ;Sprite 7 Y Pos
+        SEC 
+        SBC #$02     ;#%00000010
+        CMP $D001,X  ;Sprite 0 Y Pos
+        BCS bF360
+        LDA $D00E    ;Sprite 7 X Pos
+        CLC 
+
+; $F34A (jmp) - open log.file after SETLFS,SETNAM
+ROM_OPENj ADC #$11     ;#%00010001
+        CMP $D000,X  ;Sprite 0 X Pos
+        BCC bF360
+        LDA $D00F    ;Sprite 7 Y Pos
+        CLC 
+        ADC #$14     ;#%00010100
+        CMP $D001,X  ;Sprite 0 Y Pos
+        BCC bF360
+        LDA #$01     ;#%00000001
+        STA a58
+bF360   DEY 
+        BPL bF2FD
+        LDA a13
+        BEQ bF36A
+        JMP jF3F1
+
+bF36A   LDY #$08     ;#%00001000
+bF36C   LDA fF428,Y
+        STA a06
+        LDA fF431,Y
+        STA a07
+        STY a49
+        LDX #$03     ;#%00000011
+bF37A   CPY a6F
+        BCC bF382
+        LDA #$20     ;#%00100000
+        BNE bF385
+bF382   LDA fF43E,X
+bF385   LDY fF43A,X
+        STA (p06),Y
+        LDY a49
+        DEX 
+        BPL bF37A
+        DEY 
+        BPL bF36C
+        LDA a70
+        BEQ bF3CA
+        LDA #>p2800  ;#%00101000
+        STA a71
+        LDA #<p2800  ;#%00000000
+        STA a70
+        SED 
+        LDA a0B
+        CLC 
+        ADC #$01     ;#%00000001
+        STA a0B
+        LDA a0C
+        ADC #$00     ;#%00000000
+        STA a0C
+        CLD 
+        LDA a0B
+        AND #$1F     ;#%00011111
+        BNE bF3B9
+        INC a53
+        LDA #$5F     ;#%01011111
+        STA a55
+bF3B9   LDY #$07     ;#%00000111
+bF3BB   LDA fF442,Y
+        STA f07B8,Y
+        LDA fF44A,Y
+        STA f07E0,Y
+        DEY 
+        BPL bF3BB
+bF3CA   LDA a71
+        BEQ jF3F1
+        DEC a71
+        LDA a71
+        AND #$04     ;#%00000100
+        BEQ bF3DC
+        LDA #$01     ;#%00000001
+        STA a66
+        BNE jF3F1
+bF3DC   LDA #$00     ;#%00000000
+        STA a66
+        LDA a71
+        BNE jF3F1
+        LDY #$07     ;#%00000111
+        LDA #$20     ;#%00100000
+bF3E8   STA f07B8,Y
+        STA f07E0,Y
+        DEY 
+        BPL bF3E8
+jF3F1   LDA a55
+        BEQ bF425
+        DEC a55
+        LDA a55
+        AND #$10     ;#%00010000
+        BEQ bF414
+        LDA #$01     ;#%00000001
+        STA a67
+        LDY #$07     ;#%00000111
+bF403   LDA fF452,Y
+        STA f0650,Y
+        LDA fF45A,Y
+        STA f0678,Y
+        DEY 
+        BPL bF403
+        BMI bF425
+bF414   LDA #$00     ;#%00000000
+        STA a67
+        LDY #$07     ;#%00000111
+        LDA #$20     ;#%00100000
+bF41C   STA f0650,Y
+        STA f0678,Y
+        DEY 
+        BPL bF41C
+bF425   JMP pE008
+
+fF428   .BYTE $A1,$A3,$A5,$F1,$F3,$F5,$41,$43
+        .BYTE $45
+fF431   .BYTE $06,$06,$06,$06,$06,$06,$07,$07
+        .BYTE $07
+fF43A   .BYTE $00,$01,$28,$29
+fF43E   .BYTE $75,$76,$77,$78
+fF442   .BYTE $20,$02,$0F,$15,$0E,$13,$20,$20
+fF44A   .BYTE $22,$21,$21,$21,$20,$10,$14,$13
+fF452   .BYTE $05,$18,$14,$05,$0E,$04,$05,$04
+fF45A   .BYTE $20,$20,$14,$09,$0D,$05,$20,$20
+sF462   STY a56
+        STX a57
+        LDA a53
+        BEQ bF48B
+        DEC a53
+        LDY a54
+        CPY #$05     ;#%00000101
+        BCC bF474
+        LDY #$04     ;#%00000100
+bF474   LDA fF564,Y
+        STA a18
+        INY 
+        STY a54
+        LDA #$60     ;#%01100000
+        STA a16
+        LDA #$00     ;#%00000000
+        STA a12
+        STA a17
+        LDY a57
+        LDX a56
+        RTS 
+
+bF48B   INC a13
+        LDA #$07     ;#%00000111
+        STA a1A
+        LDA $D015    ;Sprite display Enable
+        AND #$8F     ;#%10001111
+        STA $D015    ;Sprite display Enable
+        LDA #$00     ;#%00000000
+        STA a58
+ROM_LOADj   =*+$01
+        STA a59
+        STA a64
+        STA a65
+        STA a66
+        STA a30
+        STA a31
+        STA a32
+        STA a33
+        LDA #$F0     ;#%11110000
+        STA $D417    ;Filter Resonance Control / Voice Input Control
+        LDY #$4B     ;#%01001011
+bF4B4   STY a24
+        JSR sE889
+        JSR sE5F4
+        JSR sEDDF
+        LDY a24
+        DEY 
+        BNE bF4B4
+        LDY #$1F     ;#%00011111
+bF4C6   LDA fF589,Y
+        STA f0400,Y
+        LDA #$0A     ;#%00001010
+        STA fD800,Y
+        DEY 
+        BPL bF4C6
+        JSR sE5F4
+        JSR sEDDF
+        LDY #$1F     ;#%00011111
+bF4DC   LDA fF569,Y
+        STA f0400,Y
+        DEY 
+        BPL bF4DC
+        JSR sE5F4
+        JSR sEDDF
+        LDY #$0A     ;#%00001010
+bF4ED   STY a24
+        JSR sE889
+        JSR sE5F4
+        JSR sEDDF
+        LDY a24
+        DEY 
+        BPL bF4ED
+        SEI 
+        LDA #<pE008  ;#%00001000
+        STA a02
+        LDA #>pE008  ;#%11100000
+        STA a03
+        CLI 
+        INC a13
+        LDA #$A3     ;#%10100011
+bF50B   CMP #$08     ;#%00001000
+        BCC bF51F
+        SEC 
+        SBC #$04     ;#%00000100
+        STA $D00F    ;Sprite 7 Y Pos
+        LDY #$01     ;#%00000001
+        JSR sE45B
+        LDA $D00F    ;Sprite 7 Y Pos
+        BNE bF50B
+bF51F   LDY #$07     ;#%00000111
+        LDA #$20     ;#%00100000
+bF523   STA f07B8,Y
+        STA f07E0,Y
+        DEY 
+        BPL bF523
+        LDY #$05     ;#%00000101
+        JSR sE44D
+        LDX #$1A     ;#%00011010
+bF533   STX a23
+        JSR sE889
+        JSR sE5F4
+        LDA a1F
+        CMP #$64     ;#%01100100
+        BEQ bF54A
+        BCC bF548
+        DEC a1F
+        JMP bF54A
+
+bF548   INC a1F
+bF54A   LDY #$01     ;#%00000001
+        JSR sE45B
+        LDX a23
+        DEX 
+        BPL bF533
+        LDA #$00     ;#%00000000
+        STA $D015    ;Sprite display Enable
+        LDX #$0F     ;#%00001111
+bF55B   STA $D000,X  ;Sprite 0 X Pos
+        DEX 
+        BPL bF55B
+        JMP jE0BD
+
+fF564   RTI 
+
+        .BYTE $3A,$34,$2F,$22
+fF569   .BYTE $79,$79,$79,$79,$79,$79,$85,$8E
+        .BYTE $7A,$7E,$7A,$7B,$85,$86,$79,$79
+        .BYTE $79,$79,$7A,$7E,$8A,$8B,$85,$86
+        .BYTE $85,$8E,$79,$79,$79,$79,$79,$79
+fF589   .BYTE $79,$79,$79,$79,$79,$79,$8F,$90
+        .BYTE $7F,$80,$7C,$7D,$87,$88,$79,$79
+        .BYTE $79,$79,$7C,$89,$8C,$8D,$87,$88
+        .BYTE $8F,$90,$79,$79,$79,$79,$79,$79
+sF5A9   LDA a59
+        BEQ bF5ED
+        CMP #$01     ;#%00000001
+        BNE bF5D9
+        LDA #$00     ;#%00000000
+        STA $D400    ;Voice 1: Frequency Control - Low-Byte
+        STA $D415    ;Filter Cutoff Frequency: Low-Nybble
+        LDA #$09     ;#%00001001
+        STA $D401    ;Voice 1: Frequency Control - High-Byte
+        LDA #$1F     ;#%00011111
+        STA $D418    ;Select Filter Mode and Volume
+        LDA #$F1     ;#%11110001
+        STA $D417    ;Filter Resonance Control / Voice Input Control
+        LDA #$C8     ;#%11001000
+        STA $D416    ;Filter Cutoff Frequency: High-Byte
+        STA a76
+        LDA #$81     ;#%10000001
+        STA $D404    ;Voice 1: Control Register
+        INC a59
+        JMP jF667
+
+bF5D9   CMP #$02     ;#%00000010
+        BNE bF5EA
+
+; $F5DD (jmp) - save after call SETLFS,SETNAM    
+ROM_SAVEj DEC a76
+        LDA a76
+        STA $D416    ;Filter Cutoff Frequency: High-Byte
+        CMP #$96     ;#%10010110
+        BCS bF5EA
+        INC a59
+bF5EA   JMP jF667
+
+bF5ED   LDA a13
+        CMP #$02     ;#%00000010
+        BCC bF632
+        CMP #$03     ;#%00000011
+        BEQ bF616
+        CMP #$04     ;#%00000100
+        BEQ jF667
+        LDA #$40     ;#%01000000
+        STA $D404    ;Voice 1: Control Register
+        LDA #$00     ;#%00000000
+        STA $D40B    ;Voice 2: Control Register
+        STA $D412    ;Voice 3: Control Register
+        STA a61
+        STA $D400    ;Voice 1: Frequency Control - Low-Byte
+        LDA #$0D     ;#%00001101
+        STA a62
+        STA $D401    ;Voice 1: Frequency Control - High-Byte
+        INC a13
+bF616   LDA a61
+        SEC 
+        SBC #$1E     ;#%00011110
+        STA a61
+        STA $D400    ;Voice 1: Frequency Control - Low-Byte
+        LDA a62
+        SBC #$00     ;#%00000000
+        STA a62
+        STA $D401    ;Voice 1: Frequency Control - High-Byte
+        CMP #$0A     ;#%00001010
+        BNE jF667
+        INC a13
+        JMP jF667
+
+bF632   LDA a27
+        BNE bF641
+        LDA a28
+        BNE bF641
+        LDA #$00     ;#%00000000
+        STA $D404    ;Voice 1: Control Register
+        BEQ jF667
+bF641   LDA a27
+        STA a2C
+        LDA a28
+        STA a2D
+        JSR sF227
+        LDY #$02     ;#%00000010
+bF64E   ASL a2E
+        ROL a2F
+        DEY 
+        BPL bF64E
+        LDA a2E
+        STA $D400    ;Voice 1: Frequency Control - Low-Byte
+        LDA a2F
+        CLC 
+        ADC #$03     ;#%00000011
+        STA $D401    ;Voice 1: Frequency Control - High-Byte
+        LDA #$41     ;#%01000001
+        STA $D404    ;Voice 1: Control Register
+jF667   LDA a67
+        BNE bF6CD
+        LDA a65
+        BEQ bF672
+        JMP jF6F3
+
+bF672   LDA a66
+        BNE bF6E0
+        LDA a64
+        BNE bF682
+        STA $D412    ;Voice 3: Control Register
+        BNE bF682
+        JMP jF704
+
+bF682   CMP #$01     ;#%00000001
+        BNE bF6B8
+        LDY a63
+        INY 
+        CPY #$03     ;#%00000011
+        BCC bF68F
+        LDY #$00     ;#%00000000
+bF68F   STY a63
+        CPY #$01     ;#%00000001
+        BCS bF6B1
+        LDA a27
+        BNE bF6A0
+        LDA a28
+
+; $F69B (jmp) - update jiffy clock               
+ROM_UDTIMj BNE bF6A0
+        JMP jF704
+
+bF6A0   LDA #$04     ;#%00000100
+        STA $D40F    ;Voice 3: Frequency Control - High-Byte
+        LDA #$81     ;#%10000001
+        STA $D412    ;Voice 3: Control Register
+        LDA #$F0     ;#%11110000
+        STA $D417    ;Filter Resonance Control / Voice Input Control
+        BNE jF704
+bF6B1   LDA a00
+        STA $D412    ;Voice 3: Control Register
+        BEQ jF704
+bF6B8   CMP #$02     ;#%00000010
+        BNE jF704
+        LDA #$1E     ;#%00011110
+        STA $D40F    ;Voice 3: Frequency Control - High-Byte
+        LDA #$81     ;#%10000001
+        STA $D412    ;Voice 3: Control Register
+        LDA #$F4     ;#%11110100
+        STA $D417    ;Filter Resonance Control / Voice Input Control
+        BNE jF704
+bF6CD   LDA #$50     ;#%01010000
+        STA $D40F    ;Voice 3: Frequency Control - High-Byte
+        LDA #$21     ;#%00100001
+        STA $D412    ;Voice 3: Control Register
+        LDA #$F0     ;#%11110000
+        ORA a77
+ROM_RDTIMj   =*+$02
+        STA $D417    ;Filter Resonance Control / Voice Input Control
+        BNE jF704
+bF6E0   LDA #$82     ;#%10000010
+ROM_SETTIMj   =*+$02
+        STA $D40F    ;Voice 3: Frequency Control - High-Byte
+        LDA #$21     ;#%00100001
+        STA $D412    ;Voice 3: Control Register
+        LDA #$F0     ;#%11110000
+ROM_STOPj   =*+$01
+        ORA a77
+        STA $D417    ;Filter Resonance Control / Voice Input Control
+        BNE jF704
+jF6F3   LDA #$6E     ;#%01101110
+        STA $D40F    ;Voice 3: Frequency Control - High-Byte
+        LDA #$21     ;#%00100001
+        STA $D412    ;Voice 3: Control Register
+        LDA #$F0     ;#%11110000
+        ORA a77
+        STA $D417    ;Filter Resonance Control / Voice Input Control
+jF704   LDA a13
+        CMP #$02     ;#%00000010
+        BCC bF70D
+        JMP jF793
+
+bF70D   LDA a3C
+        CMP #$10     ;#%00010000
+        BCS bF720
+        LDA a3C
+        SEC 
+        SBC #$10     ;#%00010000
+        STA a74
+        LDA #$01     ;#%00000001
+        STA a75
+        BNE bF72B
+bF720   LDA #$10     ;#%00010000
+        SEC 
+        SBC a3C
+        STA a74
+        LDA #$00     ;#%00000000
+        STA a75
+bF72B   LDA #$FF     ;#%11111111
+        STA a72
+        LDX #$03     ;#%00000011
+bF731   TXA 
+        ASL 
+        TAY 
+        LDA $D001,Y  ;Sprite 0 Y Pos
+        CMP $D00F    ;Sprite 7 Y Pos
+        BCC bF74F
+        LDA $D001,Y  ;Sprite 0 Y Pos
+        SEC 
+        SBC $D00F    ;Sprite 7 Y Pos
+        CMP a72
+        BCS bF760
+        STA a72
+        LDA #$00     ;#%00000000
+        STA a73
+        BEQ bF760
+bF74F   LDA $D00F    ;Sprite 7 Y Pos
+        SEC 
+        SBC $D001,Y  ;Sprite 0 Y Pos
+        CMP a72
+        BCS bF760
+        STA a72
+        LDA #$01     ;#%00000001
+        STA a73
+bF760   DEX 
+        BPL bF731
+        LDA a72
+        CMP #$20     ;#%00100000
+        BCC bF770
+        LDA #$40     ;#%01000000
+        STA $D40B    ;Voice 2: Control Register
+        BNE jF793
+bF770   LDA #$41     ;#%01000001
+        STA $D40B    ;Voice 2: Control Register
+        LDA a73
+        EOR a75
+        BEQ bF786
+        LDA a72
+        CLC 
+        ADC #$20     ;#%00100000
+        STA $D407    ;Voice 2: Frequency Control - Low-Byte
+        JMP jF78E
+
+bF786   LDA #$20     ;#%00100000
+        SEC 
+        SBC a72
+        STA $D407    ;Voice 2: Frequency Control - Low-Byte
+jF78E   LDA #$0A     ;#%00001010
+        STA $D408    ;Voice 2: Frequency Control - High-Byte
+jF793   RTS 
+
+        .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$FF
+        .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$FF
+        .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$FF
+        .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$FF
+        .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$FF
+        .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$00
+        .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$FF
+        .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$FF
+        .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$FF
+        .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$FF
+        .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$7F
+        .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$FF
+        .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$FF
+        .BYTE $00,$FF,$00,$FF,$00,$00,$00,$00
+        .BYTE $00,$00,$00,$00,$38,$6C,$C6,$C6
+        .BYTE $FE,$C6,$C6,$00,$FC,$66,$66,$7C
+        .BYTE $66,$66,$FC,$00,$3C,$66,$C0,$C0
+        .BYTE $C0,$66,$3C,$00,$F8,$6C,$66,$66
+        .BYTE $66,$6C,$F0,$00,$FE,$60,$60,$7C
+        .BYTE $60,$60,$FE,$00,$FE,$60,$60,$7C
+        .BYTE $60,$60,$F0,$00,$3C,$66,$C0,$DE
+        .BYTE $C6,$66,$3C,$00,$C6,$C6,$C6,$FE
+        .BYTE $C6,$C6,$C6,$00,$3C,$18,$18,$18
+        .BYTE $18,$18,$3C,$00,$1E,$0C,$0C,$0C
+        .BYTE $0C,$CC,$78,$00,$C6,$CC,$D8,$F0
+        .BYTE $D8,$CC,$C6,$00,$C0,$C0,$C0,$C0
+        .BYTE $C0,$C0,$FE,$00,$C6,$EE,$FE,$D6
+        .BYTE $C6,$C6,$C6,$00,$C6,$E6,$F6,$DE
+        .BYTE $CE,$C6,$C6,$00,$38,$6C,$C6,$C6
+        .BYTE $C6,$6C,$38,$00,$FC,$C6,$C6,$FC
+        .BYTE $C0,$C0,$C0,$00,$38,$6C,$C6,$D6
+        .BYTE $CE,$6C,$3A,$00,$FC,$C6,$C6,$FC
+        .BYTE $D8,$CC,$C6,$00,$7C,$C6,$C0,$7C
+        .BYTE $06,$C6,$7C,$00,$7E,$18,$18,$18
+        .BYTE $18,$18,$18,$00,$C6,$C6,$C6,$C6
+        .BYTE $C6,$C6,$7C,$00,$C6,$C6,$C6,$6C
+        .BYTE $6C,$38,$38,$00,$C6,$C6,$C6,$D6
+        .BYTE $FE,$EE,$C6,$00,$C6,$C6,$6C,$38
+        .BYTE $6C,$C6,$C6,$00,$66,$66,$66,$3C
+        .BYTE $18,$18,$18,$00,$FE,$06,$0C,$38
+        .BYTE $60,$C0,$FE,$00,$0C,$18,$30,$30
+        .BYTE $30,$18,$0C,$00,$30,$18,$0C,$0C
+        .BYTE $0C,$18,$30,$00,$18,$18,$18,$00
+        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
+        .BYTE $00,$18,$18,$00,$00,$00,$00,$7E
+        .BYTE $7E,$00,$00,$00,$00,$00,$00,$00
+        .BYTE $00,$00,$00,$00,$7C,$C6,$C6,$C6
+        .BYTE $C6,$C6,$7C,$00,$18,$38,$58,$18
+        .BYTE $18,$18,$7E,$00,$7C,$C6,$06,$1C
+        .BYTE $70,$C0,$FE,$00,$7C,$C6,$06,$3C
+        .BYTE $06,$C6,$7C,$00,$1C,$3C,$6C,$CC
+        .BYTE $FE,$0C,$0C,$00,$FE,$C0,$F8,$0C
+        .BYTE $06,$CC,$78,$00,$3C,$60,$C0,$FC
+        .BYTE $C6,$C6,$7C,$00,$FE,$C6,$0C,$18
+        .BYTE $30,$30,$30,$00,$7C,$C6,$C6,$7C
+        .BYTE $C6,$C6,$7C,$00,$7C,$C6,$C6,$7E
+        .BYTE $06,$0C,$78,$00,$55,$55,$57,$5F
+        .BYTE $5F,$7F,$7F,$7F,$55,$55,$D5,$F5
+        .BYTE $F5,$FD,$FD,$FD,$7F,$7F,$7F,$5F
+        .BYTE $5F,$57,$55,$55,$FD,$FD,$FD,$F5
+        .BYTE $F5,$D5,$55,$55,$00,$42,$24,$18
+        .BYTE $18,$24,$42,$00,$0A,$AA,$A0,$25
+        .BYTE $55,$68,$25,$55,$68,$95,$55,$5A
+        .BYTE $AA,$AA,$AA,$AA,$AA,$AA,$9A,$AA
+        .BYTE $A6,$9A,$96,$A6,$9A,$96,$A6,$9A
+        .BYTE $AA,$A6,$AA,$AA,$AA,$95,$55,$56
+        .BYTE $95,$55,$56,$95,$55,$56,$95,$55
+        .BYTE $56,$95,$55,$56,$95,$7D,$56,$95
+        .BYTE $7D,$56,$95,$7D,$56,$95,$7D,$56
+        .BYTE $95,$7D,$56,$AA,$95,$7D,$56,$95
+        .BYTE $7D,$56,$95,$7D,$56,$95,$7D,$56
+        .BYTE $95,$7D,$56,$95,$7D,$56,$95,$7D
+        .BYTE $56,$95,$7D,$56,$95,$55,$56,$95
+        .BYTE $55,$56,$95,$55,$56,$95,$55,$56
+        .BYTE $95,$55,$56,$2A,$00,$A8,$2A,$00
+        .BYTE $A8,$2A,$00,$A8,$2A,$00,$A8,$00
+        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
+        .BYTE $00,$00,$00,$AA,$62,$48,$62,$48
+        .BYTE $62,$48,$62,$48,$D2,$D8,$D2,$D8
+        .BYTE $D2,$D8,$D2,$D8,$F6,$F4,$F6,$F4
+        .BYTE $F6,$F4,$F6,$F4,$FD,$FD,$FD,$FD
+        .BYTE $FD,$FD,$FD,$FD,$FF,$FF,$FF,$FF
+        .BYTE $FF,$FF,$FF,$FF,$22,$88,$22,$88
+        .BYTE $22,$88,$22,$88,$26,$86,$26,$86
+        .BYTE $26,$86,$26,$86,$21,$89,$21,$89
+        .BYTE $21,$89,$21,$89,$BF,$BF,$BF,$BF
+        .BYTE $BF,$BF,$BF,$BF,$6F,$6F,$6F,$6F
+        .BYTE $6F,$6F,$6F,$6F,$1B,$9B,$1B,$9B
+        .BYTE $1B,$9B,$1B,$9B,$27,$87,$27,$87
+        .BYTE $27,$87,$27,$87,$7F,$7F,$7F,$7F
+        .BYTE $7F,$7F,$7F,$7F,$1F,$9F,$1F,$9F
+        .BYTE $1F,$9F,$1F,$9F,$89,$21,$89,$21
+        .BYTE $89,$21,$89,$21,$87,$27,$87,$27
+        .BYTE $87,$27,$87,$27,$9F,$1F,$9F,$1F
+        .BYTE $9F,$1F,$9F,$1F,$7F,$7F,$7F,$7F
+        .BYTE $7F,$7F,$7F,$7F,$88,$22,$88,$22
+        .BYTE $88,$22,$88,$22,$98,$92,$98,$92
+        .BYTE $98,$92,$98,$92,$48,$62,$48,$62
+        .BYTE $48,$62,$48,$62,$FE,$FE,$FE,$FE
+        .BYTE $FE,$FE,$FE,$FE,$F9,$F9,$F9,$F9
+        .BYTE $F9,$F9,$F9,$F9,$E4,$E6,$E4,$E6
+        .BYTE $E4,$E6,$E4,$E6,$D8,$D2,$D8,$D2
+        .BYTE $D8,$D2,$D8,$D2,$FD,$FD,$FD,$FD
+        .BYTE $FD,$FD,$FD,$FD,$F4,$F6,$F4,$F6
+        .BYTE $F4,$F6,$F4,$F6,$FF,$80,$8F,$97
+        .BYTE $98,$98,$98,$90,$FF,$01,$F1,$E9
+        .BYTE $19,$19,$19,$09,$90,$98,$98,$98
+        .BYTE $97,$8F,$80,$FF,$09,$19,$19,$19
+        .BYTE $E9,$F1,$01,$FF,$FF,$01,$01,$09
+        .BYTE $19,$19,$19,$09,$09,$19,$19,$19
+        .BYTE $09,$01,$01,$FF,$FF,$80,$8F,$87
+        .BYTE $80,$80,$80,$87,$FF,$01,$F1,$E9
+        .BYTE $19,$19,$19,$E9,$97,$98,$98,$98
+        .BYTE $97,$8F,$80,$FF,$E1,$01,$01,$01
+        .BYTE $E1,$F1,$01,$FF,$87,$80,$80,$80
+        .BYTE $87,$8F,$80,$FF,$E9,$19,$19,$19
+        .BYTE $E9,$F1,$01,$FF,$FF,$80,$80,$90
+        .BYTE $98,$98,$98,$97,$FF,$01,$01,$09
+        .BYTE $19,$19,$19,$E9,$87,$80,$80,$80
+        .BYTE $80,$80,$80,$FF,$E9,$19,$19,$19
+        .BYTE $09,$01,$01,$FF,$FF,$80,$8F,$97
+        .BYTE $98,$98,$98,$97,$FF,$01,$F1,$E1
+        .BYTE $01,$01,$01,$E1,$FF,$80,$80,$80
+        .BYTE $80,$80,$80,$80,$FF,$01,$01,$01
+        .BYTE $01,$01,$01,$01,$80,$80,$80,$80
+        .BYTE $80,$80,$80,$FF,$01,$01,$01,$01
+        .BYTE $01,$01,$01,$FF,$00,$00,$25,$29
+        .BYTE $31,$29,$25,$00,$00,$00,$10,$B0
+        .BYTE $50,$11,$12,$04,$00,$00,$00,$00
+        .BYTE $00,$01,$02,$04,$08,$10,$20,$48
+        .BYTE $88,$0E,$09,$09,$00,$00,$01,$3B
+        .BYTE $3F,$3B,$07,$0E,$00,$00,$80,$DC
+        .BYTE $FC,$DC,$E0,$70,$1C,$1E,$07,$3B
+        .BYTE $3F,$3F,$3A,$00,$38,$78,$E0,$DC
+        .BYTE $FC,$FC,$5C,$00,$AA,$AA,$AA,$AA
+        .BYTE $AA,$AA,$AA,$AA,$AA,$AB,$AB,$AE
+        .BYTE $AE,$BA,$BA,$BA,$AA,$FA,$FA,$AE
+        .BYTE $AE,$AA,$AA,$AA,$BA,$BA,$BA,$AE
+        .BYTE $AE,$AB,$AB,$AA,$AA,$AA,$AA,$AE
+        .BYTE $AE,$FA,$FA,$AA,$AA,$EA,$EA,$BA
+        .BYTE $BA,$AE,$AE,$AE,$BA,$BF,$BF,$BA
+        .BYTE $BA,$BA,$BA,$AA,$AE,$FE,$FE,$AE
+        .BYTE $AE,$AE,$AE,$AA,$AA,$BA,$BA,$BE
+        .BYTE $BE,$BB,$BB,$BB,$AA,$AE,$AE,$BE
+        .BYTE $BE,$EE,$EE,$EE,$BB,$BA,$BA,$BA
+        .BYTE $BA,$BA,$BA,$AA,$EE,$AE,$AE,$AE
+        .BYTE $AE,$AE,$AE,$AA,$AA,$BF,$BF,$BA
+        .BYTE $BA,$BA,$BA,$BF,$AA,$FE,$FE,$AA
+        .BYTE $AA,$AA,$AA,$FA,$BF,$BA,$BA,$BA
+        .BYTE $BA,$BF,$BF,$AA,$FA,$AA,$AA,$AA
+        .BYTE $AA,$FE,$FE,$AA,$AE,$AE,$AE,$BA
+        .BYTE $BA,$EA,$EA,$AA,$AA,$BA,$BA,$BA
+        .BYTE $BA,$BA,$BA,$AE,$AA,$AE,$AE,$AE
+        .BYTE $AE,$AE,$AE,$BA,$AE,$AE,$AE,$AB
+        .BYTE $AB,$AB,$AB,$AA,$BA,$BA,$BA,$EA
+        .BYTE $EA,$EA,$EA,$AA,$AA,$FA,$FA,$AE
+        .BYTE $AE,$AE,$AE,$FA,$BF,$BA,$BA,$BA
+        .BYTE $BA,$BA,$BA,$AA,$FA,$EA,$EA,$BA
+        .BYTE $BA,$AE,$AE,$AA,$AA,$AF,$AF,$BA
+        .BYTE $BA,$BA,$BA,$AF,$AA,$FA,$FA,$AE
+        .BYTE $AE,$AA,$AA,$FA,$AF,$AA,$AA,$BA
+        .BYTE $BA,$AF,$AF,$AA,$FA,$AE,$AE,$AE
+        .BYTE $AE,$FA,$FA,$AA,$AA,$BF,$BF,$AB
+        .BYTE $AB,$AB,$AB,$AB,$AA,$FA,$FA,$AA
+        .BYTE $AA,$AA,$AA,$AA,$AB,$AB,$AB,$AB
+        .BYTE $AB,$AB,$AB,$AA,$55,$55,$54,$55
+        .BYTE $55,$54,$69,$66,$A4,$66,$65,$94
+        .BYTE $66,$65,$94,$66,$65,$94,$69,$65
+        .BYTE $94,$65,$65,$94,$65,$65,$94,$65
+        .BYTE $65,$94,$55,$55,$54,$55
+RESET_VECTOR .BYTE $55,$54,$55,$D5,$54,$57,$D5,$54
+        .BYTE $5F,$FF,$F4,$7F,$FF,$F4,$5F,$FF
+        .BYTE $F4,$57,$D5,$54,$55,$D5,$54,$55
+        .BYTE $55,$54,$55,$55,$54,$AA,$0A,$AA
+        .BYTE $00,$20,$A0,$80,$3C,$A3,$C0,$3C
+        .BYTE $A3,$C0,$3D,$A7,$C0,$3C,$A3,$C0
+        .BYTE $3C,$A3,$C0
+
+; $FD15 (jmp) - restore default I/O vectors      
+ROM_RESTORj .BYTE $02,$A8,$00,$02,$58
+
+; $FD1A (jmp) - read/set I/O vectors             
+ROM_VECTORj .BYTE $00,$0A,$5A,$00,$09,$56,$00,$29
+        .BYTE $56,$80,$2A,$5A,$80,$2A,$AA,$80
+        .BYTE $02,$A8,$00,$F2,$A8,$F0,$F2,$A8
+        .BYTE $F0,$F6,$A9,$F0,$F6,$A9,$F0,$F2
+        .BYTE $A8,$F0,$F0,$A0,$F0,$AA,$0A,$AA
+        .BYTE $00,$20,$A0,$80,$3C,$A3,$C0,$14
+        .BYTE $A1,$40,$3D,$A7,$C0,$3C
+
+; $FD50 (jmp) - RAM test & search RAM end        
+ROM_RAMTASj .BYTE $A3,$C0,$3C,$A3,$C0,$02,$A8,$00
+        .BYTE $02,$58,$00,$0A,$5A,$00,$09,$56
+        .BYTE $00,$29,$56,$80,$2A,$5A,$80,$2A
+        .BYTE $AA,$80,$02,$A8,$00,$F2,$A8,$F0
+        .BYTE $52,$A8,$50,$F6,$A9,$F0,$76,$A9
+        .BYTE $D0,$F2,$A8,$F0,$F0,$A0,$F0,$AA
+        .BYTE $00,$A0,$00,$02,$A8,$00,$F2,$A8
+        .BYTE $F0,$F2,$A8,$F0,$F6,$A9,$F0,$F2
+        .BYTE $A8,$F0,$F2,$A8,$F0,$0A,$AA,$00
+        .BYTE $0A,$AA,$00,$0A,$AA,$00,$2A,$5A
+        .BYTE $80,$2A,$5A
+
+; $FDA3 (jmp) - initialize CIA & IRQ             
+ROM_IOINITj .BYTE $80,$29,$56,$80,$29,$56,$80,$0A
+        .BYTE $5A,$00,$FA,$AA,$F0,$FA,$AA,$F0
+        .BYTE $FA,$AA,$F0,$FA,$AA,$F0,$F2,$A8
+        .BYTE $F0,$F2,$08,$F0,$AA,$00,$A0,$00
+        .BYTE $02,$A8,$00,$F2,$A8,$F0,$52,$A8
+        .BYTE $50,$F6,$A9,$F0,$F2,$A8,$F0,$F2
+        .BYTE $A8,$F0,$0A,$AA,$00,$0A,$AA,$00
+        .BYTE $0A,$AA,$00,$2A,$5A,$80,$2A,$5A
+        .BYTE $80,$29,$56,$80,$29,$56,$80,$0A
+        .BYTE $5A,$00,$FA,$AA,$F0,$5A,$AA,$50
+        .BYTE $FA,$AA,$F0,$FA,$AA,$F0
+
+; $FDF9 (jmp) - set file name                    
+ROM_SETNAMj .BYTE $72,$A8,$D0,$F2,$08,$F0,$AA
+
+; $FE00 (jmp) - set file parameters              
+ROM_SETLFSj .BYTE $03,$80,$00,$0E,$C6,$00,$1F
+
+; $FE07 (jmp) - read I/O status byte             
+ROM_READSTj .BYTE $6F,$00,$1B,$FB,$80,$31,$B9,$80
+        .BYTE $39,$B9,$C0,$39,$9B,$E0,$79,$CD
+        .BYTE $E0
+
+; $FE18 (jmp) - enable/disable KERNAL messages   
+ROM_SETMSGj .BYTE $73,$EF,$B0,$F3,$EF,$10,$B3,$DF
+        .BYTE $10
+
+; $FE21 (jmp) - set IEEE timeout                 
+ROM_SETTMOj .BYTE $B7,$FB,$80,$BB
+
+; $FE25 (jmp) - read/set top of memory           
+ROM_MEMTOPj .BYTE $B9,$E0,$3B,$B9,$E0,$7F,$90,$E0
+        .BYTE $39,$C8,$F0,$30,$E9,$F0,$30
+
+; $FE34 (jmp) - read/set bottom of memory        
+ROM_MEMBOTj .BYTE $63,$30,$30,$22,$10,$10,$42,$10
+        .BYTE $10,$40,$20,$AA,$00,$0E,$00
+NMI_VECTOR .BYTE $06,$1F,$80,$0F,$3F,$C0,$19,$38
+        .BYTE $C0,$18,$20,$60,$18,$20,$60,$30
+        .BYTE $43,$20,$30,$07,$30,$23,$8F,$10
+        .BYTE $27,$86,$10,$07,$C6,$40,$0E,$E6
+        .BYTE $60,$1C,$E6,$E0,$3C,$EE,$E0,$38
+        .BYTE $4C,$E0,$38,$88,$E0,$7C,$84,$60
+        .BYTE $66,$10,$60,$C2,$30,$C0,$82,$30
+        .BYTE $80,$80,$21,$00,$AA,$00,$F0,$00
+        .BYTE $03,$FC,$00,$F3,$FC,$F0,$F3,$FC
+        .BYTE $F0,$FF,$FF,$F0,$F3,$FC,$F0,$F3
+        .BYTE $FC,$F0,$0F,$FF,$00,$0F,$FF,$00
+        .BYTE $0F,$FF,$00,$3F,$FF,$C0,$3F,$FF
+        .BYTE $C0,$3F,$FF,$C0,$3F,$FF,$C0,$0F
+        .BYTE $FF,$00,$FF,$FF,$F0,$FF,$FF,$F0
+        .BYTE $FF,$FF,$F0,$FF,$FF,$F0,$F1,$F4
+        .BYTE $F0,$F1,$04,$F0,$AA,$AA,$AA,$AA
+        .BYTE $90,$EB,$06,$B0,$69,$0E,$90,$EB
+        .BYTE $06,$B0,$69,$0E,$90,$EB,$06,$B0
+        .BYTE $69,$0E,$90,$EB,$06,$B0,$69,$0E
+        .BYTE $90,$EB,$06,$B0,$00,$0E,$90,$00
+        .BYTE $06,$B0,$00,$0E,$90,$00,$06,$B0
+        .BYTE $00,$0E,$90,$00,$06,$B0,$00,$0E
+        .BYTE $90,$00,$06,$B0,$00,$0E,$90,$00
+        .BYTE $06,$AA,$AA,$AA,$AA,$00,$12,$80
+        .BYTE $00,$44,$10,$00,$1A,$C4,$01,$6B
+        .BYTE $B6,$01,$DE,$ED,$02,$FF,$FF,$03
+        .BYTE $BF,$FF,$01,$FF,$FF,$01,$FF,$FF
+        .BYTE $00,$FF,$FF,$00,$FF,$FF,$00,$7F
+        .BYTE $FF,$00,$7F,$FF,$00,$3F,$FF,$00
+        .BYTE $3F,$FF,$00,$1F,$FF,$00,$1B,$EF
+        .BYTE $00,$0E,$FE,$00,$0B,$B5,$00,$01
+        .BYTE $59,$00,$04,$A2,$AA,$04,$90,$00
+        .BYTE $10,$22,$00,$05,$54
+IRQ_BRK_VECTOR .BYTE $00,$6B,$EA,$80,$B6,$F7,$80,$FF
+        .BYTE $FD,$40,$FF,$FF,$80,$FF,$FF,$80
+        .BYTE $FF,$FF,$80
+
+; $FF5B (jmp) - init VIC & screen editor         
+ROM_CINTj .BYTE $FF,$FF,$00,$FF,$FF,$00,$FF,$FE
+        .BYTE $00,$FF,$FE,$00,$FF,$FC,$00,$FF
+        .BYTE $FC,$00,$FF,$F8,$00,$EF,$78,$00
+        .BYTE $BF,$B0,$00,$76,$D0,$00,$DB,$00
+        .BYTE $00,$94,$40,$00,$AA,$FF
+
+; $FF81 - init VIC & screen editor         
+ROM_CINT .BYTE $FF,$FF,$FF
+
+; $FF84 - initialize CIA & IRQ             
+ROM_IOINIT .BYTE $FF,$FF,$FF
+
+; $FF87 - RAM test & search RAM end        
+ROM_RAMTAS .BYTE $FF,$FF,$7F
+
+; $FF8A - restore default I/O vectors      
+ROM_RESTOR .BYTE $FF,$FE,$7F
+
+; $FF8D - read/set I/O vectors             
+ROM_VECTOR .BYTE $FF,$FE,$3F
+
+; $FF90 - enable/disable KERNAL messages   
+ROM_SETMSG .BYTE $FF,$FC,$3F
+
+; $FF93 - send secondary addr after listen 
+ROM_SECOND .BYTE $FF,$FC,$1F
+
+; $FF96 - send secondary addr after talk   
+ROM_TKSA .BYTE $FF,$F8,$1F
+
+; $FF99 - read/set top of memory           
+ROM_MEMTOP .BYTE $FF,$F8,$0F
+
+; $FF9C - read/set bottom of memory        
+ROM_MEMBOT .BYTE $FF,$F0,$0F
+
+; $FF9F - scan keyboard                    
+ROM_SCNKEY .BYTE $FF,$F0,$07
+
+; $FFA2 - set IEEE timeout                 
+ROM_SETTMO .BYTE $FF,$E0,$07
+
+; $FFA5 - input byte from SERIAL           
+ROM_ACPTR .BYTE $FF,$E0,$03
+
+; $FFA8 - output byte to SERIAL            
+ROM_CIOUT .BYTE $FF,$C0,$03
+
+; $FFAB - untalk all SERIAL devices        
+ROM_UNTLK .BYTE $FF,$C0,$01
+
+; $FFAE - unlisten all SERIAL devices      
+ROM_UNLSN .BYTE $E7,$80,$01
+
+; $FFB1 - make SERIAL device listen        
+ROM_LISTEN .BYTE $E7,$80,$00
+
+; $FFB4 - make SERIAL device talk          
+ROM_TALK .BYTE $E7,$00,$00
+
+; $FFB7 - read I/O status byte             
+ROM_READST .BYTE $C3,$00,$00
+
+; $FFBA - set file parameters              
+ROM_SETLFS .BYTE $42,$00,$00
+
+; $FFBD - set file name                    
+ROM_SETNAM .BYTE $42,$00,$AA
+
+; $FFC0 - open log.file after SETLFS,SETNAM
+ROM_OPEN .BYTE $00,$FF,$00
+
+; $FFC3 - close a logical file             
+ROM_CLOSE .BYTE $00,$00,$FF
+
+; $FFC6 - open channel for input           
+ROM_CHKIN .BYTE $00,$FF,$00
+
+; $FFC9 - open channel for output          
+ROM_CHKOUT .BYTE $FF,$00,$FF
+
+; $FFCC - restore default devices          
+ROM_CLRCHN .BYTE $00,$FF,$00
+
+; $FFCF - input character                  
+ROM_CHRIN .BYTE $FF,$00,$FF
+
+; $FFD2 - output character                 
+ROM_CHROUT .BYTE $00,$FF,$00
+
+; $FFD5 - load after call SETLFS,SETNAM    
+ROM_LOAD .BYTE $FF,$00,$FF
+
+; $FFD8 - save after call SETLFS,SETNAM    
+ROM_SAVE .BYTE $00,$FF,$00
+
+; $FFDB - set jiffy clock                  
+ROM_SETTIM .BYTE $FF,$00,$FF
+
+; $FFDE - read jiffy clock                 
+ROM_RDTIM .BYTE $00,$FF,$00
+
+; $FFE1 - check stop key                   
+ROM_STOP .BYTE $FF,$00,$FF
+
+; $FFE4 - get a byte from channel          
+ROM_GETIN .BYTE $00,$FF,$00
+
+; $FFE7 - close or abort all files         
+ROM_CLALL .BYTE $FF,$00,$FF
+
+; $FFEA - update jiffy clock               
+ROM_UDTIM .BYTE $00,$7F,$00
+
+; $FFED - return screen size               
+ROM_SCREEN .BYTE $FF,$00,$FF
+
+; $FFF0 - read/set cursor position         
+ROM_PLOT .BYTE $00,$FF,$00
+
+; $FFF3 - returns the addr of I/O devices  
+ROM_IOBASE .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$54
+        .BYTE $F5,$37,$E0,$00,$E0
