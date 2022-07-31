@@ -1137,7 +1137,6 @@ sE7D8   LDA ZP_TMP
         LDA ZP_TMP
         AND #$0F     ;#%00001111
         STA a21
-bE7EA   =*+$01
 sE7E9   LDA a21
         BNE bE7F7
         LDX a0D
@@ -1153,10 +1152,9 @@ bE7F7   CLC
 bE800   INY
         RTS
 
-        BVS bE7EA
-        RTS
+        ; Unused ?
+        .BYTE $70,$E6,$60,$04,$04,$05
 
-        .BYTE $04,$04,$05
 sE808   LDX #$00     ;#%00000000
         STX a0D
         LDA a28
