@@ -51,8 +51,8 @@ a23 = $23
 a24 = $24
 a25 = $25
 a26 = $26
-a27 = $27
-a28 = $28
+SPEED_LO = $27
+SPEED_HI = $28
 a29 = $29
 a2A = $2A
 a2B = $2B
@@ -77,7 +77,7 @@ a3D = $3D
 a3E = $3E
 a41 = $41
 a42 = $42
-a43 = $43
+ZP_FRAME_PTR_IDX = $43
 a44 = $44
 a45 = $45
 a46 = $46
@@ -190,11 +190,11 @@ a05DE = $05DE
 a05DF = $05DF
 a0606 = $0606
 a0607 = $0607
-a07F8 = $07F8
-a07FC = $07FC
-a07FD = $07FD
-a07FE = $07FE
-a07FF = $07FF
+SPR_FRAME_PTR_00 = $07F8
+SPR_FRAME_PTR_04 = $07FC
+SPR_FRAME_PTR_05 = $07FD
+SPR_FRAME_PTR_06 = $07FE
+SPR_FRAME_PTR_07 = $07FF
 aDAB0 = $DAB0
 ;
 ; **** POINTERS ****
@@ -301,8 +301,8 @@ _L00    LDA fE02D,X
         STA a1C
         STA a23
         STA a24
-        STA a27
-        STA a28
+        STA SPEED_LO
+        STA SPEED_HI
         STA a08
         STA a09
         STA ZP_TIME
@@ -337,12 +337,14 @@ IRQ_HANDLER_WAIT_BUTTON
         LDA $DC01    ;CIA1: Data Port Register B
         AND #$04     ;#%00000100
         BEQ _L00
+
         ; Read button from Joystick
         LDA #$FE     ;#%11111110
         STA $DC00    ;CIA1: Data Port Register A
         LDA $DC01    ;CIA1: Data Port Register B
         AND #$10     ;#%00010000
         BNE _L01
+
 _L00    LDA #<IRQ_HANDLER_MAIN  ;#%00001000
         STA ZP_IRQ_LO
         LDA #>IRQ_HANDLER_MAIN  ;#%11100000
@@ -366,12 +368,12 @@ INIT_GAME
         STX a1C
         STX a24
         STX a26
-        STX a27
-        STX a28
+        STX SPEED_LO
+        STX SPEED_HI
         STX a25
         STX a20
         STX a42
-        STX a43
+        STX ZP_FRAME_PTR_IDX
         STX a11
         STX a12
         STX a13
@@ -436,9 +438,9 @@ INIT_GAME
         STA a51
         LDA #$00     ;#%00000000
         LDY #$18     ;#%00011000
-bE1A4   STA $D400,Y  ;Voice 1: Frequency Control - Low-Byte
+_L00    STA $D400,Y  ;Voice 1: Frequency Control - Low-Byte
         DEY
-        BPL bE1A4
+        BPL _L00
         LDA #$02     ;#%00000010
         STA $D403    ;Voice 1: Pulse Waveform Width - High-Nybble
         STA $D40A    ;Voice 2: Pulse Waveform Width - High-Nybble
@@ -459,18 +461,20 @@ bE1A4   STA $D400,Y  ;Voice 1: Frequency Control - Low-Byte
         LDA #$0E     ;#%00001110
         STA $D027    ;Sprite 0 Color
         LDA #$F4     ;#%11110100
-        STA a07F8
+        STA SPR_FRAME_PTR_00
         LDA #$89     ;#%10001001
         STA $D000    ;Sprite 0 X Pos
+
         LDX #$0F     ;#%00001111
-bE1E7   STX a23
+_L01    STX a23
         JSR sE889
         JSR SCROLL_DOWN
         LDY #$01     ;#%00000001
         JSR sE45B
         LDX a23
         DEX
-        BPL bE1E7
+        BPL _L01
+
         LDA #$0A     ;#%00001010
         STA $D401    ;Voice 1: Frequency Control - High-Byte
         LDA #$41     ;#%01000001
@@ -485,6 +489,7 @@ jE205   STX a23
         BEQ bE241
         CPX #$CB     ;#%11001011
         BNE bE26B
+
         LDY #$1F     ;#%00011111
 bE219   LDA fECAB,Y
         STA SCREEN_RAM,Y
@@ -493,6 +498,7 @@ bE219   LDA fECAB,Y
         DEY
         BPL bE219
         BMI bE26E
+
 bE229   JSR sE889
         LDY #$07     ;#%00000111
 bE22E   TYA
@@ -551,8 +557,8 @@ bE287   LDA #$00     ;#%00000000
         JSR sE44D
         LDA #$0E     ;#%00001110
         STA $D02E    ;Sprite 7 Color
-        LDA #$F4     ;#%11110100
-        STA a07FF
+        LDA #$F4     ;Sprite pointer: Stopped car
+        STA SPR_FRAME_PTR_07
         LDA #$C3     ;#%11000011
         STA $D00F    ;Sprite 7 Y Pos
         LDA #$19     ;#%00011001
@@ -1028,18 +1034,18 @@ bE800   INY
 
 sE808   LDX #$00     ;#%00000000
         STX a0D
-        LDA a28
+        LDA SPEED_HI
         AND #$0F     ;#%00001111
         STA a21
         JSR sE831
-        LDA a27
+        LDA SPEED_LO
         LSR A
         LSR A
         LSR A
         LSR A
         STA a21
         JSR sE831
-        LDA a27
+        LDA SPEED_LO
         AND #$0F     ;#%00001111
         STA a21
         JSR sE831
@@ -1078,6 +1084,7 @@ fE873   .BYTE $5D,$6F,$63,$65,$69,$65,$63,$6F
 fE87E   .BYTE $5E,$60,$64,$66,$6A,$66,$66,$60
         .BYTE $66,$66,$70
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sE889   LDA a25
         BEQ _L00
         DEC a25
@@ -1095,6 +1102,7 @@ _L01    STA SCREEN_RAM,Y
 _L02    STA COLOR_RAM,X
         DEX
         BPL _L02
+
         INC a20
         LDA a20
         AND #$03     ;#%00000011
@@ -1319,15 +1327,16 @@ bEA40   STA (p04),Y
         BCC bEA34
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 jEA49   LDY #$05     ;#%00000101
         LDA #$0E     ;#%00001110
-bEA4D   STA pD807,Y
+_L00    STA pD807,Y
         STA COLOR_RAM+19,Y
         DEY
-        BPL bEA4D
+        BPL _L00
         LDY #$03     ;#%00000011
-bEA58   LDA a20
-        BNE bEA76
+_L01    LDA a20
+        BNE _L02
         LDA fEAD0,Y
         STA SCREEN_RAM+4,Y
         LDA fEAD4,Y
@@ -1336,8 +1345,8 @@ bEA58   LDA a20
         STA SCREEN_RAM+12,Y
         LDA fEAB0,Y
         STA p0419,Y
-        BNE bEA8E
-bEA76   LDA fEAE0,Y
+        BNE _L03
+_L02    LDA fEAE0,Y
         STA SCREEN_RAM+4,Y
         LDA fEAE4,Y
         STA SCREEN_RAM+16,Y
@@ -1345,8 +1354,8 @@ bEA76   LDA fEAE0,Y
         STA SCREEN_RAM+12,Y
         LDA fEAC0,Y
         STA p0419,Y
-bEA8E   DEY
-        BPL bEA58
+_L03    DEY
+        BPL _L01
         LDA #$38     ;#%00111000
         STA a79
         LDA #$E0     ;#%11100000
@@ -1380,12 +1389,16 @@ fEAF4   .BYTE $00,$00,$01,$01,$01,$02,$02,$02
         .BYTE $0E,$0E,$0D,$0D,$0C,$0B,$0A,$09
         .BYTE $08,$07,$06,$05,$04,$04,$03,$03
         .BYTE $02,$02,$02,$01,$01,$01,$00,$00
-jEB34   LDA a27
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+jEB34   LDA SPEED_LO
         BNE bEB44
-        LDA a28
+        LDA SPEED_HI
         BNE bEB44
-        LDA #$F4     ;#%11110100
-        STA a07FF
+
+        ; Speed is 0
+        LDA #$F4     ;Sprite pointer: Stopped car
+        STA SPR_FRAME_PTR_07
         JMP jEC0E
 
 bEB44   LDA a1A
@@ -1485,6 +1498,7 @@ bEBFB   LDA a38
 bEC08   INC $D00E    ;Sprite 7 X Pos
 jEC0B   DEY
         BPL bEBFB
+
 jEC0E   LDA a25
         BEQ bEC7A
         CMP #$01     ;#%00000001
@@ -1509,11 +1523,11 @@ bEC21   LDA $D015    ;Sprite display Enable
         LDA #$0F     ;#%00001111
         STA $D02D    ;Sprite 6 Color
         LDY #$FC     ;#%11111100
-        STY a07FC
+        STY SPR_FRAME_PTR_04
         INY
-        STY a07FD
+        STY SPR_FRAME_PTR_05
         INY
-        STY a07FE
+        STY SPR_FRAME_PTR_06
         LDA $D00F    ;Sprite 7 Y Pos
         SEC
         SBC #$2A     ;#%00101010
@@ -1554,6 +1568,8 @@ fECCB   .BYTE $00,$01,$02,$03,$05,$04,$06,$03
         .BYTE $00,$02,$00,$03,$05,$00,$01,$00
         .BYTE $04,$06,$00,$01,$00,$02,$04,$06
         .BYTE $00,$02,$03,$05,$00,$01,$04,$06
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 jECF3   LDY #$02     ;#%00000010
         STY a42
         DEY
@@ -1577,9 +1593,9 @@ jECF3   LDY #$02     ;#%00000010
         LDA #$0C     ;#%00001100
         STA $D02C    ;Sprite 5 Color
         LDY #$F8     ;#%11111000
-        STY a07FE
+        STY SPR_FRAME_PTR_06
         INY
-        STY a07FD
+        STY SPR_FRAME_PTR_05
         LDA #$07     ;#%00000111
         STA a1A
         LDY #$23     ;#%00100011
@@ -1613,9 +1629,9 @@ bED53   CPY #$32     ;#%00110010
 
 bED74   LDA #$03     ;#%00000011
         STA a42
-bED78   LDA a27
+bED78   LDA SPEED_LO
         BNE bED80
-        LDA a28
+        LDA SPEED_HI
         BEQ bED96
 bED80   JSR sE889
         JSR SCROLL_DOWN
@@ -1636,7 +1652,7 @@ bED96   LDA $D015    ;Sprite display Enable
         LDA #$F0     ;#%11110000
         STA $D417    ;Filter Resonance Control / Voice Input Control
         LDA #$00     ;#%00000000
-        STA a43
+        STA ZP_FRAME_PTR_IDX
         STA a44
         STA a42
         STA a59
@@ -1677,13 +1693,16 @@ bEDE7   LDA a3D
         CPY #$02     ;#%00000010
         BCC bEE0D
         LDY #$00     ;#%00000000
-        LDA a43
+
+        ; Switch between "stopped car" and "moving car"
+        LDA ZP_FRAME_PTR_IDX
         EOR #$01     ;#%00000001
         AND #$01     ;#%00000001
-        STA a43
+        STA ZP_FRAME_PTR_IDX
         CLC
         ADC #$F4     ;#%11110100
-        STA a07FF
+        STA SPR_FRAME_PTR_07
+
 bEE0D   STY a44
         RTS
 
@@ -1726,7 +1745,7 @@ bEE53   RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 IRQ_HANDLER_PADDLE
-pEE54   LDA a13
+        LDA a13
         BEQ _L00
         SED
         JMP _L05
@@ -1752,6 +1771,8 @@ _L01    LDA #$EC     ;#%11101100
         LDA $DC01    ;CIA1: Data Port Register B
         AND #$04     ;#%00000100
         BNE _L07
+
+        ; Button pressed
 _L02    SED
         LDA a42
         BEQ _L05
@@ -1761,27 +1782,27 @@ _L02    SED
         BEQ _L07
         LDA #$50     ;#%01010000
         SEC
-        SBC a27
+        SBC SPEED_LO
         LDA #$00     ;#%00000000
-        SBC a28
+        SBC SPEED_HI
         BCC _L04
         BCS _L09
 _L03    LDA #$50     ;#%01010000
         SEC
-        SBC a27
+        SBC SPEED_LO
         LDA #$01     ;#%00000001
-        SBC a28
+        SBC SPEED_HI
         BCS _L05
-_L04    LDA a27
+_L04    LDA SPEED_LO
         SEC
         SBC #$02     ;#%00000010
-        STA a27
-        LDA a28
+        STA SPEED_LO
+        LDA SPEED_HI
         SBC #$00     ;#%00000000
-        STA a28
+        STA SPEED_HI
         JMP _L06
 
-_L05    LDY a28
+_L05    LDY SPEED_HI
         LDA fF2F3,Y
         STA a68
         LDA fF2F7,Y
@@ -1790,42 +1811,44 @@ _L05    LDY a28
         CLC
         ADC a68
         STA a29
-        LDA a27
+        LDA SPEED_LO
         ADC a69
-        STA a27
-        LDA a28
+        STA SPEED_LO
+        LDA SPEED_HI
         ADC #$00     ;#%00000000
-        STA a28
+        STA SPEED_HI
 _L06    LDA #$20     ;#%00100000
         SEC
-        SBC a27
+        SBC SPEED_LO
         LDA #$03     ;#%00000011
-        SBC a28
+        SBC SPEED_HI
         BCS _L09
         LDA #$03
-        STA a28
+        STA SPEED_HI
         LDA #$20
-        STA a27
+        STA SPEED_LO
         JMP _L09
 
-_L07    LDA a28
+        ; Button not pressed
+_L07    LDA SPEED_HI
         BNE _L08
-        LDA a27
+        LDA SPEED_LO
         BEQ _L09
 _L08    SED
-        LDA a27
+        LDA SPEED_LO
         SEC
         SBC #$02     ;#%00000010
-        STA a27
-        LDA a28
+        STA SPEED_LO
+        LDA SPEED_HI
         SBC #$00     ;#%00000000
-        STA a28
-_L09    LDA a28
+        STA SPEED_HI
+
+_L09    LDA SPEED_HI
         CMP #$04     ;#%00000100
         BCC _L10
         LDA #$00     ;#%00000000
-        STA a27
-        STA a28
+        STA SPEED_LO
+        STA SPEED_HI
 _L10    CLD
         JSR sE753
         INC a6A
@@ -1833,12 +1856,12 @@ _L10    CLD
         AND #$07     ;#%00000111
         BNE _L11
         JSR sE808
-_L11    LDA a27
+_L11    LDA SPEED_LO
         LSR A
         LSR A
         LSR A
         LSR A
-        LDX a28
+        LDX SPEED_HI
         CLC
         ADC fF2E3,X
         STA a3C
@@ -1875,12 +1898,12 @@ _L12    LDA a1A
         STA a46
         CLC
         ADC #$F8     ;#%11111000
-        STA a07FE
+        STA SPR_FRAME_PTR_06
         AND #$01     ;#%00000001
         EOR #$01     ;#%00000001
         CLC
         ADC #$F8     ;#%11111000
-        STA a07FD
+        STA SPR_FRAME_PTR_05
 _L13    STY a45
 _L14    LDA a1A
         CMP #$04     ;#%00000100
@@ -1901,7 +1924,7 @@ _L14    LDA a1A
         LDA #$03     ;#%00000011
         STA $D02D    ;Sprite 6 Color
         LDA #$FB     ;#%11111011
-        STA a07FE
+        STA SPR_FRAME_PTR_06
         LDA #$3A     ;#%00111010
         STA $D00D    ;Sprite 6 Y Pos
         LDA #$81     ;#%10000001
@@ -1951,31 +1974,31 @@ _L19    LDA #$01     ;#%00000001
         STA a12
 _L20    STY a17
         SED
-        LDA a27
+        LDA SPEED_LO
         SEC
         SBC a2A
-        LDA a28
+        LDA SPEED_HI
         SBC a2B
         BCS _L21
         LDA #$01     ;#%00000001
         STA a4D
         LDA a2A
         SEC
-        SBC a27
+        SBC SPEED_LO
         STA a2C
         LDA a2B
-        SBC a28
+        SBC SPEED_HI
         STA a2D
         JSR sF227
         JMP _L22
 
 _L21    LDA #$00     ;#%00000000
         STA a4D
-        LDA a27
+        LDA SPEED_LO
         SEC
         SBC a2A
         STA a2C
-        LDA a28
+        LDA SPEED_HI
         SBC a2B
         STA a2D
         JSR sF227
@@ -2132,10 +2155,10 @@ _L36    LDY a49
         CMP #$02     ;#%00000010
         BNE _L37
         LDA #$FA     ;#%11111010
-        STA a07F8,X
+        STA SPR_FRAME_PTR_00,X
         BNE _L38
 _L37    LDA #$F6     ;#%11110110
-        STA a07F8,X
+        STA SPR_FRAME_PTR_00,X
 _L38    LDY a49
         LDA $D001,Y  ;Sprite 0 Y Pos
         CMP #$32     ;#%00110010
@@ -2174,10 +2197,10 @@ _L41    LDY a4B
         CLC
         ADC #$F6     ;#%11110110
         LDY #$03     ;#%00000011
-_L42    LDX a07F8,Y
+_L42    LDX SPR_FRAME_PTR_00,Y
         CPX #$FA     ;#%11111010
         BEQ _L43
-        STA a07F8,Y
+        STA SPR_FRAME_PTR_00,Y
 _L43    DEY
         BPL _L42
 _L44    STY a4B
@@ -2207,7 +2230,7 @@ _L45    LDA $D015    ;Sprite display Enable
         LDA #$02     ;#%00000010
         STA $D02B    ;Sprite 4 Color
         LDA #$F3     ;#%11110011
-        STA a07FC
+        STA SPR_FRAME_PTR_04
         LDA #$81     ;#%10000001
         STA $D008    ;Sprite 4 X Pos
         LDA #$3A     ;#%00111010
@@ -2453,6 +2476,7 @@ fF442   .BYTE $20,$02,$0F,$15,$0E,$13,$20,$20
 fF44A   .BYTE $22,$21,$21,$21,$20,$10,$14,$13
 fF452   .BYTE $05,$18,$14,$05,$0E,$04,$05,$04
 fF45A   .BYTE $20,$20,$14,$09,$0D,$05,$20,$20
+
 sF462   STY a56
         STX a57
         LDA a53
@@ -2652,16 +2676,16 @@ bF616   LDA a61
         INC a13
         JMP jF667
 
-bF632   LDA a27
+bF632   LDA SPEED_LO
         BNE bF641
-        LDA a28
+        LDA SPEED_HI
         BNE bF641
         LDA #$00     ;#%00000000
         STA $D404    ;Voice 1: Control Register
         BEQ jF667
-bF641   LDA a27
+bF641   LDA SPEED_LO
         STA a2C
-        LDA a28
+        LDA SPEED_HI
         STA a2D
         JSR sF227
         LDY #$02     ;#%00000010
@@ -2701,9 +2725,9 @@ bF682   CMP #$01     ;#%00000001
 bF68F   STY a63
         CPY #$01     ;#%00000001
         BCS bF6B1
-        LDA a27
+        LDA SPEED_LO
         BNE bF6A0
-        LDA a28
+        LDA SPEED_HI
         BNE bF6A0
         JMP jF704
 
