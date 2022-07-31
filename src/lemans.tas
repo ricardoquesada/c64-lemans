@@ -277,7 +277,7 @@ IRQ_HANDLER
         PHA
         JMP (p0002)
 
-IRQ_HANDLER_MAIN_MENU
+IRQ_HANDLER_MAIN
         LDA a11
         BEQ bE00F
         JSR sF5A9
@@ -338,9 +338,9 @@ bE046   LDA fE02D,X
         STA $DC0D    ;CIA1: CIA Interrupt Control Register
         LDA #$11     ;#%00010001
         STA $DC0E    ;CIA1: CIA Control Register A
-        LDA #<IRQ_HANDLER_MAIN_MENU  ;#%00001000
+        LDA #<IRQ_HANDLER_MAIN  ;#%00001000
         STA ZP_IRQ_LO
-        LDA #>IRQ_HANDLER_MAIN_MENU  ;#%11100000
+        LDA #>IRQ_HANDLER_MAIN  ;#%11100000
         STA ZP_IRQ_HI
         CLI
         CLD
@@ -373,15 +373,16 @@ jE0BD   SEI
         TXS
         LDA #$00     ;#%00000000
         STA $D418    ;Select Filter Mode and Volume
-        LDA #<pE0D3  ;#%11010011
+        LDA #<IRQ_HANDLER_WAIT_BUTTON  ;#%11010011
         STA ZP_IRQ_LO
-        LDA #>pE0D3  ;#%11100000
+        LDA #>IRQ_HANDLER_WAIT_BUTTON  ;#%11100000
         STA ZP_IRQ_HI
         CLI
         CLD
         JMP jE34C
 
-pE0D3   LDA #$FF     ;#%11111111
+IRQ_HANDLER_WAIT_BUTTON
+        LDA #$FF     ;#%11111111
         STA $DC00    ;CIA1: Data Port Register A
         LDA $DC01    ;CIA1: Data Port Register B
         AND #$04     ;#%00000100
@@ -391,14 +392,14 @@ pE0D3   LDA #$FF     ;#%11111111
         LDA $DC01    ;CIA1: Data Port Register B
         AND #$10     ;#%00010000
         BNE bE0F9
-bE0EB   LDA #<IRQ_HANDLER_MAIN_MENU  ;#%00001000
+bE0EB   LDA #<IRQ_HANDLER_MAIN  ;#%00001000
         STA ZP_IRQ_LO
-        LDA #>IRQ_HANDLER_MAIN_MENU  ;#%11100000
+        LDA #>IRQ_HANDLER_MAIN  ;#%11100000
         STA ZP_IRQ_HI
         LDA $DC0D    ;CIA1: CIA Interrupt Control Register
         JMP jE0FC
 
-bE0F9   JMP IRQ_HANDLER_MAIN_MENU
+bE0F9   JMP IRQ_HANDLER_MAIN
 
 jE0FC   SEI
         LDX #$FA     ;#%11111010
@@ -2567,7 +2568,7 @@ bF41C   STA f0650,Y
         STA f0678,Y
         DEY
         BPL bF41C
-bF425   JMP IRQ_HANDLER_MAIN_MENU
+bF425   JMP IRQ_HANDLER_MAIN
 
 fF428   .BYTE $A1,$A3,$A5,$F1,$F3,$F5,$41,$43
         .BYTE $45
@@ -2653,9 +2654,9 @@ bF4ED   STY a24
         DEY
         BPL bF4ED
         SEI
-        LDA #<IRQ_HANDLER_MAIN_MENU  ;#%00001000
+        LDA #<IRQ_HANDLER_MAIN  ;#%00001000
         STA ZP_IRQ_LO
-        LDA #>IRQ_HANDLER_MAIN_MENU  ;#%11100000
+        LDA #>IRQ_HANDLER_MAIN  ;#%11100000
         STA ZP_IRQ_HI
         CLI
         INC a13
