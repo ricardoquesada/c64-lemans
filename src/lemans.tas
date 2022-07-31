@@ -270,6 +270,7 @@ pD807 = $D807
 
         * = $E000
 
+IRQ_HANDLER
         PHA
         TXA
         PHA
@@ -301,6 +302,8 @@ bE020   LDA #$01     ;#%00000001
 
 fE02D   .BYTE $10,$00,$00,$00,$00,$18,$00,$1E
         .BYTE $00,$00
+
+START
         SEI
         LDA #$00     ;#%00000000
         STA a0E
@@ -2715,6 +2718,7 @@ bF54A   LDY #$01     ;#%00000001
         LDX a23
         DEX
         BPL bF533
+NMI_HANDLER
         LDA #$00     ;#%00000000
         STA $D015    ;Sprite display Enable
         LDX #$0F     ;#%00001111
@@ -2993,4 +2997,32 @@ jF793   RTS
         .BINARY "charset-f800-f97f.bin"
         .BINARY "sprites-f980-f9ff.bin"
         .BINARY "charset-fa00-fcbf.bin"
-        .BINARY "sprites-fcc0-ffff.bin"
+        .BINARY "sprites-fcc0-ffbf.bin"
+
+        ; GARBAGE
+        .BYTE $00,$FF,$00
+        .BYTE $00,$00,$FF
+        .BYTE $00,$FF,$00
+        .BYTE $FF,$00,$FF
+        .BYTE $00,$FF,$00
+        .BYTE $FF,$00,$FF
+        .BYTE $00,$FF,$00
+        .BYTE $FF,$00,$FF
+        .BYTE $00,$FF,$00
+        .BYTE $FF,$00,$FF
+        .BYTE $00,$FF,$00
+        .BYTE $FF,$00,$FF
+        .BYTE $00,$FF,$00
+        .BYTE $FF,$00,$FF
+        .BYTE $00,$7F,$00
+        .BYTE $FF,$00,$FF
+        .BYTE $00,$FF,$00
+        .BYTE $FF,$00,$FF
+        .BYTE $00,$FF,$00,$FF
+
+        ; NMI ($FFFA-$FFFB)
+        .ADDR NMI_HANDLER
+        ; COLD RESET ($FFFC-$FFFD)
+        .ADDR START
+        ; IRQ ($FFFE-$FFFF)
+        .ADDR IRQ_HANDLER
