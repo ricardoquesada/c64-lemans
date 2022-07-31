@@ -14,8 +14,8 @@ fAB = $AB
 ;
 a00 = $00
 a01 = $01
-a02 = $02
-a03 = $03
+ZP_IRQ_LO = $02
+ZP_IRQ_HI = $03
 a04 = $04
 a05 = $05
 a06 = $06
@@ -26,9 +26,9 @@ ZP_SCORE_01 = $0A
 ZP_SCORE_02 = $0B
 ZP_SCORE_03 = $0C
 a0D = $0D
-a0E = $0E
-a0F = $0F
-a10 = $10
+ZP_HI_SCORE_01 = $0E
+ZP_HI_SCORE_02 = $0F
+ZP_HI_SCORE_03 = $10
 a11 = $11
 a12 = $12
 a13 = $13
@@ -259,7 +259,6 @@ aDAB0 = $DAB0
 ; **** POINTERS ****
 ;
 p0002 = $0002
-p05 = $0005
 p0419 = $0419
 p0420 = $0420
 p0470 = $0470
@@ -278,7 +277,8 @@ IRQ_HANDLER
         PHA
         JMP (p0002)
 
-pE008   LDA a11
+IRQ_HANDLER_MAIN_MENU
+        LDA a11
         BEQ bE00F
         JSR sF5A9
 bE00F   INC a14
@@ -306,9 +306,9 @@ fE02D   .BYTE $10,$00,$00,$00,$00,$18,$00,$1E
 START
         SEI
         LDA #$00     ;#%00000000
-        STA a0E
-        STA a0F
-        STA a10
+        STA ZP_HI_SCORE_01
+        STA ZP_HI_SCORE_02
+        STA ZP_HI_SCORE_03
         LDX #$FA     ;#%11111010
         TXS
         CLD
@@ -338,10 +338,10 @@ bE046   LDA fE02D,X
         STA $DC0D    ;CIA1: CIA Interrupt Control Register
         LDA #$11     ;#%00010001
         STA $DC0E    ;CIA1: CIA Control Register A
-        LDA #<pE008  ;#%00001000
-        STA a02
-        LDA #>pE008  ;#%11100000
-        STA a03
+        LDA #<IRQ_HANDLER_MAIN_MENU  ;#%00001000
+        STA ZP_IRQ_LO
+        LDA #>IRQ_HANDLER_MAIN_MENU  ;#%11100000
+        STA ZP_IRQ_HI
         CLI
         CLD
         LDA #$00     ;#%00000000
@@ -374,9 +374,9 @@ jE0BD   SEI
         LDA #$00     ;#%00000000
         STA $D418    ;Select Filter Mode and Volume
         LDA #<pE0D3  ;#%11010011
-        STA a02
+        STA ZP_IRQ_LO
         LDA #>pE0D3  ;#%11100000
-        STA a03
+        STA ZP_IRQ_HI
         CLI
         CLD
         JMP jE34C
@@ -391,14 +391,14 @@ pE0D3   LDA #$FF     ;#%11111111
         LDA $DC01    ;CIA1: Data Port Register B
         AND #$10     ;#%00010000
         BNE bE0F9
-bE0EB   LDA #<pE008  ;#%00001000
-        STA a02
-        LDA #>pE008  ;#%11100000
-        STA a03
+bE0EB   LDA #<IRQ_HANDLER_MAIN_MENU  ;#%00001000
+        STA ZP_IRQ_LO
+        LDA #>IRQ_HANDLER_MAIN_MENU  ;#%11100000
+        STA ZP_IRQ_HI
         LDA $DC0D    ;CIA1: CIA Interrupt Control Register
         JMP jE0FC
 
-bE0F9   JMP pE008
+bE0F9   JMP IRQ_HANDLER_MAIN_MENU
 
 jE0FC   SEI
         LDX #$FA     ;#%11111010
@@ -654,9 +654,9 @@ bE2FE   LDY fF43A,X
         STA $D40C    ;Voice 2: Attack / Decay Cycle Control
         SEI
         LDA #<pEE54  ;#%01010100
-        STA a02
+        STA ZP_IRQ_LO
         LDA #>pEE54  ;#%11101110
-        STA a03
+        STA ZP_IRQ_HI
         CLI
         LDA #$01     ;#%00000001
         STA a11
@@ -1058,20 +1058,20 @@ bE738   ASL a08
         LDY a4A
         RTS
 
-sE753   LDA a0E
+sE753   LDA ZP_HI_SCORE_01
         SEC
         SBC ZP_SCORE_01
-        LDA a0F
+        LDA ZP_HI_SCORE_02
         SBC ZP_SCORE_02
-        LDA a10
+        LDA ZP_HI_SCORE_03
         SBC ZP_SCORE_03
         BCS bE76E
         LDA ZP_SCORE_01
-        STA a0E
+        STA ZP_HI_SCORE_01
         LDA ZP_SCORE_02
-        STA a0F
+        STA ZP_HI_SCORE_02
         LDA ZP_SCORE_03
-        STA a10
+        STA ZP_HI_SCORE_03
 bE76E   LDA #<p0560  ;#%01100000
         STA a06
         LDA #>p0560  ;#%00000101
@@ -1079,13 +1079,13 @@ bE76E   LDA #<p0560  ;#%01100000
         LDA #$00     ;#%00000000
         STA a0D
         TAY
-        LDA a10
+        LDA ZP_HI_SCORE_03
         STA ZP_TMP
         JSR sE7D8
-        LDA a0F
+        LDA ZP_HI_SCORE_02
         STA ZP_TMP
         JSR sE7D8
-        LDA a0E
+        LDA ZP_HI_SCORE_01
         STA ZP_TMP
         JSR sE7D8
         LDA #$21     ;#%00100001
@@ -1558,9 +1558,9 @@ bEB66   JSR sE889
         SBC #$16     ;#%00010110
         CMP $D00E    ;Sprite 7 X Pos
         BCC bEBAB
-        LDA #<p05    ;#%00000101
+        LDA #$05    ;#%00000101
         STA a41
-        LDA #>p05    ;#%00000000
+        LDA #$00    ;#%00000000
         STA a42
         STA a64
         BEQ bEBB8
@@ -2567,7 +2567,7 @@ bF41C   STA f0650,Y
         STA f0678,Y
         DEY
         BPL bF41C
-bF425   JMP pE008
+bF425   JMP IRQ_HANDLER_MAIN_MENU
 
 fF428   .BYTE $A1,$A3,$A5,$F1,$F3,$F5,$41,$43
         .BYTE $45
@@ -2653,10 +2653,10 @@ bF4ED   STY a24
         DEY
         BPL bF4ED
         SEI
-        LDA #<pE008  ;#%00001000
-        STA a02
-        LDA #>pE008  ;#%11100000
-        STA a03
+        LDA #<IRQ_HANDLER_MAIN_MENU  ;#%00001000
+        STA ZP_IRQ_LO
+        LDA #>IRQ_HANDLER_MAIN_MENU  ;#%11100000
+        STA ZP_IRQ_HI
         CLI
         INC a13
         LDA #$A3     ;#%10100011
