@@ -206,6 +206,33 @@ HI_SCORE_OFFSET = SCREEN_RAM + 40 * 8 + 32
 p2800 = $2800
 pD807 = $D807
 
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Notes
+; Sprite frames:
+; $e6 = ???
+; $e7 = ???
+; $f3 = PIT
+; $f4 = Hero Car 00
+; $f5 = Hero Car 01, simil 00 but with tires moving
+; $f6 = Enemy Car 00
+; $f7 = Enemy Car 01, simil 02 but with tires moving
+; $f8 = Flames 1 (overlay sprite)
+; $f9 = Flames 2 (overlay sprite)
+; $fa = Car mask (?)
+; $fb = Split road ahead
+; $fc = Headlights top-left
+; $fd = Headlights top-right
+; $fe = Headlights center
+;
+; Sprites:
+; 0-3: Enemy cars
+; 4: PIT
+; 6: Split road ahead
+; 4,5,6: Headlights
+; 7: Hero car
+
+
         * = $E000
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -458,7 +485,7 @@ _L00    STA $D400,Y  ;Voice 1: Frequency Control - Low-Byte
         JSR PRINT_SPEED
         LDA #$0E     ;#%00001110
         STA $D027    ;Sprite 0 Color
-        LDA #$F4     ;#%11110100
+        LDA #$F4     ;Car pos 1
         STA SPR_FRAME_PTR_00
         LDA #$89     ;#%10001001
         STA $D000    ;Sprite 0 X Pos
@@ -1557,11 +1584,11 @@ bEC21   LDA $D015    ;Sprite display Enable
         STA $D02C    ;Sprite 5 Color
         LDA #$0F     ;#%00001111
         STA $D02D    ;Sprite 6 Color
-        LDY #$FC     ;#%11111100
+        LDY #$FC        ;Headlight top-left
         STY SPR_FRAME_PTR_04
-        INY
+        INY             ;Headlight top-right
         STY SPR_FRAME_PTR_05
-        INY
+        INY             ;Headlight center
         STY SPR_FRAME_PTR_06
         LDA $D00F    ;Sprite 7 Y Pos
         SEC
@@ -1605,6 +1632,7 @@ fECCB   .BYTE $00,$01,$02,$03,$05,$04,$06,$03
         .BYTE $00,$02,$03,$05,$00,$01,$04,$06
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+;Collision (?)
 jECF3   LDY #$02     ;#%00000010
         STY a42
         DEY
@@ -1613,27 +1641,27 @@ jECF3   LDY #$02     ;#%00000010
         DEY
         STY a64
         STY a65
-        STY $D017    ;Sprites Expand 2x Vertical (Y)
-        STY $D01D    ;Sprites Expand 2x Horizontal (X)
+        STY $D017       ;Sprites Expand 2x Vertical (Y)
+        STY $D01D       ;Sprites Expand 2x Horizontal (X)
         STY a25
-        LDA $D015    ;Sprite display Enable
-        AND #$EF     ;#%11101111
-        ORA #$60     ;#%01100000
-        STA $D015    ;Sprite display Enable
-        LDA $D01C    ;Sprites Multi-Color Mode Select
-        AND #$9F     ;#%10011111
-        STA $D01C    ;Sprites Multi-Color Mode Select
-        LDA #$0F     ;#%00001111
-        STA $D02D    ;Sprite 6 Color
-        LDA #$0C     ;#%00001100
-        STA $D02C    ;Sprite 5 Color
-        LDY #$F8     ;#%11111000
+        LDA $D015       ;Sprite display Enable
+        AND #$EF        ;#%11101111
+        ORA #$60        ;#%01100000
+        STA $D015       ;Sprite display Enable
+        LDA $D01C       ;Sprites Multi-Color Mode Select
+        AND #$9F        ;#%10011111
+        STA $D01C       ;Sprites Multi-Color Mode Select
+        LDA #$0F        ;#%00001111
+        STA $D02D       ;Sprite 6 Color
+        LDA #$0C        ;#%00001100
+        STA $D02C       ;Sprite 5 Color
+        LDY #$F8        ;Flames1 sprite
         STY SPR_FRAME_PTR_06
-        INY
+        INY             ;Flames 2 sprite
         STY SPR_FRAME_PTR_05
-        LDA #$07     ;#%00000111
+        LDA #$07        ;#%00000111
         STA a1A
-        LDY #$23     ;#%00100011
+        LDY #$23        ;#%00100011
 bED34   STY a24
         LDA a12
         BEQ bED3D
@@ -1645,9 +1673,9 @@ bED3D   JSR sE889
         LDY a24
         DEY
         BPL bED34
-bED4E   LDX #$03     ;#%00000011
-        LDY $D00E    ;Sprite 7 X Pos
-bED53   CPY #$32     ;#%00110010
+bED4E   LDX #$03        ;#%00000011
+        LDY $D00E       ;Sprite 7 X Pos
+bED53   CPY #$32        ;#%00110010
         BCC bED74
         DEY
         DEX
@@ -1958,7 +1986,7 @@ _L14    LDA a1A
         STA $D01C    ;Sprites Multi-Color Mode Select
         LDA #$03     ;#%00000011
         STA $D02D    ;Sprite 6 Color
-        LDA #$FB     ;#%11111011
+        LDA #$FB        ;Split road ahead
         STA SPR_FRAME_PTR_06
         LDA #$3A     ;#%00111010
         STA $D00D    ;Sprite 6 Y Pos
@@ -2189,10 +2217,10 @@ _L36    LDY a49
         LDA f00AB,Y
         CMP #$02     ;#%00000010
         BNE _L37
-        LDA #$FA     ;#%11111010
+        LDA #$FA        ;Car mask
         STA SPR_FRAME_PTR_00,X
         BNE _L38
-_L37    LDA #$F6     ;#%11110110
+_L37    LDA #$F6        ;Enemy Car 00
         STA SPR_FRAME_PTR_00,X
 _L38    LDY a49
         LDA $D001,Y  ;Sprite 0 Y Pos
@@ -2230,10 +2258,10 @@ _L41    LDY a4B
         EOR #$01     ;#%00000001
         STA a4C
         CLC
-        ADC #$F6     ;#%11110110
+        ADC #$F6        ;Enemy Car 00
         LDY #$03     ;#%00000011
 _L42    LDX SPR_FRAME_PTR_00,Y
-        CPX #$FA     ;#%11111010
+        CPX #$FA        ;Car mask
         BEQ _L43
         STA SPR_FRAME_PTR_00,Y
 _L43    DEY
