@@ -25,7 +25,7 @@ a09 = $09
 ZP_SCORE_01 = $0A
 ZP_SCORE_02 = $0B
 ZP_SCORE_03 = $0C
-a0D = $0D
+ZP_ZERO_IS_ZERO = $0D           ;If 1, print "0" as "0", otherwise as " "
 ZP_HI_SCORE_01 = $0E
 ZP_HI_SCORE_02 = $0F
 ZP_HI_SCORE_03 = $10
@@ -45,8 +45,8 @@ a1D = $1D
 a1E = $1E
 a1F = $1F
 a20 = $20
-a21 = $21
-ZP_TMP = $22
+ZP_DIGIT_TO_PRINT = $21         ;Digit to print. Values from 0 to 9
+ZP_BCD_TO_PRINT = $22           ;Encoded in BCD
 a23 = $23
 a24 = $24
 a25 = $25
@@ -68,8 +68,8 @@ a34 = $34
 a35 = $35
 a36 = $36
 a37 = $37
-a38 = $38
-a39 = $39
+ZP_PADDLE_1_VALUE_INV = $38
+ZP_PADDLE_1_VALUE = $39
 a3A = $3A
 a3B = $3B
 a3C = $3C
@@ -84,7 +84,7 @@ a46 = $46
 a47 = $47
 a48 = $48
 a49 = $49
-a4A = $4A
+ZP_TMP = $4A
 a4B = $4B
 a4C = $4C
 a4D = $4D
@@ -150,8 +150,6 @@ f0448 = $0448
 f04C0 = $04C0
 f0538 = $0538
 f05B0 = $05B0
-f05D8 = $05D8
-f05D9 = $05D9
 f0601 = $0601
 f0650 = $0650
 f0678 = $0678
@@ -203,7 +201,7 @@ p0002 = $0002
 p0419 = $0419
 p0420 = $0420
 SCORE_OFFSET = SCREEN_RAM + 40 * 2 + 32
-TIME_OFFSET = $04EB
+TIME_OFFSET = SCREEN_RAM + 40 * 5 + 35
 HI_SCORE_OFFSET = SCREEN_RAM + 40 * 8 + 32
 p2800 = $2800
 pD807 = $D807
@@ -621,8 +619,14 @@ bE2FE   LDY fF43A,X
         STA a11
         JMP jEB34
 
-fE338   .BYTE $3A,$38,$36,$34
-fE33C   .BYTE $DA,$DA,$DA,$DA
+fE338   .BYTE <(COLOR_RAM+40*14+10)
+        .BYTE <(COLOR_RAM+40*14+8)
+        .BYTE <(COLOR_RAM+40*14+6)
+        .BYTE <(COLOR_RAM+40*14+4)
+fE33C   .BYTE >(COLOR_RAM+40*14+10)
+        .BYTE >(COLOR_RAM+40*14+8)
+        .BYTE >(COLOR_RAM+40*14+6)
+        .BYTE >(COLOR_RAM+40*14+4)
 fE340   .BYTE $0B,$0F,$0A,$0A
 fE344   .BYTE $59,$2C,$2C,$2C
 fE348   .BYTE $10,$00,$00,$00
@@ -917,9 +921,10 @@ _L02    LDA f0079,Y
         BPL _L02
         RTS
 
-sE734   STY a4A
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+sE734   STY ZP_TMP
         LDY #$05     ;#%00000101
-bE738   ASL a08
+_L00    ASL a08
         ROL a09
         ROL A
         ROL A
@@ -933,8 +938,8 @@ bE738   ASL a08
         ORA a08
         STA a08
         DEY
-        BPL bE738
-        LDY a4A
+        BPL _L00
+        LDY ZP_TMP
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -965,19 +970,19 @@ _L00
         STA ZP_SCREEN_PTR_LO
         LDA #>HI_SCORE_OFFSET
         STA ZP_SCREEN_PTR_HI
-        LDA #$00     ;#%00000000
-        STA a0D
-        TAY
+        LDA #$00                ;Print "0" as " "
+        STA ZP_ZERO_IS_ZERO
+        TAY                     ;Y is screen offset
         LDA ZP_HI_SCORE_03
-        STA ZP_TMP
-        JSR PRINT_TWO_DIGITS
+        STA ZP_BCD_TO_PRINT
+        JSR PRINT_BCD
         LDA ZP_HI_SCORE_02
-        STA ZP_TMP
-        JSR PRINT_TWO_DIGITS
+        STA ZP_BCD_TO_PRINT
+        JSR PRINT_BCD
         LDA ZP_HI_SCORE_01
-        STA ZP_TMP
-        JSR PRINT_TWO_DIGITS
-        LDA #$21     ;Print "Zero" after Hi-Score
+        STA ZP_BCD_TO_PRINT
+        JSR PRINT_BCD
+        LDA #$21                ;Append "0" after Hi-Score
         STA (ZP_SCREEN_PTR_LO),Y
 
         ; Print Score
@@ -985,19 +990,19 @@ _L00
         STA ZP_SCREEN_PTR_LO
         LDA #>SCORE_OFFSET
         STA ZP_SCREEN_PTR_HI
-        LDA #$00     ;#%00000000
-        STA a0D
+        LDA #$00                ;Print "0" as " "
+        STA ZP_ZERO_IS_ZERO
         TAY
         LDA ZP_SCORE_03
-        STA ZP_TMP
-        JSR PRINT_TWO_DIGITS
+        STA ZP_BCD_TO_PRINT
+        JSR PRINT_BCD
         LDA ZP_SCORE_02
-        STA ZP_TMP
-        JSR PRINT_TWO_DIGITS
+        STA ZP_BCD_TO_PRINT
+        JSR PRINT_BCD
         LDA ZP_SCORE_01
-        STA ZP_TMP
-        JSR PRINT_TWO_DIGITS
-        LDA #$21     ;Print "Zero" after Score
+        STA ZP_BCD_TO_PRINT
+        JSR PRINT_BCD
+        LDA #$21                ;Append "0" after Score
         STA (ZP_SCREEN_PTR_LO),Y
 
         ; Print Time
@@ -1005,44 +1010,55 @@ _L00
         STA ZP_SCREEN_PTR_LO
         LDA #>TIME_OFFSET
         STA ZP_SCREEN_PTR_HI
-        LDA #$00     ;#%00000000
-        STA a0D
+        LDA #$00                ;Print "0" as " "
+        STA ZP_ZERO_IS_ZERO
         TAY
         LDA ZP_TIME
-        STA ZP_TMP
-        JSR PRINT_TWO_DIGITS
-        LDA a0D
+        STA ZP_BCD_TO_PRINT
+        JSR PRINT_BCD
+        LDA ZP_ZERO_IS_ZERO
         BNE _L01
         DEY
-        LDA #$21     ;Print "Zero"
+        LDA #$21                ;Append a "0" after Time
         STA (ZP_SCREEN_PTR_LO),Y
 _L01    RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-PRINT_TWO_DIGITS
-        LDA ZP_TMP
+; Prints BCD character in ZP_SCREEN_PTR,Y
+; Y gets incremented
+; If ZP_ZERO_IS_ZERO, then '0' is printed as '0', otherwise as ' '
+PRINT_BCD
+        ; Print MSB first
+        LDA ZP_BCD_TO_PRINT
         LSR A
         LSR A
         LSR A
         LSR A
-        STA a21
-        JSR _L00
-        LDA ZP_TMP
+        STA ZP_DIGIT_TO_PRINT
+        JSR PRINT_DIGIT
+
+        ; Print LSB after
+        LDA ZP_BCD_TO_PRINT
         AND #$0F     ;#%00001111
-        STA a21
-_L00    LDA a21
+        STA ZP_DIGIT_TO_PRINT
+
+PRINT_DIGIT
+        LDA ZP_DIGIT_TO_PRINT
         BNE _L01
-        LDX a0D
+
+        ; Determine how to print '0'. With ' ' or with '0'?
+        LDX ZP_ZERO_IS_ZERO
         BNE _L01
-        LDA #$20     ;Space character
+        LDA #$20        ;Space character
         STA (ZP_SCREEN_PTR_LO),Y
         BNE _L02
+
 _L01    CLC
-        ADC #$21     ;$21 is "Zero" character
+        ADC #$21        ;Get correct number. $21 is "Zero"
         STA (ZP_SCREEN_PTR_LO),Y
-        LDA #$01     ;#%00000001
-        STA a0D
-_L02    INY
+        LDA #$01        ;#%00000001
+        STA ZP_ZERO_IS_ZERO
+_L02    INY             ;Update char pointer
         RTS
 
         ; Unused ?
@@ -1050,43 +1066,43 @@ _L02    INY
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 PRINT_SPEED
-        LDX #$00     ;#%00000000
-        STX a0D
+        LDX #$00        ;'0' is ' '
+        STX ZP_ZERO_IS_ZERO
         LDA ZP_SPEED_HI
         AND #$0F     ;#%00001111
-        STA a21
+        STA ZP_DIGIT_TO_PRINT
         JSR _L00
         LDA ZP_SPEED_LO
         LSR A
         LSR A
         LSR A
         LSR A
-        STA a21
+        STA ZP_DIGIT_TO_PRINT
         JSR _L00
         LDA ZP_SPEED_LO
         AND #$0F     ;#%00001111
-        STA a21
+        STA ZP_DIGIT_TO_PRINT
         JSR _L00
-        LDA a0D
+        LDA ZP_ZERO_IS_ZERO
         BNE _L03
-        INC a0D
+        INC ZP_ZERO_IS_ZERO
         DEX
         DEX
-_L00    LDA a21
+_L00    LDA ZP_DIGIT_TO_PRINT
         BNE _L01
-        LDY a0D
+        LDY ZP_ZERO_IS_ZERO
         BNE _L01
         LDY #$0A     ;#%00001010
         BNE _L02
 _L01    TAY
-        LDA #$01     ;#%00000001
-        STA a0D
+        LDA #$01        ;'0' is '0'
+        STA ZP_ZERO_IS_ZERO
 _L02    LDA fE85D,Y
-        STA f05D8,X
+        STA SCREEN_RAM+40*11+32,X
         LDA fE868,Y
-        STA f05D9,X
+        STA SCREEN_RAM+40*11+33,X
         LDA fE873,Y
-        STA SCREEN_RAM+$0200,X
+        STA SCREEN_RAM+40*12+32,X
         LDA fE87E,Y
         STA f0601,X
         INX
@@ -1506,8 +1522,9 @@ bEBCB   LDA f00AB,Y
         BCC bEBF9
         JMP jECF3
 
+        ;Update car X position based on Paddle reading
 bEBF9   LDY a41
-bEBFB   LDA a38
+bEBFB   LDA ZP_PADDLE_1_VALUE_INV
         CMP $D00E    ;Sprite 7 X Pos
         BCS bEC08
         DEC $D00E    ;Sprite 7 X Pos
@@ -1771,17 +1788,17 @@ IRQ_HANDLER_PADDLE
 _L00    LDA #$40     ;#%01000000
         STA $DC00    ;CIA1: Data Port Register A
         LDA $D419    ;Analog/Digital Converter: Game Paddle 1
-        STA a39
+        STA ZP_PADDLE_1_VALUE
         CMP #$BC     ;#%10111100
         BCC _L01
 
         LDA #$BC     ;#%10111100
-        STA a39
+        STA ZP_PADDLE_1_VALUE
 
 _L01    LDA #$EC     ;#%11101100
         SEC
-        SBC a39
-        STA a38
+        SBC ZP_PADDLE_1_VALUE
+        STA ZP_PADDLE_1_VALUE_INV
         LDA a42
         CMP #$02     ;#%00000010
         BCS _L02
