@@ -12,8 +12,6 @@ fAB = $AB
 ;
 ; **** ZP ABSOLUTE ADRESSES ****
 ;
-a00 = $00
-a01 = $01
 ZP_IRQ_LO = $02
 ZP_IRQ_HI = $03
 a04 = $04
@@ -160,12 +158,10 @@ fD848 = $D848
 fD870 = $D870
 fD8C0 = $D8C0
 fD8E8 = $D8E8
-fD900 = $D900
 fD938 = $D938
 fD960 = $D960
 fD9B0 = $D9B0
 fD9D8 = $D9D8
-fDA00 = $DA00
 fDA34 = $DA34
 fDA50 = $DA50
 fDA5C = $DA5C
@@ -173,7 +169,6 @@ fDA78 = $DA78
 fDAA0 = $DAA0
 fDAC8 = $DAC8
 fDAD8 = $DAD8
-fDAE8 = $DAE8
 fDAF0 = $DAF0
 fDB00 = $DB00
 fDB18 = $DB18
@@ -233,6 +228,9 @@ pD807 = $D807
 ; 7: Hero car
 
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; It is an 8Kb Ultimax cartridge.
+; Starting address:
         * = $E000
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -245,6 +243,7 @@ IRQ_HANDLER
         JMP (p0002)
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Interrupt is triggered by Timer A
 IRQ_HANDLER_MAIN
         LDA a11
         BEQ _L00
@@ -254,18 +253,18 @@ IRQ_HANDLER_MAIN
 _L00    INC a14
         INC a14
         LDA a14
-        CMP #$3C     ;#%00111100
+        CMP #$3C
         BCC _L01
 
-        LDY #$00     ;#%00000000
+        LDY #$00
         STY a14
         INY
         STY a15
 
-_L01    LDA #$01     ;#%00000001
+_L01    LDA #$01
         STA a19
 
-        LDA $DC0D    ;CIA1: CIA Interrupt Control Register
+        LDA $DC0D               ;CIA1: CIA Interrupt Control Register
 
         PLA
         TAY
@@ -274,48 +273,70 @@ _L01    LDA #$01     ;#%00000001
         PLA
         RTI
 
-fE02D   .BYTE $10,$00,$00,$00,$00,$18,$00,$1E
-        .BYTE $00,$00
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+VIC_VALUES
+        .BYTE $10       ;$D011 - Text, 24-rows
+        .BYTE $00       ;$D012 - Raster
+        .BYTE $00       ;$D013 - Latch X
+        .BYTE $00       ;$D014 - Latch Y
+        .BYTE $00       ;$D015 - All sprites disabled
+        .BYTE $18       ;$D016 - 40 Cols, Multicolor mode
+        .BYTE $00       ;$D017 - Y-expanded sprites: None
+        .BYTE $1E       ;$D018 - Charset : 0x3800 / Screen RAM: 0x0400
+        .BYTE $00       ;$D019 - VIC Interrupts (ACK)
+        .BYTE $00       ;$D01A - Request VIC Interrupts: None
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Starting address
 START
         SEI
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA ZP_HI_SCORE_01
         STA ZP_HI_SCORE_02
         STA ZP_HI_SCORE_03
-        LDX #$FA     ;#%11111010
+
+        LDX #$FA                ;Stack size
         TXS
+
+        ; Init VIC
         CLD
         LDX #$09     ;#%00001001
-_L00    LDA fE02D,X
-        STA $D011,X  ;VIC Control Register 1
+_L00    LDA VIC_VALUES,X
+        STA $D011,X             ;VIC Control Register 1
         DEX
         BPL _L00
-        LDA #$7F     ;#%01111111
-        STA $DC0D    ;CIA1: CIA Interrupt Control Register
-        LDA #$08     ;#%00001000
-        STA $DC0E    ;CIA1: CIA Control Register A
-        STA $DC0F    ;CIA1: CIA Control Register B
-        LDX #$00     ;#%00000000
-        STX $DC03    ;CIA1: Data Direction Register B
-        DEX
-        STX $DC02    ;CIA1: Data Direction Register A
-        LDA #$E5     ;#%11100101
-        STA a01
-        LDA #$2F     ;#%00101111
-        STA a00
-        LDA #$1A     ;#%00011010
-        STA $DC04    ;CIA1: Timer A: Low-Byte
-        LDA #$41     ;#%01000001
-        STA $DC05    ;CIA1: Timer A: High-Byte
-        LDA #$81     ;#%10000001
-        STA $DC0D    ;CIA1: CIA Interrupt Control Register
-        LDA #$11     ;#%00010001
-        STA $DC0E    ;CIA1: CIA Control Register A
-        LDA #<IRQ_HANDLER_MAIN  ;#%00001000
+
+        ; Init CIA
+        LDA #$7F                ;Clear interrupt flags
+        STA $DC0D               ;CIA1: CIA Interrupt Control Register
+        LDA #$08                ;Set Timer A and B for One-shot
+        STA $DC0E               ;CIA1: CIA Control Register A
+        STA $DC0F               ;CIA1: CIA Control Register B
+        LDX #$00                ;Set as Input
+        STX $DC03               ;CIA1: Data Direction Register B
+        DEX                     ;Set as Output
+        STX $DC02               ;CIA1: Data Direction Register A
+
+        LDA #$E5                ;$8000-$BFFF=RAM, $D000-$DFFF=I/O, $E000-$FFFF=RAM
+        STA $01
+        LDA #$2F                ;Default value
+        STA $00
+
+        LDA #$1A                ;Set Timer A (LSB)
+        STA $DC04               ;CIA1: Timer A: Low-Byte
+        LDA #$41                ;Set Timer A (MSB)
+        STA $DC05               ;CIA1: Timer A: High-Byte
+        LDA #$81                ;Enable Timer A
+        STA $DC0D               ;CIA1: CIA Interrupt Control Register
+        LDA #$11                ;Start Timer A
+        STA $DC0E               ;CIA1: CIA Control Register A
+
+        LDA #<IRQ_HANDLER_MAIN
         STA ZP_IRQ_LO
-        LDA #>IRQ_HANDLER_MAIN  ;#%11100000
+        LDA #>IRQ_HANDLER_MAIN
         STA ZP_IRQ_HI
+
+        ; Init Variables
         CLI
         CLD
         LDA #$00     ;#%00000000
@@ -331,17 +352,21 @@ _L00    LDA fE02D,X
         STA a08
         STA a09
         STA ZP_TIME
-        STA $D015    ;Sprite display Enable
-        LDY #$0A     ;#%00001010
-_L01    STA $D000,Y  ;Sprite 0 X Pos
+        STA $D015               ;Disable all sprites
+
+        ; Sprites from 0 to 5 have X & Y = 10
+        LDY #$0A
+_L01    STA $D000,Y             ;Sprite Pos
         DEY
         BPL _L01
+
         STA a1E
-        LDA #$64     ;#%01100100
+        LDA #$64                ;#%01100100
         STA a1F
-        LDA #$07     ;#%00000111
+        LDA #$07                ;#%00000111
         STA a1A
-        JSR sE479
+        JSR INIT_SCREEN
+
 jE0BD   SEI
         LDX #$FA     ;#%11111010
         TXS
@@ -355,6 +380,7 @@ jE0BD   SEI
         CLD
         JMP jE34C
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 IRQ_HANDLER_WAIT_BUTTON
         ; Read button from Paddle
         LDA #$FF     ;#%11111111
@@ -740,42 +766,52 @@ bE45F   LDA a19
         BNE sE45B
         RTS
 
-sE467   LDY #$00     ;#%00000000
-bE469   STA SCREEN_RAM,Y
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Clears the screen RAM with register A
+CLEAR_SCREEN_RAM
+        LDY #$00     ;#%00000000
+_L00    STA SCREEN_RAM,Y
         STA SCREEN_RAM+$0100,Y
         STA SCREEN_RAM+$0200,Y
         STA SCREEN_RAM+$02E8,Y
         INY
-        BNE bE469
+        BNE _L00
         RTS
 
-sE479   LDA #$44     ;#%01000100
-        JSR sE467
-        LDA #$00     ;#%00000000
-        STA $D020    ;Border Color
-        STA $D021    ;Background Color 0
-        LDA #$08     ;#%00001000
-        STA $D022    ;Background Color 1, Multi-Color Register 0
-        LDA #$0F     ;#%00001111
-        STA $D023    ;Background Color 2, Multi-Color Register 1
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Setup screen, colors, etc.
+INIT_SCREEN
+        LDA #$44
+        JSR CLEAR_SCREEN_RAM
+        LDA #$00                ;Black
+        STA $D020               ;Border Color
+        STA $D021               ;Background Color 0
+        LDA #$08                ;#%00001000
+        STA $D022               ;Background Color 1, Multi-Color Register 0
+        LDA #$0F                ;#%00001111
+        STA $D023               ;Background Color 2, Multi-Color Register 1
+
         LDA #$0C     ;#%00001100
         LDY #$00     ;#%00000000
-bE494   STA COLOR_RAM,Y
-        STA fD900,Y
-        STA fDA00,Y
-        STA fDAE8,Y
+_L00    STA COLOR_RAM,Y
+        STA COLOR_RAM+$0100,Y
+        STA COLOR_RAM+$0200,Y
+        STA COLOR_RAM+$02E8,Y
         INY
-        BNE bE494
+        BNE _L00
+
         LDA #<p0420  ;#%00100000
         STA a04
         LDA #>p0420  ;#%00000100
         STA a05
+
         LDX #$18     ;#%00011000
-bE4AD   LDY #$07     ;#%00000111
+_L01    LDY #$07     ;#%00000111
         LDA #$20     ;#%00100000
-bE4B1   STA (p04),Y
+_L02    STA (p04),Y
         DEY
-        BPL bE4B1
+        BPL _L02
+
         LDA a04
         CLC
         ADC #$28     ;#%00101000
@@ -784,9 +820,9 @@ bE4B1   STA (p04),Y
         ADC #$00     ;#%00000000
         STA a05
         DEX
-        BPL bE4AD
+        BPL _L01
         LDY #$07     ;#%00000111
-bE4C8   LDA fE5D4,Y
+_L03    LDA fE5D4,Y
         STA f0448,Y
         LDA fE5DC,Y
         STA f04C0,Y
@@ -802,7 +838,7 @@ bE4C8   LDA fE5D4,Y
         LDA #$03     ;#%00000011
         STA fD8C0,Y
         STA fD9D8,Y
-        STA fDA00,Y
+        STA COLOR_RAM+$0200,Y
         LDA #$04     ;#%00000100
         STA fDAA0,Y
         STA fDAC8,Y
@@ -819,7 +855,7 @@ bE4C8   LDA fE5D4,Y
         STA fDBB8,Y
         STA fDBE0,Y
         DEY
-        BPL bE4C8
+        BPL _L03
         LDY #$71     ;#%01110001
         STY a05DE
         INY
@@ -835,18 +871,18 @@ bE4C8   LDA fE5D4,Y
         LDA #>SCREEN_RAM  ;#%00000100
         STA a05
         LDX #$18     ;#%00011000
-bE547   LDY #$03     ;#%00000011
-bE549   CPY #$00     ;#%00000000
-        BNE bE556
+_L04    LDY #$03     ;#%00000011
+_L05    CPY #$00     ;#%00000000
+        BNE _L06
         TXA
         AND #$03     ;#%00000011
-        BNE bE556
+        BNE _L06
         LDA #$57     ;#%01010111
-        BNE bE559
-bE556   LDA fEAE0,Y
-bE559   STA (p04),Y
+        BNE _L07
+_L06    LDA fEAE0,Y
+_L07    STA (p04),Y
         DEY
-        BPL bE549
+        BPL _L05
         LDA a04
         CLC
         ADC #$28     ;#%00101000
@@ -855,24 +891,24 @@ bE559   STA (p04),Y
         ADC #$00     ;#%00000000
         STA a05
         DEX
-        BPL bE547
+        BPL _L04
         LDA #<p0419  ;#%00011001
         STA a04
         LDA #>p0419  ;#%00000100
         STA a05
         LDX #$18     ;#%00011000
-bE578   LDY #$03     ;#%00000011
-bE57A   CPY #$02     ;#%00000010
-        BNE bE587
+_L08    LDY #$03     ;#%00000011
+_L09    CPY #$02     ;#%00000010
+        BNE _L10
         TXA
         AND #$03     ;#%00000011
-        BNE bE587
+        BNE _L10
         LDA #$46     ;#%01000110
-        BNE bE58A
-bE587   LDA fEAC0,Y
-bE58A   STA (p04),Y
+        BNE _L11
+_L10    LDA fEAC0,Y
+_L11    STA (p04),Y
         DEY
-        BPL bE57A
+        BPL _L09
         LDA a04
         CLC
         ADC #$28     ;#%00101000
@@ -881,7 +917,7 @@ bE58A   STA (p04),Y
         ADC #$00     ;#%00000000
         STA a05
         DEX
-        BPL bE578
+        BPL _L08
         LDA #<pD807  ;#%00000111
         STA a04
         LDA #>pD807  ;#%11011000
@@ -912,6 +948,7 @@ bE5C4   LDA #$1A     ;#%00011010
         BPL bE5C4
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 fE5D4   .BYTE $20,$13,$03,$0F,$12,$05,$20,$20
 fE5DC   .BYTE $20,$20,$14,$09,$0D,$05,$20,$20
 fE5E4   .BYTE $08,$09,$1F,$13,$03,$0F,$12,$05
@@ -2803,7 +2840,7 @@ bF6A0   LDA #$04     ;#%00000100
         LDA #$F0     ;#%11110000
         STA $D417    ;Filter Resonance Control / Voice Input Control
         BNE jF704
-bF6B1   LDA a00
+bF6B1   LDA $00                 ;BUG? Should be LDA #$00 instead of LDA $00
         STA $D412    ;Voice 3: Control Register
         BEQ jF704
 bF6B8   CMP #$02     ;#%00000010
