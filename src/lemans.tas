@@ -194,7 +194,6 @@ aDAB0 = $DAB0
 ;
 p0002 = $0002
 p0419 = $0419
-p0420 = $0420
 SCORE_OFFSET = SCREEN_RAM + 40 * 2 + 32
 TIME_OFFSET = SCREEN_RAM + 40 * 5 + 35
 HI_SCORE_OFFSET = SCREEN_RAM + 40 * 8 + 32
@@ -791,8 +790,8 @@ INIT_SCREEN
         LDA #$0F                ;#%00001111
         STA $D023               ;Background Color 2, Multi-Color Register 1
 
-        LDA #$0C     ;#%00001100
-        LDY #$00     ;#%00000000
+        LDA #$0C                ;#%00001100
+        LDY #$00
 _L00    STA COLOR_RAM,Y
         STA COLOR_RAM+$0100,Y
         STA COLOR_RAM+$0200,Y
@@ -800,14 +799,16 @@ _L00    STA COLOR_RAM,Y
         INY
         BNE _L00
 
-        LDA #<p0420  ;#%00100000
+        LDA #<(SCREEN_RAM + 32)
         STA a04
-        LDA #>p0420  ;#%00000100
+        LDA #>(SCREEN_RAM + 32)
         STA a05
 
-        LDX #$18     ;#%00011000
-_L01    LDY #$07     ;#%00000111
-        LDA #$20     ;#%00100000
+        ; Fill the right part of the screen with spaces
+        LDX #24                 ;In total 24 rows
+
+_L01    LDY #$07                ;7 colums: from 32 to 39
+        LDA #$20                ;Space character
 _L02    STA (p04),Y
         DEY
         BPL _L02
@@ -821,7 +822,8 @@ _L02    STA (p04),Y
         STA a05
         DEX
         BPL _L01
-        LDY #$07     ;#%00000111
+
+        LDY #$07                ;7 colums
 _L03    LDA fE5D4,Y
         STA f0448,Y
         LDA fE5DC,Y
@@ -830,15 +832,18 @@ _L03    LDA fE5D4,Y
         STA f0538,Y
         LDA fE5EC,Y
         STA f05B0,Y
+
         LDA #$01     ;#%00000001
         STA fD848,Y
         STA fD9B0,Y
         STA fDA50,Y
         STA fDA78,Y
+
         LDA #$03     ;#%00000011
         STA fD8C0,Y
         STA fD9D8,Y
         STA COLOR_RAM+$0200,Y
+
         LDA #$04     ;#%00000100
         STA fDAA0,Y
         STA fDAC8,Y
@@ -846,8 +851,10 @@ _L03    LDA fE5D4,Y
         STA fDB18,Y
         STA fDB40,Y
         STA fDB68,Y
+
         LDA #$05     ;#%00000101
         STA fD938,Y
+
         LDA #$07     ;#%00000111
         STA fD870,Y
         STA fD8E8,Y
@@ -856,6 +863,7 @@ _L03    LDA fE5D4,Y
         STA fDBE0,Y
         DEY
         BPL _L03
+
         LDY #$71     ;#%01110001
         STY a05DE
         INY
@@ -866,9 +874,9 @@ _L03    LDA fE5D4,Y
         STY a0607
         JSR PRINT_SCORE_AND_TIME
         JSR PRINT_SPEED
-        LDA #<SCREEN_RAM  ;#%00000000
+        LDA #<SCREEN_RAM
         STA a04
-        LDA #>SCREEN_RAM  ;#%00000100
+        LDA #>SCREEN_RAM
         STA a05
         LDX #$18     ;#%00011000
 _L04    LDY #$03     ;#%00000011
@@ -923,11 +931,11 @@ _L11    STA (p04),Y
         LDA #>pD807  ;#%11011000
         STA a05
         LDX #$18     ;#%00011000
-bE5A9   LDY #$13     ;#%00010011
+_L12    LDY #$13     ;#%00010011
         LDA #$0E     ;#%00001110
-bE5AD   STA (p04),Y
+_L13    STA (p04),Y
         DEY
-        BPL bE5AD
+        BPL _L13
         LDA a04
         CLC
         ADC #$28     ;#%00101000
@@ -936,16 +944,16 @@ bE5AD   STA (p04),Y
         ADC #$00     ;#%00000000
         STA a05
         DEX
-        BPL bE5A9
+        BPL _L12
         LDX #$18     ;#%00011000
-bE5C4   LDA #$1A     ;#%00011010
+_L14    LDA #$1A     ;#%00011010
         STA f79,X
         LDA #$E0     ;#%11100000
         STA f92,X
         LDA #$07     ;#%00000111
         STA fAB,X
         DEX
-        BPL bE5C4
+        BPL _L14
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
