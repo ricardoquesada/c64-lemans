@@ -28,7 +28,7 @@ ZP_HI_SCORE_01 = $0E
 ZP_HI_SCORE_02 = $0F
 ZP_HI_SCORE_03 = $10
 a11 = $11
-a12 = $12
+ZP_IS_GAME_OVER = $12
 a13 = $13
 a14 = $14
 a15 = $15
@@ -36,7 +36,7 @@ ZP_TIME = $16
 a17 = $17
 a18 = $18
 a19 = $19
-a1A = $1A
+ZP_ROAD_STATE = $1A
 a1B = $1B
 a1C = $1C
 a1D = $1D
@@ -361,18 +361,18 @@ _L01    STA $D000,Y             ;Sprite Pos
         STA a1E
         LDA #$64                ;#%01100100
         STA a1F
-        LDA #$07                ;#%00000111
-        STA a1A
+        LDA #$07
+        STA ZP_ROAD_STATE
         JSR INIT_SCREEN
 
 jE0BD   SEI
-        LDX #$FA     ;#%11111010
+        LDX #$FA                ;Stack
         TXS
-        LDA #$00     ;#%00000000
-        STA $D418    ;Select Filter Mode and Volume
-        LDA #<IRQ_HANDLER_WAIT_BUTTON  ;#%11010011
+        LDA #$00
+        STA $D418               ;Select Filter Mode and Volume
+        LDA #<IRQ_HANDLER_WAIT_BUTTON
         STA ZP_IRQ_LO
-        LDA #>IRQ_HANDLER_WAIT_BUTTON  ;#%11100000
+        LDA #>IRQ_HANDLER_WAIT_BUTTON
         STA ZP_IRQ_HI
         CLI
         CLD
@@ -426,7 +426,7 @@ INIT_GAME
         STX a42
         STX ZP_FRAME_PTR_IDX
         STX a11
-        STX a12
+        STX ZP_IS_GAME_OVER
         STX a13
         STX a4B
         STX a4C
@@ -473,12 +473,12 @@ INIT_GAME
         LDA #$06
         STA a41
         LDA #$07
-        STA a1A
+        STA ZP_ROAD_STATE
         LDA #$0F
         STA $D025               ;Sprite Multi-Color Register 0
         LDA #$3C                ;#%00111100
         STA a18
-        LDA #$60                ;#%01100000
+        LDA #$60                ;Initial time: 60 seconds
         STA ZP_TIME
         LDA #$64                ;#%01100100
         STA a1F
@@ -667,8 +667,8 @@ bE2FE   LDY fF43A,X
         STA ZP_TMP_REG_00
         LDA #$3C     ;#%00111100
         STA a52
-        LDA #$08     ;#%00001000
-        STA a1A
+        LDA #$08
+        STA ZP_ROAD_STATE
 
         LDA #$90     ;#%10010000
         STA $D40C    ;Voice 2: Attack / Decay Cycle Control
@@ -682,6 +682,7 @@ bE2FE   LDY fF43A,X
         STA a11
         JMP jEB34
 
+        ; FIXME: What is this about
 COLOR_RAM_POS_LO
         .BYTE <(COLOR_RAM+40*14+10)
         .BYTE <(COLOR_RAM+40*14+8)
@@ -697,7 +698,7 @@ fE344   .BYTE $59,$2C,$2C,$2C
 fE348   .BYTE $10,$00,$00,$00
 
 jE34C   LDA #$07     ;#%00000111
-        STA a1A
+        STA ZP_ROAD_STATE
         LDX #$00     ;#%00000000
 bE352   STX ZP_TMP_REG_00
         JSR sE889
@@ -1215,8 +1216,8 @@ _L01    STA SCREEN_RAM,Y
         DEY
         BPL _L01
 
-        LDY a1A
-        LDA fEA9E,Y
+        LDY ZP_ROAD_STATE
+        LDA ROAD_COLOR_TBL,Y
         LDX #$1F                ;32 columns
 _L02    STA COLOR_RAM,X
         DEX
@@ -1226,9 +1227,11 @@ _L02    STA COLOR_RAM,X
         LDA a20
         AND #$03     ;#%00000011
         STA a20
-        LDA a1A
+
+        LDA ZP_ROAD_STATE
         CMP #$05     ;#%00000101
         BCC _L03
+
         JMP jE972
 
 _L03    LDA a1E
@@ -1247,11 +1250,13 @@ _L05    INC a1B
         BCC _L09
         LDA #$00     ;#%00000000
         STA a1B
-        LDA a1A
+
+        LDA ZP_ROAD_STATE
         CMP #$03     ;#%00000011
         BCS _L12
         CMP #$02     ;#%00000010
         BNE _L06
+
         LDA #$14     ;#%00010100
         STA a25
 _L06    JSR sE734
@@ -1328,9 +1333,10 @@ _L19    CMP #$64     ;#%01100100
         INC a1F
         JMP jE9BF
 
-jE972   LDA a1A
+jE972   LDA ZP_ROAD_STATE
         CMP #$05     ;#%00000101
         BNE bE994
+
         INC a1C
         LDA a1C
         AND #$3F     ;#%00111111
@@ -1365,9 +1371,11 @@ bE9A8   LDA a52
 bE9B1   LDA a1E
         CMP #$0F     ;#%00001111
         BCC bE9BD
+
         LDA #$00     ;#%00000000
-        STA a1A
+        STA ZP_ROAD_STATE
         BNE jE9BF
+
 bE9BD   INC a1E
 jE9BF   LDA a1E
         ASL A
@@ -1389,19 +1397,21 @@ jE9BF   LDA a1E
         LSR A
         TAY
         INY
-        LDA a1A
+        LDA ZP_ROAD_STATE
         STA aAB
         CMP #$07     ;#%00000111
         BCC bE9EB
         CPY #$06     ;#%00000110
         BCS bE9EB
+
         LDY #$06     ;#%00000110
-bE9EB   LDX a1A
+bE9EB   LDX ZP_ROAD_STATE
         LDA fEAA7,X
 bE9F0   STA COLOR_RAM+1,Y
         INY
         CPY a1D
         BCC bE9F0
+
         LDA a1E
         LSR A
         LSR A
@@ -1483,7 +1493,8 @@ _L03    DEY
         STA aAB
         RTS
 
-fEA9E   .BYTE $0D,$09,$08,$0D,$0D,$0A,$0B,$0C
+ROAD_COLOR_TBL
+        .BYTE $0D,$09,$08,$0D,$0D,$0A,$0B,$0C
         .BYTE $0C
 fEAA7   .BYTE $0E,$09,$08,$0E,$0E,$0E,$0E,$0E
         .BYTE $0E
@@ -1520,23 +1531,26 @@ jEB34   LDA ZP_SPEED_LO
         STA SPR_FRAME_PTR_07
         JMP jEC0E
 
-_L00    LDA a1A
+_L00    LDA ZP_ROAD_STATE
         CMP #$08     ;#%00001000
         BEQ bEB66
+
         INC ZP_TMP_REG_01
         LDA ZP_TMP_REG_01
         CMP #$FA     ;#%11111010
         BCC bEB66
+
         LDA #$00     ;#%00000000
         STA ZP_TMP_REG_01
         LDY ZP_TMP_REG_00
         INY
         CPY #$28     ;#%00101000
         BCC bEB5F
+
         LDY #$20     ;#%00100000
 bEB5F   STY ZP_TMP_REG_00
-        LDA fECCB,Y
-        STA a1A
+        LDA ROAD_STATE_TBL,Y
+        STA ZP_ROAD_STATE
 bEB66   JSR sE889
         JSR SCROLL_DOWN
         JSR sEE10
@@ -1666,9 +1680,11 @@ bEC21   LDA $D015    ;Sprite display Enable
         SEC
         SBC #$18     ;#%00011000
         STA $D008    ;Sprite 4 X Pos
-bEC7A   LDA a12
+
+bEC7A   LDA ZP_IS_GAME_OVER
         BEQ bEC81
-        JSR sF462
+        JSR GAME_OVER
+
 bEC81   LDA a58
         BEQ bEC88
         JMP jECF3
@@ -1683,7 +1699,9 @@ fECAB   .BYTE $79,$79,$79,$79,$79,$79,$79,$93
         .BYTE $94,$79,$79,$97,$79,$79,$79,$7F
         .BYTE $80,$79,$79,$8F,$90,$79,$79,$97
         .BYTE $79,$79,$79,$79,$79,$79,$79,$79
-fECCB   .BYTE $00,$01,$02,$03,$05,$04,$06,$03
+
+ROAD_STATE_TBL
+        .BYTE $00,$01,$02,$03,$05,$04,$06,$03
         .BYTE $05,$00,$02,$00,$01,$00,$04,$06
         .BYTE $00,$02,$00,$03,$05,$00,$01,$00
         .BYTE $04,$06,$00,$01,$00,$02,$04,$06
@@ -1718,12 +1736,14 @@ jECF3   LDY #$02     ;#%00000010
         INY             ;Flames 2 sprite
         STY SPR_FRAME_PTR_05
         LDA #$07        ;#%00000111
-        STA a1A
+        STA ZP_ROAD_STATE
         LDY #$23        ;#%00100011
 bED34   STY ZP_TMP_REG_01
-        LDA a12
+
+        LDA ZP_IS_GAME_OVER
         BEQ bED3D
-        JSR sF462
+        JSR GAME_OVER
+
 bED3D   JSR sE889
         JSR SCROLL_DOWN
         JSR sEE10
@@ -1743,9 +1763,10 @@ bED53   CPY #$32        ;#%00110010
         JSR SCROLL_DOWN
         JSR sEE10
         JSR sEDDF
-        LDA a12
+
+        LDA ZP_IS_GAME_OVER
         BEQ bED4E
-        JSR sF462
+        JSR GAME_OVER
         JMP bED4E
 
 bED74   LDA #$03     ;#%00000011
@@ -1758,9 +1779,10 @@ bED80   JSR sE889
         JSR SCROLL_DOWN
         JSR sEE10
         JSR sEDDF
-        LDA a12
+
+        LDA ZP_IS_GAME_OVER
         BEQ bED78
-        JSR sF462
+        JSR GAME_OVER
         JMP bED78
 
 bED96   LDA $D015    ;Sprite display Enable
@@ -1783,9 +1805,9 @@ bED96   LDA $D015    ;Sprite display Enable
         LDA #$3C     ;#%00111100
         STA a52
         LDA #$08     ;#%00001000
-        STA a1A
+        STA ZP_ROAD_STATE
         LDY ZP_TMP_REG_00
-        LDA fECCB,Y
+        LDA ROAD_STATE_TBL,Y
         BEQ bEDD6
         CMP #$03     ;#%00000011
         BEQ bEDD6
@@ -1997,7 +2019,7 @@ _L11    LDA ZP_SPEED_LO
         SEC
         SBC a3C
         STA $D00F    ;Sprite 7 Y Pos
-_L12    LDA a1A
+_L12    LDA ZP_ROAD_STATE
         CMP #$07     ;#%00000111
         BNE _L14
         LDY $D00F    ;Sprite 7 Y Pos
@@ -2026,7 +2048,7 @@ _L12    LDA a1A
         ADC #$F8     ;#%11111000
         STA SPR_FRAME_PTR_05
 _L13    STY a45
-_L14    LDA a1A
+_L14    LDA ZP_ROAD_STATE
         CMP #$04     ;#%00000100
         BNE _L18
         LDA ZP_TMP_REG_01
@@ -2076,13 +2098,14 @@ _L16    LDA $D015    ;Sprite display Enable
 _L17    STY a47
 _L18    LDA a11
         BEQ _L20
+
         LDA ZP_TIME
         BEQ _L19
         LDY a17
         INY
         CPY a18
         BCC _L20
-        LDY #$00     ;#%00000000
+        LDY #$00
         SED
         LDA ZP_TIME
         SEC
@@ -2091,8 +2114,10 @@ _L18    LDA a11
         CLD
         JMP _L20
 
-_L19    LDA #$01     ;#%00000001
-        STA a12
+        ; Enable Game Over animation
+_L19    LDA #$01
+        STA ZP_IS_GAME_OVER
+
 _L20    STY a17
         SED
         LDA ZP_SPEED_LO
@@ -2226,7 +2251,7 @@ _L31    LDA f34,X
 _L32    LDY a49
         LDA #$19     ;#%00011001
         STA $D001,Y  ;Sprite 0 Y Pos
-_L33    LDA a1A
+_L33    LDA ZP_ROAD_STATE
         CMP #$04     ;#%00000100
         BNE _L34
         LDA ZP_TMP_REG_01
@@ -2245,7 +2270,7 @@ _L33    LDA a1A
 
 _L34    LDA f5D,X
         BNE _L36
-        LDA a1A
+        LDA ZP_ROAD_STATE
         CMP #$06     ;#%00000110
         BEQ _L36
         LDA aC3
@@ -2600,35 +2625,43 @@ fF44A   .BYTE $22,$21,$21,$21,$20,$10,$14,$13
 fF452   .BYTE $05,$18,$14,$05,$0E,$04,$05,$04
 fF45A   .BYTE $20,$20,$14,$09,$0D,$05,$20,$20
 
-sF462   STY a56
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Called when time is 0.
+; Game over animnation gets triggered from here
+GAME_OVER
+        STY a56
         STX a57
         LDA a53
         BEQ _L01
+
         DEC a53
         LDY a54
-        CPY #$05     ;#%00000101
+        CPY #$05
         BCC _L00
-        LDY #$04     ;#%00000100
+        LDY #$04
 _L00    LDA fF564,Y
         STA a18
         INY
         STY a54
-        LDA #$60     ;#%01100000
+        LDA #$60                ;Initial time: 60 seconds
         STA ZP_TIME
-        LDA #$00     ;#%00000000
-        STA a12
+        LDA #$00
+        STA ZP_IS_GAME_OVER
         STA a17
         LDY a57
         LDX a56
         RTS
 
 _L01    INC a13
-        LDA #$07     ;#%00000111
-        STA a1A
-        LDA $D015    ;Sprite display Enable
-        AND #$8F     ;#%10001111
-        STA $D015    ;Sprite display Enable
-        LDA #$00     ;#%00000000
+        LDA #$07
+        STA ZP_ROAD_STATE
+
+        ; Turn off headlight/pits sprites, in case they are visible
+        LDA $D015               ;Sprite display Enable
+        AND #$8F                ;#%10001111
+        STA $D015               ;Sprite display Enable
+
+        LDA #$00
         STA a58
         STA a59
         STA a64
@@ -2638,82 +2671,91 @@ _L01    INC a13
         STA a31
         STA a32
         STA a33
-        LDA #$F0     ;#%11110000
-        STA $D417    ;Filter Resonance Control / Voice Input Control
-        LDY #$4B     ;#%01001011
-bF4B4   STY ZP_TMP_REG_01
+        LDA #$F0                ;#%11110000
+        STA $D417               ;Filter Resonance Control / Voice Input Control
+
+        LDY #$4B                ;75 rows to scroll down
+_L02    STY ZP_TMP_REG_01
         JSR sE889
         JSR SCROLL_DOWN
         JSR sEDDF
         LDY ZP_TMP_REG_01
         DEY
-        BNE bF4B4
+        BNE _L02
+
         LDY #$1F     ;#%00011111
-bF4C6   LDA fF589,Y
+_L03    LDA fF589,Y
         STA SCREEN_RAM,Y
         LDA #$0A     ;#%00001010
         STA COLOR_RAM,Y
         DEY
-        BPL bF4C6
+        BPL _L03
+
         JSR SCROLL_DOWN
         JSR sEDDF
+
         LDY #$1F     ;#%00011111
-bF4DC   LDA fF569,Y
+_L04    LDA fF569,Y
         STA SCREEN_RAM,Y
         DEY
-        BPL bF4DC
+        BPL _L04
+
         JSR SCROLL_DOWN
         JSR sEDDF
         LDY #$0A     ;#%00001010
-bF4ED   STY ZP_TMP_REG_01
+_L05    STY ZP_TMP_REG_01
         JSR sE889
         JSR SCROLL_DOWN
         JSR sEDDF
         LDY ZP_TMP_REG_01
         DEY
-        BPL bF4ED
+        BPL _L05
+
         SEI
         LDA #<IRQ_HANDLER_MAIN  ;#%00001000
         STA ZP_IRQ_LO
         LDA #>IRQ_HANDLER_MAIN  ;#%11100000
         STA ZP_IRQ_HI
         CLI
+
         INC a13
         LDA #$A3     ;#%10100011
-bF50B   CMP #$08     ;#%00001000
-        BCC bF51F
+_L06    CMP #$08     ;#%00001000
+        BCC _L07
         SEC
         SBC #$04     ;#%00000100
         STA $D00F    ;Sprite 7 Y Pos
         LDY #$01     ;#%00000001
         JSR sE45B
         LDA $D00F    ;Sprite 7 Y Pos
-        BNE bF50B
-bF51F   LDY #$07     ;#%00000111
+        BNE _L06
+
+_L07    LDY #$07     ;#%00000111
         LDA #$20     ;#%00100000
-bF523   STA f07B8,Y
+_L08    STA f07B8,Y
         STA f07E0,Y
         DEY
-        BPL bF523
+        BPL _L08
+
         LDY #$05     ;#%00000101
         JSR sE44D
         LDX #$1A     ;#%00011010
-bF533   STX ZP_TMP_REG_00
+_L09    STX ZP_TMP_REG_00
         JSR sE889
         JSR SCROLL_DOWN
         LDA a1F
         CMP #$64     ;#%01100100
-        BEQ bF54A
-        BCC bF548
+        BEQ _L11
+        BCC _L10
         DEC a1F
-        JMP bF54A
+        JMP _L11
 
-bF548   INC a1F
-bF54A   LDY #$01     ;#%00000001
+_L10    INC a1F
+_L11    LDY #$01     ;#%00000001
         JSR sE45B
         LDX ZP_TMP_REG_00
         DEX
-        BPL bF533
+        BPL _L09
 
 NMI_HANDLER
         LDA #$00     ;#%00000000
