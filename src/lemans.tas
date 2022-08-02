@@ -224,6 +224,17 @@ pD807 = $D807
 ; 6: Split road ahead
 ; 4,5,6: Headlights
 ; 7: Hero car
+;
+; Road states (ZP_ROAD_STATE)
+; $00 = Green
+; $01 = White, Ice
+; $02 = Black, Night
+; $03 = Green
+; $04 = Green
+; $05 = Brown, turns
+; $06 = Split screen
+; $07 = Purple, shoulder on left (initial state)
+; $08 = Purple, shoulder on left
 
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -1205,6 +1216,7 @@ fE87E   .BYTE $5E,$60,$64,$66,$6A,$66,$66,$60
         .BYTE $66,$66,$70
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Draw road (?)
 sE889   LDA a25
         BEQ _L00
         DEC a25
@@ -1229,12 +1241,13 @@ _L02    STA COLOR_RAM,X
         STA a20
 
         LDA ZP_ROAD_STATE
-        CMP #$05     ;#%00000101
-        BCC _L03
+        CMP #$05
+        BCC _STATES_00_04
+        JMP _STATES_05_08
 
-        JMP jE972
-
-_L03    LDA a1E
+        ; Road State 00-04
+_STATES_00_04
+        LDA a1E
         CMP #$10     ;#%00010000
         BCS _L04
         INC a1E
@@ -1242,7 +1255,7 @@ _L04    LDA a1F
         CMP #$54     ;#%01010100
         BCS _L05
         INC a1F
-        JMP jE9BF
+        JMP DRAW_EPILOG
 
 _L05    INC a1B
         LDA a1B
@@ -1253,13 +1266,17 @@ _L05    INC a1B
 
         LDA ZP_ROAD_STATE
         CMP #$03     ;#%00000011
-        BCS _L12
+        BCS _STATES_03_04
         CMP #$02     ;#%00000010
-        BNE _L06
+        BNE _STATES_00_01
 
+        ; Road State 02: Night
         LDA #$14     ;#%00010100
         STA a25
-_L06    JSR sE734
+
+        ; Road States 00, 01
+_STATES_00_01
+        JSR sE734
         LDA a08
         AND #$03     ;#%00000011
         BEQ _L09
@@ -1281,7 +1298,7 @@ _L07    STA a1E
         BCC _L08
         LDA #$64     ;#%01100100
 _L08    STA a1F
-_L09    JMP jE9BF
+_L09    JMP DRAW_EPILOG
 
 _L10    LDA a1E
         CLC
@@ -1297,8 +1314,12 @@ _L11    STA a1E
         BCS _L08
         LDA #$54     ;#%01010100
         BNE _L08
-_L12    CMP #$03     ;#%00000011
-        BNE _L16
+
+_STATES_03_04
+        CMP #$03     ;#%00000011
+        BNE _STATE_04
+
+        ; Road State 03
         LDA #$00     ;#%00000000
         STA a1C
         LDA a1E
@@ -1315,9 +1336,11 @@ _L14    LDA a1F
 _L15    CMP #$53     ;#%01010011
         BCS _L09
         INC a1F
-        JMP jE9BF
+        JMP DRAW_EPILOG
 
-_L16    LDA a1E
+        ; Road State 04
+_STATE_04
+        LDA a1E
         CMP #$11     ;#%00010001
         BCC _L17
         DEC a1E
@@ -1329,14 +1352,17 @@ _L18    LDA a1F
         BCC _L19
         DEC a1F
 _L19    CMP #$64     ;#%01100100
-        BCS jE9BF
+        BCS DRAW_EPILOG
         INC a1F
-        JMP jE9BF
+        JMP DRAW_EPILOG
 
-jE972   LDA ZP_ROAD_STATE
+        ; Road States: 05-08
+_STATES_05_08
+        LDA ZP_ROAD_STATE
         CMP #$05     ;#%00000101
-        BNE bE994
+        BNE _STATES_06_08
 
+        ; Road State 05: Turns
         INC a1C
         LDA a1C
         AND #$3F     ;#%00111111
@@ -1350,34 +1376,46 @@ jE972   LDA ZP_ROAD_STATE
         CLC
         ADC #$53     ;#%01010011
         STA a1F
-        JMP jE9BF
+        JMP DRAW_EPILOG
 
-bE994   CMP #$06     ;#%00000110
-        BNE bE99B
-        JMP jEA49
+_STATES_06_08
+        CMP #$06     ;#%00000110
+        BNE _STATES_07_08
+        JMP DRAW_SPLIT_SCREEN
 
-bE99B   CMP #$07     ;#%00000111
-        BNE bE9A8
+_STATES_07_08
+        CMP #$07     ;#%00000111
+        BNE _STATE_08
+
+        ; Road State 07
         LDA a1E
-        BEQ jE9BF
+        BEQ DRAW_EPILOG
         DEC a1E
-        JMP jE9BF
+        JMP DRAW_EPILOG
 
-bE9A8   LDA a52
-        BEQ bE9B1
+        ; Road State 08
+_STATE_08
+        LDA a52
+        BEQ _L20
         DEC a52
-        JMP jE9BF
+        JMP DRAW_EPILOG
 
-bE9B1   LDA a1E
+_L20    LDA a1E
         CMP #$0F     ;#%00001111
-        BCC bE9BD
+        BCC _L21
 
         LDA #$00     ;#%00000000
         STA ZP_ROAD_STATE
-        BNE jE9BF
+        BNE DRAW_EPILOG
 
-bE9BD   INC a1E
-jE9BF   LDA a1E
+_L21    INC a1E
+
+        ; Fallthrough
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; All DRAW functions seems to call this function when they end.
+DRAW_EPILOG
+        LDA a1E
         ASL A
         CLC
         ADC #$18     ;#%00011000
@@ -1406,7 +1444,7 @@ jE9BF   LDA a1E
 
         LDY #$06     ;#%00000110
 bE9EB   LDX ZP_ROAD_STATE
-        LDA fEAA7,X
+        LDA ROAAD_COLOR2_TBL,X
 bE9F0   STA COLOR_RAM+1,Y
         INY
         CPY a1D
@@ -1457,7 +1495,9 @@ bEA40   STA (ZP_TMP_PTR_LO),Y
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-jEA49   LDY #$05     ;#%00000101
+; Road State 06: Split screen
+DRAW_SPLIT_SCREEN
+        LDY #$05     ;#%00000101
         LDA #$0E     ;#%00001110
 _L00    STA pD807,Y
         STA COLOR_RAM+19,Y
@@ -1496,8 +1536,10 @@ _L03    DEY
 ROAD_COLOR_TBL
         .BYTE $0D,$09,$08,$0D,$0D,$0A,$0B,$0C
         .BYTE $0C
-fEAA7   .BYTE $0E,$09,$08,$0E,$0E,$0E,$0E,$0E
+ROAAD_COLOR2_TBL
+        .BYTE $0E,$09,$08,$0E,$0E,$0E,$0E,$0E
         .BYTE $0E
+
 fEAB0   .BYTE $40,$45,$46,$44,$41,$45,$47,$48
         .BYTE $42,$45,$45,$49
 fEABC   .BYTE $43,$45,$45,$4A
@@ -1691,10 +1733,12 @@ bEC81   LDA a58
 
 bEC88   JMP jEB34
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 fEC8B   .BYTE $79,$79,$79,$79,$79,$79,$79,$91
         .BYTE $92,$79,$79,$95,$96,$79,$79,$7A
         .BYTE $7E,$79,$79,$85,$8E,$79,$79,$95
         .BYTE $96,$79,$79,$79,$79,$79,$79,$79
+
 fECAB   .BYTE $79,$79,$79,$79,$79,$79,$79,$93
         .BYTE $94,$79,$79,$97,$79,$79,$79,$7F
         .BYTE $80,$79,$79,$8F,$90,$79,$79,$97
@@ -2022,6 +2066,8 @@ _L11    LDA ZP_SPEED_LO
 _L12    LDA ZP_ROAD_STATE
         CMP #$07     ;#%00000111
         BNE _L14
+
+        ; Road state 07: Initial state
         LDY $D00F    ;Sprite 7 Y Pos
         INY
         STY $D00D    ;Sprite 6 Y Pos
@@ -2048,9 +2094,12 @@ _L12    LDA ZP_ROAD_STATE
         ADC #$F8     ;#%11111000
         STA SPR_FRAME_PTR_05
 _L13    STY a45
+
 _L14    LDA ZP_ROAD_STATE
         CMP #$04     ;#%00000100
         BNE _L18
+
+        ; Road State 04: Green (?)
         LDA ZP_TMP_REG_01
         CMP #$A0     ;#%10100000
         BCC _L18
@@ -2096,6 +2145,8 @@ _L16    LDA $D015    ;Sprite display Enable
         LDA #$00     ;#%00000000
         STA a65
 _L17    STY a47
+
+        ; Remaining of Road States
 _L18    LDA a11
         BEQ _L20
 
