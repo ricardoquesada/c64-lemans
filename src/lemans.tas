@@ -14,8 +14,8 @@ fAB = $AB
 ;
 ZP_IRQ_LO = $02
 ZP_IRQ_HI = $03
-a04 = $04
-a05 = $05
+ZP_TMP_PTR_LO = $04
+ZP_TMP_PTR_HI = $05
 ZP_SCREEN_PTR_LO = $06
 ZP_SCREEN_PTR_HI = $07
 a08 = $08
@@ -45,8 +45,8 @@ a1F = $1F
 a20 = $20
 ZP_DIGIT_TO_PRINT = $21         ;Digit to print. Values from 0 to 9
 ZP_BCD_TO_PRINT = $22           ;Encoded in BCD
-a23 = $23
-a24 = $24
+ZP_TMP_REG_00 = $23
+ZP_TMP_REG_01 = $24
 a25 = $25
 a26 = $26
 ZP_SPEED_LO = $27
@@ -132,7 +132,6 @@ aC3 = $C3
 ;
 ; **** ZP POINTERS ****
 ;
-p04 = $04
 
 ;
 ; **** FIELDS ****
@@ -179,8 +178,8 @@ fDBE0 = $DBE0
 ;
 ; **** ABSOLUTE ADRESSES ****
 ;
-a05DE = $05DE
-a05DF = $05DF
+ZP_TMP_PTR_HIDE = $05DE
+ZP_TMP_PTR_HIDF = $05DF
 a0606 = $0606
 a0607 = $0607
 SPR_FRAME_PTR_00 = $07F8
@@ -344,8 +343,8 @@ _L00    LDA VIC_VALUES,X
         STA ZP_SCORE_03
         STA a1B
         STA a1C
-        STA a23
-        STA a24
+        STA ZP_TMP_REG_00
+        STA ZP_TMP_REG_01
         STA ZP_SPEED_LO
         STA ZP_SPEED_HI
         STA a08
@@ -382,41 +381,43 @@ jE0BD   SEI
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 IRQ_HANDLER_WAIT_BUTTON
         ; Read button from Paddle
-        LDA #$FF     ;#%11111111
-        STA $DC00    ;CIA1: Data Port Register A
-        LDA $DC01    ;CIA1: Data Port Register B
-        AND #$04     ;#%00000100
+        LDA #$FF                ;#%11111111
+        STA $DC00               ;CIA1: Data Port Register A
+        LDA $DC01               ;CIA1: Data Port Register B
+        AND #$04
         BEQ _L00
 
         ; Read button from Joystick
-        LDA #$FE     ;#%11111110
-        STA $DC00    ;CIA1: Data Port Register A
-        LDA $DC01    ;CIA1: Data Port Register B
-        AND #$10     ;#%00010000
+        LDA #$FE                ;#%11111110
+        STA $DC00               ;CIA1: Data Port Register A
+        LDA $DC01               ;CIA1: Data Port Register B
+        AND #$10                ;#%00010000
         BNE _L01
 
 _L00    LDA #<IRQ_HANDLER_MAIN  ;#%00001000
         STA ZP_IRQ_LO
         LDA #>IRQ_HANDLER_MAIN  ;#%11100000
         STA ZP_IRQ_HI
-        LDA $DC0D    ;CIA1: CIA Interrupt Control Register
+        LDA $DC0D               ;CIA1: CIA Interrupt Control Register
         JMP INIT_GAME
 
 _L01    JMP IRQ_HANDLER_MAIN
 
 INIT_GAME
         SEI
-        LDX #$FA     ;#%11111010
+        LDX #$FA                ;Stack
         TXS
+
         CLD
         CLI
-        LDX #$00     ;#%00000000
+
+        LDX #$00
         STX ZP_SCORE_01
         STX ZP_SCORE_02
         STX ZP_SCORE_03
         STX a1B
         STX a1C
-        STX a24
+        STX ZP_TMP_REG_01
         STX a26
         STX ZP_SPEED_LO
         STX ZP_SPEED_HI
@@ -455,73 +456,80 @@ INIT_GAME
         STX a31
         STX a32
         STX a33
-        STX $D017    ;Sprites Expand 2x Vertical (Y)
-        STX $D01B    ;Sprite to Background Display Priority
-        STX $D01D    ;Sprites Expand 2x Horizontal (X)
-        STX $D026    ;Sprite Multi-Color Register 1
+        STX $D017               ;Sprites Expand 2x Vertical (Y)
+        STX $D01B               ;Sprite to Background Display Priority
+        STX $D01D               ;Sprites Expand 2x Horizontal (X)
+        STX $D026               ;Sprite Multi-Color Register 1
         STX a1E
+
         INX
+
         STX a2B
         STX a4E
         STX a4F
-        LDA #$04     ;#%00000100
+
+        LDA #$04
         STA a5A
-        LDA #$06     ;#%00000110
+        LDA #$06
         STA a41
-        LDA #$07     ;#%00000111
+        LDA #$07
         STA a1A
-        LDA #$0F     ;#%00001111
-        STA $D025    ;Sprite Multi-Color Register 0
-        LDA #$3C     ;#%00111100
+        LDA #$0F
+        STA $D025               ;Sprite Multi-Color Register 0
+        LDA #$3C                ;#%00111100
         STA a18
-        LDA #$60     ;#%01100000
+        LDA #$60                ;#%01100000
         STA ZP_TIME
-        LDA #$64     ;#%01100100
+        LDA #$64                ;#%01100100
         STA a1F
-        LDA #$70     ;#%01110000
+        LDA #$70                ;#%01110000
         STA a2A
-        LDA #$8F     ;#%10001111
-        STA $D015    ;Sprite display Enable
-        LDA #$FF     ;#%11111111
-        STA $D01C    ;Sprites Multi-Color Mode Select
+        LDA #$8F                ;#%10001111
+        STA $D015               ;Sprite display Enable
+        LDA #$FF                ;#%11111111
+        STA $D01C               ;Sprites Multi-Color Mode Select
         STA a50
         STA a51
-        LDA #$00     ;#%00000000
-        LDY #$18     ;#%00011000
-_L00    STA $D400,Y  ;Voice 1: Frequency Control - Low-Byte
+
+        ; Init SID
+        LDA #$00                ;#%00000000
+        LDY #$18                ;#%00011000
+_L00    STA $D400,Y             ;Voice 1: Frequency Control - Low-Byte
         DEY
         BPL _L00
-        LDA #$02     ;#%00000010
-        STA $D403    ;Voice 1: Pulse Waveform Width - High-Nybble
-        STA $D40A    ;Voice 2: Pulse Waveform Width - High-Nybble
-        LDA #$08     ;#%00001000
-        STA $D40C    ;Voice 2: Attack / Decay Cycle Control
-        LDA #$F9     ;#%11111001
-        STA $D40D    ;Voice 2: Sustain / Release Cycle Control
-        LDA #$2F     ;#%00101111
-        STA $D418    ;Select Filter Mode and Volume
-        LDA #$BE     ;#%10111110
-        STA $D416    ;Filter Cutoff Frequency: High-Byte
-        LDA #$F0     ;#%11110000
-        STA $D414    ;Voice 3: Sustain / Release Cycle Control
-        LDA #$FB     ;#%11111011
-        STA $D406    ;Voice 1: Sustain / Release Cycle Control
+
+        LDA #$02
+        STA $D403               ;Voice 1: Pulse Waveform Width - High-Nybble
+        STA $D40A               ;Voice 2: Pulse Waveform Width - High-Nybble
+        LDA #$08
+        STA $D40C               ;Voice 2: Attack / Decay Cycle Control
+        LDA #$F9
+        STA $D40D               ;Voice 2: Sustain / Release Cycle Control
+        LDA #$2F
+        STA $D418               ;Select Filter Mode and Volume
+        LDA #$BE
+        STA $D416               ;Filter Cutoff Frequency: High-Byte
+        LDA #$F0
+        STA $D414               ;Voice 3: Sustain / Release Cycle Control
+        LDA #$FB
+        STA $D406               ;Voice 1: Sustain / Release Cycle Control
+
         JSR PRINT_SCORE_AND_TIME
         JSR PRINT_SPEED
-        LDA #$0E     ;#%00001110
-        STA $D027    ;Sprite 0 Color
-        LDA #$F4     ;Car pos 1
+        LDA #$0E
+        STA $D027               ;Sprite 0 Color
+        LDA #$F4                ;Car pos 1
         STA SPR_FRAME_PTR_00
-        LDA #$89     ;#%10001001
-        STA $D000    ;Sprite 0 X Pos
+        LDA #$89
+        STA $D000               ;Sprite 0 X Pos
 
-        LDX #$0F     ;#%00001111
-_L01    STX a23
+        LDX #$0F
+_L01    STX ZP_TMP_REG_00
         JSR sE889
         JSR SCROLL_DOWN
-        LDY #$01     ;#%00000001
+        LDY #$01
         JSR sE45B
-        LDX a23
+        LDX ZP_TMP_REG_00
         DEX
         BPL _L01
 
@@ -530,7 +538,7 @@ _L01    STX a23
         LDA #$41     ;#%01000001
         STA $D404    ;Voice 1: Control Register
         LDX #$FA     ;#%11111010
-jE205   STX a23
+jE205   STX ZP_TMP_REG_00
         CPX #$CA     ;#%11001010
         BEQ bE259
         CPX #$C9     ;#%11001001
@@ -583,7 +591,7 @@ bE25B   LDA fEC8B,Y
         BMI bE26E
 bE26B   JSR sE889
 bE26E   JSR SCROLL_DOWN
-        LDX a23
+        LDX ZP_TMP_REG_00
         TXA
         CLC
         ADC #$08     ;#%00001000
@@ -623,7 +631,7 @@ bE287   LDA #$00     ;#%00000000
         STA $D004    ;Sprite 2 X Pos
         STA $D006    ;Sprite 3 X Pos
         LDX #$03     ;#%00000011
-bE2D0   STX a23
+bE2D0   STX ZP_TMP_REG_00
         LDY #$02     ;#%00000010
         JSR sE44D
         LDA fE344,X
@@ -636,29 +644,32 @@ bE2E6   STA fDA34,Y
         STA fDA5C,Y
         DEY
         BPL bE2E6
-        LDA fE338,X
-        STA a04
-        LDA fE33C,X
-        STA a05
+
+        LDA COLOR_RAM_POS_LO,X
+        STA ZP_TMP_PTR_LO
+        LDA COLOR_RAM_POS_HI,X
+        STA ZP_TMP_PTR_HI
         LDA fE340,X
         LDX #$03     ;#%00000011
 bE2FE   LDY fF43A,X
-        STA (p04),Y
+        STA (ZP_TMP_PTR_LO),Y
         DEX
         BPL bE2FE
         LDY #$0A     ;#%00001010
         JSR sE45B
-        LDX a23
+        LDX ZP_TMP_REG_00
         LDA fE348,X
         STA $D40B    ;Voice 2: Control Register
         DEX
         BPL bE2D0
+
         LDA #$00     ;#%00000000
-        STA a23
+        STA ZP_TMP_REG_00
         LDA #$3C     ;#%00111100
         STA a52
         LDA #$08     ;#%00001000
         STA a1A
+
         LDA #$90     ;#%10010000
         STA $D40C    ;Voice 2: Attack / Decay Cycle Control
         SEI
@@ -671,11 +682,13 @@ bE2FE   LDY fF43A,X
         STA a11
         JMP jEB34
 
-fE338   .BYTE <(COLOR_RAM+40*14+10)
+COLOR_RAM_POS_LO
+        .BYTE <(COLOR_RAM+40*14+10)
         .BYTE <(COLOR_RAM+40*14+8)
         .BYTE <(COLOR_RAM+40*14+6)
         .BYTE <(COLOR_RAM+40*14+4)
-fE33C   .BYTE >(COLOR_RAM+40*14+10)
+COLOR_RAM_POS_HI
+        .BYTE >(COLOR_RAM+40*14+10)
         .BYTE >(COLOR_RAM+40*14+8)
         .BYTE >(COLOR_RAM+40*14+6)
         .BYTE >(COLOR_RAM+40*14+4)
@@ -686,9 +699,9 @@ fE348   .BYTE $10,$00,$00,$00
 jE34C   LDA #$07     ;#%00000111
         STA a1A
         LDX #$00     ;#%00000000
-bE352   STX a23
+bE352   STX ZP_TMP_REG_00
         JSR sE889
-        LDX a23
+        LDX ZP_TMP_REG_00
         LDY fE43D,X
         LDX #$00     ;#%00000000
 bE35E   LDA fE3AD,Y
@@ -702,17 +715,17 @@ bE35E   LDA fE3AD,Y
         JSR SCROLL_DOWN
         LDY #$02     ;#%00000010
         JSR sE45B
-        LDX a23
+        LDX ZP_TMP_REG_00
         INX
         CPX #$10     ;#%00010000
         BCC bE352
         LDX #$03     ;#%00000011
-bE380   STX a23
+bE380   STX ZP_TMP_REG_00
         JSR sE889
         JSR SCROLL_DOWN
         LDY #$02     ;#%00000010
         JSR sE45B
-        LDX a23
+        LDX ZP_TMP_REG_00
         DEX
         BPL bE380
 jE392   LDY #$14     ;#%00010100
@@ -800,26 +813,26 @@ _L00    STA COLOR_RAM,Y
         BNE _L00
 
         LDA #<(SCREEN_RAM + 32)
-        STA a04
+        STA ZP_TMP_PTR_LO
         LDA #>(SCREEN_RAM + 32)
-        STA a05
+        STA ZP_TMP_PTR_HI
 
         ; Fill the right part of the screen with spaces
         LDX #24                 ;In total 24 rows
 
 _L01    LDY #$07                ;7 colums: from 32 to 39
         LDA #$20                ;Space character
-_L02    STA (p04),Y
+_L02    STA (ZP_TMP_PTR_LO),Y
         DEY
         BPL _L02
 
-        LDA a04
+        LDA ZP_TMP_PTR_LO
         CLC
         ADC #$28     ;#%00101000
-        STA a04
-        LDA a05
+        STA ZP_TMP_PTR_LO
+        LDA ZP_TMP_PTR_HI
         ADC #$00     ;#%00000000
-        STA a05
+        STA ZP_TMP_PTR_HI
         DEX
         BPL _L01
 
@@ -865,9 +878,9 @@ _L03    LDA fE5D4,Y
         BPL _L03
 
         LDY #$71     ;#%01110001
-        STY a05DE
+        STY ZP_TMP_PTR_HIDE
         INY
-        STY a05DF
+        STY ZP_TMP_PTR_HIDF
         INY
         STY a0606
         INY
@@ -875,9 +888,9 @@ _L03    LDA fE5D4,Y
         JSR PRINT_SCORE_AND_TIME
         JSR PRINT_SPEED
         LDA #<SCREEN_RAM
-        STA a04
+        STA ZP_TMP_PTR_LO
         LDA #>SCREEN_RAM
-        STA a05
+        STA ZP_TMP_PTR_HI
         LDX #$18     ;#%00011000
 _L04    LDY #$03     ;#%00000011
 _L05    CPY #$00     ;#%00000000
@@ -888,22 +901,22 @@ _L05    CPY #$00     ;#%00000000
         LDA #$57     ;#%01010111
         BNE _L07
 _L06    LDA fEAE0,Y
-_L07    STA (p04),Y
+_L07    STA (ZP_TMP_PTR_LO),Y
         DEY
         BPL _L05
-        LDA a04
+        LDA ZP_TMP_PTR_LO
         CLC
         ADC #$28     ;#%00101000
-        STA a04
-        LDA a05
+        STA ZP_TMP_PTR_LO
+        LDA ZP_TMP_PTR_HI
         ADC #$00     ;#%00000000
-        STA a05
+        STA ZP_TMP_PTR_HI
         DEX
         BPL _L04
         LDA #<p0419  ;#%00011001
-        STA a04
+        STA ZP_TMP_PTR_LO
         LDA #>p0419  ;#%00000100
-        STA a05
+        STA ZP_TMP_PTR_HI
         LDX #$18     ;#%00011000
 _L08    LDY #$03     ;#%00000011
 _L09    CPY #$02     ;#%00000010
@@ -914,35 +927,35 @@ _L09    CPY #$02     ;#%00000010
         LDA #$46     ;#%01000110
         BNE _L11
 _L10    LDA fEAC0,Y
-_L11    STA (p04),Y
+_L11    STA (ZP_TMP_PTR_LO),Y
         DEY
         BPL _L09
-        LDA a04
+        LDA ZP_TMP_PTR_LO
         CLC
         ADC #$28     ;#%00101000
-        STA a04
-        LDA a05
+        STA ZP_TMP_PTR_LO
+        LDA ZP_TMP_PTR_HI
         ADC #$00     ;#%00000000
-        STA a05
+        STA ZP_TMP_PTR_HI
         DEX
         BPL _L08
         LDA #<pD807  ;#%00000111
-        STA a04
+        STA ZP_TMP_PTR_LO
         LDA #>pD807  ;#%11011000
-        STA a05
+        STA ZP_TMP_PTR_HI
         LDX #$18     ;#%00011000
 _L12    LDY #$13     ;#%00010011
         LDA #$0E     ;#%00001110
-_L13    STA (p04),Y
+_L13    STA (ZP_TMP_PTR_LO),Y
         DEY
         BPL _L13
-        LDA a04
+        LDA ZP_TMP_PTR_LO
         CLC
         ADC #$28     ;#%00101000
-        STA a04
-        LDA a05
+        STA ZP_TMP_PTR_LO
+        LDA ZP_TMP_PTR_HI
         ADC #$00     ;#%00000000
-        STA a05
+        STA ZP_TMP_PTR_HI
         DEX
         BPL _L12
         LDX #$18     ;#%00011000
@@ -1196,15 +1209,15 @@ sE889   LDA a25
         DEC a25
 
         ; Paint top row with "full" characters
-_L00    LDY #$1F     ;#%00011111
-        LDA #$44     ;"Full" character
+_L00    LDY #$1F                ;32 columns
+        LDA #$44                ;"Full" character
 _L01    STA SCREEN_RAM,Y
         DEY
         BPL _L01
 
         LDY a1A
         LDA fEA9E,Y
-        LDX #$1F     ;#%00011111
+        LDX #$1F                ;32 columns
 _L02    STA COLOR_RAM,X
         DEX
         BPL _L02
@@ -1392,9 +1405,9 @@ bE9F0   STA COLOR_RAM+1,Y
         LDA a1E
         LSR A
         LSR A
-        STA a04
+        STA ZP_TMP_PTR_LO
         LDA #$04     ;#%00000100
-        STA a05
+        STA ZP_TMP_PTR_HI
         LDA a1E
         AND #$03     ;#%00000011
         TAY
@@ -1405,7 +1418,7 @@ bEA0C   LDA a20
         LDA fEAD0,X
         BNE bEA18
 bEA15   LDA fEAE0,X
-bEA18   STA (p04),Y
+bEA18   STA (ZP_TMP_PTR_LO),Y
         INX
         INY
         CPY #$04     ;#%00000100
@@ -1413,9 +1426,9 @@ bEA18   STA (p04),Y
         LDA a1F
         LSR A
         LSR A
-        STA a04
+        STA ZP_TMP_PTR_LO
         LDA #$04     ;#%00000100
-        STA a05
+        STA ZP_TMP_PTR_HI
         LDA a1F
         AND #$03     ;#%00000011
         TAY
@@ -1426,7 +1439,7 @@ bEA34   LDA a20
         LDA fEAB0,X
         BNE bEA40
 bEA3D   LDA fEAC0,X
-bEA40   STA (p04),Y
+bEA40   STA (ZP_TMP_PTR_LO),Y
         INX
         INY
         CPY #$04     ;#%00000100
@@ -1498,30 +1511,30 @@ fEAF4   .BYTE $00,$00,$01,$01,$01,$02,$02,$02
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 jEB34   LDA ZP_SPEED_LO
-        BNE bEB44
+        BNE _L00
         LDA ZP_SPEED_HI
-        BNE bEB44
+        BNE _L00
 
         ; Speed is 0
         LDA #$F4     ;Sprite pointer: Stopped car
         STA SPR_FRAME_PTR_07
         JMP jEC0E
 
-bEB44   LDA a1A
+_L00    LDA a1A
         CMP #$08     ;#%00001000
         BEQ bEB66
-        INC a24
-        LDA a24
+        INC ZP_TMP_REG_01
+        LDA ZP_TMP_REG_01
         CMP #$FA     ;#%11111010
         BCC bEB66
         LDA #$00     ;#%00000000
-        STA a24
-        LDY a23
+        STA ZP_TMP_REG_01
+        LDY ZP_TMP_REG_00
         INY
         CPY #$28     ;#%00101000
         BCC bEB5F
         LDY #$20     ;#%00100000
-bEB5F   STY a23
+bEB5F   STY ZP_TMP_REG_00
         LDA fECCB,Y
         STA a1A
 bEB66   JSR sE889
@@ -1707,7 +1720,7 @@ jECF3   LDY #$02     ;#%00000010
         LDA #$07        ;#%00000111
         STA a1A
         LDY #$23        ;#%00100011
-bED34   STY a24
+bED34   STY ZP_TMP_REG_01
         LDA a12
         BEQ bED3D
         JSR sF462
@@ -1715,7 +1728,7 @@ bED3D   JSR sE889
         JSR SCROLL_DOWN
         JSR sEE10
         JSR sEDDF
-        LDY a24
+        LDY ZP_TMP_REG_01
         DEY
         BPL bED34
 bED4E   LDX #$03        ;#%00000011
@@ -1771,7 +1784,7 @@ bED96   LDA $D015    ;Sprite display Enable
         STA a52
         LDA #$08     ;#%00001000
         STA a1A
-        LDY a23
+        LDY ZP_TMP_REG_00
         LDA fECCB,Y
         BEQ bEDD6
         CMP #$03     ;#%00000011
@@ -1779,9 +1792,9 @@ bED96   LDA $D015    ;Sprite display Enable
         CMP #$04     ;#%00000100
         BEQ bEDD6
         BNE bEDD8
-bEDD6   DEC a23
+bEDD6   DEC ZP_TMP_REG_00
 bEDD8   LDA #$FA     ;#%11111010
-        STA a24
+        STA ZP_TMP_REG_01
         JMP jEB34
 
 sEDDF   LDA a3A
@@ -2016,7 +2029,7 @@ _L13    STY a45
 _L14    LDA a1A
         CMP #$04     ;#%00000100
         BNE _L18
-        LDA a24
+        LDA ZP_TMP_REG_01
         CMP #$A0     ;#%10100000
         BCC _L18
         CMP #$F0     ;#%11110000
@@ -2216,7 +2229,7 @@ _L32    LDY a49
 _L33    LDA a1A
         CMP #$04     ;#%00000100
         BNE _L34
-        LDA a24
+        LDA ZP_TMP_REG_01
         CMP #$C8     ;#%11001000
         BCC _L34
         LDA $D000,Y  ;Sprite 0 X Pos
@@ -2628,11 +2641,11 @@ _L01    INC a13
         LDA #$F0     ;#%11110000
         STA $D417    ;Filter Resonance Control / Voice Input Control
         LDY #$4B     ;#%01001011
-bF4B4   STY a24
+bF4B4   STY ZP_TMP_REG_01
         JSR sE889
         JSR SCROLL_DOWN
         JSR sEDDF
-        LDY a24
+        LDY ZP_TMP_REG_01
         DEY
         BNE bF4B4
         LDY #$1F     ;#%00011111
@@ -2652,11 +2665,11 @@ bF4DC   LDA fF569,Y
         JSR SCROLL_DOWN
         JSR sEDDF
         LDY #$0A     ;#%00001010
-bF4ED   STY a24
+bF4ED   STY ZP_TMP_REG_01
         JSR sE889
         JSR SCROLL_DOWN
         JSR sEDDF
-        LDY a24
+        LDY ZP_TMP_REG_01
         DEY
         BPL bF4ED
         SEI
@@ -2685,7 +2698,7 @@ bF523   STA f07B8,Y
         LDY #$05     ;#%00000101
         JSR sE44D
         LDX #$1A     ;#%00011010
-bF533   STX a23
+bF533   STX ZP_TMP_REG_00
         JSR sE889
         JSR SCROLL_DOWN
         LDA a1F
@@ -2698,7 +2711,7 @@ bF533   STX a23
 bF548   INC a1F
 bF54A   LDY #$01     ;#%00000001
         JSR sE45B
-        LDX a23
+        LDX ZP_TMP_REG_00
         DEX
         BPL bF533
 
