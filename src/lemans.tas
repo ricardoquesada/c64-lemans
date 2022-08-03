@@ -143,33 +143,21 @@ f0093 = $0093
 f00AB = $00AB
 f00AC = $00AC
 SCREEN_RAM = $0400
-f0448 = $0448
-f04C0 = $04C0
-f0538 = $0538
-f05B0 = $05B0
 f0601 = $0601
 f0650 = $0650
 f0678 = $0678
 f07B8 = $07B8
 f07E0 = $07E0
 COLOR_RAM = $D800
-fD848 = $D848
 fD870 = $D870
-fD8C0 = $D8C0
 fD8E8 = $D8E8
 fD938 = $D938
 fD960 = $D960
-fD9B0 = $D9B0
-fD9D8 = $D9D8
 fDA34 = $DA34
-fDA50 = $DA50
 fDA5C = $DA5C
-fDA78 = $DA78
 fDAA0 = $DAA0
 fDAC8 = $DAC8
-fDAD8 = $DAD8
 fDAF0 = $DAF0
-fDB00 = $DB00
 fDB18 = $DB18
 fDB40 = $DB40
 fDB68 = $DB68
@@ -727,16 +715,17 @@ fE348   .BYTE $10,$00,$00,$00
 PRINT_TITLE_SCREEN
         LDA #$07
         STA ZP_ROAD_STATE
+
         LDX #$00
 _L00    STX ZP_TMP_REG_00
         JSR DRAW_ROAD_TOP_ROW
-        LDX ZP_TMP_REG_00
 
-        LDY fE43D,X
+        LDX ZP_TMP_REG_00       ;Index of row to print
+        LDY TITLE_ROWS_TBL,X    ;Choose which row to print
         LDX #$00
-_L01    LDA TITLE_COPYRIGHT_MSG,Y
+_L01    LDA TITLE_MSG,Y
         STA SCREEN_RAM+8,X
-        LDA #$03
+        LDA #$03                ;Cyan color
         STA COLOR_RAM+8,X
         INY
         INX
@@ -752,7 +741,7 @@ _L01    LDA TITLE_COPYRIGHT_MSG,Y
         CPX #16                 ;16 rows in total (?)
         BCC _L00
 
-        ; Draw 4 rows of street
+        ; After print the Title Message Draw 4 rows of street
         LDX #$03
 _L02    STX ZP_TMP_REG_00
         JSR DRAW_ROAD_TOP_ROW
@@ -770,35 +759,33 @@ _L03    LDY #$14
         JSR DELAY_01
 
         ; Blink 'Press F1...'
-        LDA aDAB0
-        EOR #$03
+        LDA COLOR_RAM + 40 * 17 + 8
+        EOR #$03                ;Switch between black and cyan
         LDY #$0F                ;16 columns to blink
-_L04    STA aDAB0,Y             ;3 rows
-        STA fDAD8,Y
-        STA fDB00,Y
+_L04    STA COLOR_RAM+40*17+8,Y ;3 rows
+        STA COLOR_RAM+40*18+8,Y
+        STA COLOR_RAM+40*19+8,Y
         DEY
         BPL _L04
         JMP _L03
 
         ; (C) 1982 by Commodore electronics...
-TITLE_COPYRIGHT_MSG
+TITLE_MSG
         .ENC "screen"
-        .BYTE $1B,$03,$1C               ; (C)
-        .BYTE $20,$22,$2A,$29,$23       ; 1982
+        .BYTE $1B,$03,$1C,$20,$22,$2A,$29,$23   ; (C) 1982
         .TEXT         " BY     "
         .TEXT "   COMMODORE    "
-        .TEXT "ELECTRONICS LTD"
-        .BYTE $1E
+        .TEXT "ELECTRONICS LTD",$1E             ; .
         .TEXT "      AND       "
         .TEXT " HAL LABORATORY "
-        .TEXT "  PUSH "
-        .BYTE $1D,$06,$22,$1D
-        .TEXT            " OR  "
+        .TEXT "  PUSH ",$1D,$06,$22,$1D," OR  " ; 'F1'
         .TEXT "BUTTON ON PADDLE"
         .TEXT "    TO START    "
         .TEXT "                "
 
-fE43D   .BYTE $80,$70,$60,$50,$80,$80,$80,$40
+        ;
+TITLE_ROWS_TBL
+        .BYTE $80,$70,$60,$50,$80,$80,$80,$40
         .BYTE $80,$30,$80,$20,$10,$80,$00,$80
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -887,27 +874,27 @@ _L02    STA (ZP_TMP_PTR_LO),Y
         BPL _L01
 
         LDY #$07                ;7 colums
-_L03    LDA fE5D4,Y
-        STA f0448,Y
-        LDA fE5DC,Y
-        STA f04C0,Y
-        LDA fE5E4,Y
-        STA f0538,Y
-        LDA fE5EC,Y
-        STA f05B0,Y
+_L03    LDA SCORE_MSG,Y
+        STA SCREEN_RAM+40*1+32,Y
+        LDA TIME_MSG,Y
+        STA SCREEN_RAM+40*4+32,Y
+        LDA HISCORE_MSG,Y
+        STA SCREEN_RAM+40*7+32,Y
+        LDA SPEED_MSG,Y
+        STA SCREEN_RAM+40*10+32,Y
 
-        LDA #$01     ;#%00000001
-        STA fD848,Y
-        STA fD9B0,Y
-        STA fDA50,Y
-        STA fDA78,Y
+        LDA #$01                        ;White
+        STA COLOR_RAM+40*1+32,Y         ;Color for Score
+        STA COLOR_RAM+40*10+32,Y        ;Color for Speed
+        STA COLOR_RAM+40*14+32,Y        ;Color for XXX?
+        STA COLOR_RAM+40*15+32,Y        ;Color for XXX?
 
-        LDA #$03     ;#%00000011
-        STA fD8C0,Y
-        STA fD9D8,Y
-        STA COLOR_RAM+$0200,Y
+        LDA #$03                ;Cyan
+        STA COLOR_RAM+40*4+32,Y         ;Color for Time
+        STA COLOR_RAM+40*11+32,Y        ;Color for Speed value row0
+        STA COLOR_RAM+40*12+32,Y        ;Color for Speed value row1
 
-        LDA #$04     ;#%00000100
+        LDA #$04                ;Purple
         STA fDAA0,Y
         STA fDAC8,Y
         STA fDAF0,Y
@@ -915,10 +902,10 @@ _L03    LDA fE5D4,Y
         STA fDB40,Y
         STA fDB68,Y
 
-        LDA #$05     ;#%00000101
+        LDA #$05                ;Green
         STA fD938,Y
 
-        LDA #$07     ;#%00000111
+        LDA #$07                ;Yellow
         STA fD870,Y
         STA fD8E8,Y
         STA fD960,Y
@@ -1020,10 +1007,15 @@ _L14    LDA #$1A     ;#%00011010
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-fE5D4   .BYTE $20,$13,$03,$0F,$12,$05,$20,$20
-fE5DC   .BYTE $20,$20,$14,$09,$0D,$05,$20,$20
-fE5E4   .BYTE $08,$09,$1F,$13,$03,$0F,$12,$05
-fE5EC   .BYTE $20,$13,$10,$05,$05,$04,$20,$20
+        .ENC "screen"
+SCORE_MSG
+        .TEXT " SCORE  "
+TIME_MSG
+        .TEXT "  TIME  "
+HISCORE_MSG
+        .TEXT "HI",$1F,"SCORE"
+SPEED_MSG
+        .TEXT " SPEED  "
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 SCROLL_DOWN
