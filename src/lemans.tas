@@ -722,7 +722,8 @@ fE344   .BYTE $59,$2C,$2C,$2C
 fE348   .BYTE $10,$00,$00,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; Part of init code
+; Initial screen, including the scrolling + animation
+; Does not return (?)
 PRINT_TITLE_SCREEN
         LDA #$07
         STA ZP_ROAD_STATE
@@ -781,24 +782,21 @@ _L04    STA aDAB0,Y             ;3 rows
 
         ; (C) 1982 by Commodore electronics...
 TITLE_COPYRIGHT_MSG
-        .BYTE $1B,$03,$1C,$20,$22,$2A,$29,$23
-        .BYTE $20,$02,$19,$20,$20,$20,$20,$20
-        .BYTE $20,$20,$20,$03,$0F,$0D,$0D,$0F
-        .BYTE $04,$0F,$12,$05,$20,$20,$20,$20
-        .BYTE $05,$0C,$05,$03,$14,$12,$0F,$0E
-        .BYTE $09,$03,$13,$20,$0C,$14,$04,$1E
-        .BYTE $20,$20,$20,$20,$20,$20,$01,$0E
-        .BYTE $04,$20,$20,$20,$20,$20,$20,$20
-        .BYTE $20,$08,$01,$0C,$20,$0C,$01,$02
-        .BYTE $0F,$12,$01,$14,$0F,$12,$19,$20
-        .BYTE $20,$20,$10,$15,$13,$08,$20,$1D
-        .BYTE $06,$22,$1D,$20,$0F,$12,$20,$20
-        .BYTE $02,$15,$14,$14,$0F,$0E,$20,$0F
-        .BYTE $0E,$20,$10,$01,$04,$04,$0C,$05
-        .BYTE $20,$20,$20,$20,$14,$0F,$20,$13
-        .BYTE $14,$01,$12,$14,$20,$20,$20,$20
-        .BYTE $20,$20,$20,$20,$20,$20,$20,$20
-        .BYTE $20,$20,$20,$20,$20,$20,$20,$20
+        .ENC "screen"
+        .BYTE $1B,$03,$1C               ; (C)
+        .BYTE $20,$22,$2A,$29,$23       ; 1982
+        .TEXT         " BY     "
+        .TEXT "   COMMODORE    "
+        .TEXT "ELECTRONICS LTD"
+        .BYTE $1E
+        .TEXT "      AND       "
+        .TEXT " HAL LABORATORY "
+        .TEXT "  PUSH "
+        .BYTE $1D,$06,$22,$1D
+        .TEXT            " OR  "
+        .TEXT "BUTTON ON PADDLE"
+        .TEXT "    TO START    "
+        .TEXT "                "
 
 fE43D   .BYTE $80,$70,$60,$50,$80,$80,$80,$40
         .BYTE $80,$30,$80,$20,$10,$80,$00,$80
