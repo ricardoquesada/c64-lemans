@@ -96,7 +96,7 @@ a54 = $54
 a55 = $55
 a56 = $56
 a57 = $57
-a58 = $58
+ZP_COLLISION_DETECTED = $58
 a59 = $59
 a5A = $5A
 a5B = $5B
@@ -410,7 +410,7 @@ INIT_GAME
         STX ZP_TICK_COUNTER
         STX a53
         STX a54
-        STX a58
+        STX ZP_COLLISION_DETECTED
         STX a59
         STX a64
         STX a65
@@ -1789,7 +1789,7 @@ bEC7A   LDA ZP_IS_GAME_OVER
         BEQ bEC81
         JSR GAME_OVER
 
-bEC81   LDA a58
+bEC81   LDA ZP_COLLISION_DETECTED
         BEQ bEC88
         JMP jECF3
 
@@ -1815,7 +1815,7 @@ ROAD_STATE_TBL
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ;Collision detected, do the collision animation (?)
-jECF3   LDY #$02     ;#%00000010
+jECF3   LDY #$02
         STY a42
         DEY
         STY a59
@@ -1823,47 +1823,59 @@ jECF3   LDY #$02     ;#%00000010
         DEY
         STY a64
         STY a65
-        STY $D017       ;Sprites Expand 2x Vertical (Y)
-        STY $D01D       ;Sprites Expand 2x Horizontal (X)
+        STY $D017       		;Sprites Expand 2x Vertical (Y)
+        STY $D01D       		;Sprites Expand 2x Horizontal (X)
         STY a25
-        LDA $D015       ;Sprite display Enable
-        AND #$EF        ;#%11101111
-        ORA #$60        ;#%01100000
-        STA $D015       ;Sprite display Enable
-        LDA $D01C       ;Sprites Multi-Color Mode Select
-        AND #$9F        ;#%10011111
-        STA $D01C       ;Sprites Multi-Color Mode Select
-        LDA #$0F        ;#%00001111
-        STA $D02D       ;Sprite 6 Color
-        LDA #$0C        ;#%00001100
-        STA $D02C       ;Sprite 5 Color
-        LDY #$F8        ;Flames1 sprite
+
+	; Turn off headlights sprites
+	; And turn on "Flames" sprites
+        LDA $D015       		;Sprite display Enable
+        AND #$EF        		;#%11101111
+        ORA #$60        		;#%01100000
+        STA $D015       		;Sprite display Enable
+
+	; No Multicolor for "Flames" sprites
+        LDA $D01C       		;Sprites Multi-Color Mode Select
+        AND #$9F        		;#%10011111
+        STA $D01C       		;Sprites Multi-Color Mode Select
+
+	; Set color for "Flames" sprites
+        LDA #$0F
+        STA $D02D       		;Sprite 6 Color
+        LDA #$0C
+        STA $D02C       		;Sprite 5 Color
+
+	; Set correct sprite frames for "Flames" sprites
+        LDY #$F8        		;Flames1 sprite
         STY SPR_FRAME_PTR_06
-        INY             ;Flames 2 sprite
+        INY             		;Flames 2 sprite
         STY SPR_FRAME_PTR_05
-        LDA #$07        ;#%00000111
+
+        LDA #$07 			; Set Road State to "normal"
         STA ZP_ROAD_STATE
-        LDY #$23        ;#%00100011
-bED34   STY ZP_TMP_REG_01
+
+        LDY #35 			;Draw 35 rows
+_L00 	STY ZP_TMP_REG_01
 
         LDA ZP_IS_GAME_OVER
-        BEQ bED3D
+        BEQ _L01
         JSR GAME_OVER
 
-bED3D   JSR DRAW_ROAD_TOP_ROW
+_L01 	JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
         JSR sEE10
         JSR sEDDF
         LDY ZP_TMP_REG_01
         DEY
-        BPL bED34
-bED4E   LDX #$03        ;#%00000011
+        BPL _L00
+
+_L02 	LDX #$03        ;#%00000011
         LDY $D00E       ;Sprite 7 X Pos
-bED53   CPY #$32        ;#%00110010
-        BCC bED74
+_L03 	CPY #$32        ;#%00110010
+        BCC _L04
         DEY
         DEX
-        BPL bED53
+        BPL _L03
         STY $D00E    ;Sprite 7 X Pos
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
@@ -1871,27 +1883,27 @@ bED53   CPY #$32        ;#%00110010
         JSR sEDDF
 
         LDA ZP_IS_GAME_OVER
-        BEQ bED4E
+        BEQ _L02
         JSR GAME_OVER
-        JMP bED4E
+        JMP _L02
 
-bED74   LDA #$03     ;#%00000011
+_L04 	LDA #$03     ;#%00000011
         STA a42
-bED78   LDA ZP_SPEED_LO
-        BNE bED80
+_L05 	LDA ZP_SPEED_LO
+        BNE _L06
         LDA ZP_SPEED_HI
-        BEQ bED96
-bED80   JSR DRAW_ROAD_TOP_ROW
+        BEQ _L07
+_L06 	JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
         JSR sEE10
         JSR sEDDF
 
         LDA ZP_IS_GAME_OVER
-        BEQ bED78
+        BEQ _L05
         JSR GAME_OVER
-        JMP bED78
+        JMP _L05
 
-bED96   LDA $D015    ;Sprite display Enable
+_L07 	LDA $D015    ;Sprite display Enable
         AND #$8F     ;#%10001111
         STA $D015    ;Sprite display Enable
         LDA #$2F     ;#%00101111
@@ -1905,7 +1917,7 @@ bED96   LDA $D015    ;Sprite display Enable
         STA a44
         STA a42
         STA a59
-        STA a58
+        STA ZP_COLLISION_DETECTED
         STA a6F
         STA a77
         LDA #$3C     ;#%00111100
@@ -1914,17 +1926,18 @@ bED96   LDA $D015    ;Sprite display Enable
         STA ZP_ROAD_STATE
         LDY ZP_TMP_REG_00
         LDA ROAD_STATE_TBL,Y
-        BEQ bEDD6
+        BEQ _L08
         CMP #$03     ;#%00000011
-        BEQ bEDD6
+        BEQ _L08
         CMP #$04     ;#%00000100
-        BEQ bEDD6
-        BNE bEDD8
-bEDD6   DEC ZP_TMP_REG_00
-bEDD8   LDA #$FA     ;#%11111010
+        BEQ _L08
+        BNE _L09
+_L08 	DEC ZP_TMP_REG_00
+_L09 	LDA #$FA     ;#%11111010
         STA ZP_TMP_REG_01
         JMP jEB34
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sEDDF   LDA a3A
         STA a3D
         LDA a3B
@@ -2203,11 +2216,13 @@ _L15    LDY a47
         LDA #$01     ;#%00000001
         STA a65
         BNE _L17
+
 _L16    LDA $D015    ;Sprite display Enable
         AND #$BF     ;#%10111111
         STA $D015    ;Sprite display Enable
         LDA #$00     ;#%00000000
         STA a65
+
 _L17    STY a47
 
         ; Remaining of Road States
@@ -2600,58 +2615,67 @@ _L00    TYA
         ASL A 				;Y *= 2
         TAX 				;X = Y
 
+	; Convention used for comments:
+	; H = hero car (our car)
+	; E = enemy car (the ones to pass/avoid)
+
+	; Collision between Hero and Enemies cars?
         LDA $D000,X  			;Sprite 0 X Pos
         SEC
-        SBC #$05
+        SBC #$05 			;if ((E.X-5) > H.X) then No collision
         CMP $D00E    			;Sprite 7 X Pos
         BCS _L01
 
         LDA $D001,X  			;Sprite 0 Y Pos
         SEC
-        SBC #$04
+        SBC #$04 			;if ((E.Y-4) > H.Y) then No collision
         CMP $D00F    			;Sprite 7 Y Pos
         BCS _L01
 
         LDA $D000,X  			;Sprite 0 X Pos
         CLC
-        ADC #$0F
+        ADC #15 			;if ((E.X+15) < H.X) then No collision
         CMP $D00E    			;Sprite 7 X Pos
         BCC _L01
 
         LDA $D001,X  			;Sprite 0 Y Pos
         CLC
-        ADC #$12
+        ADC #18 			;if ((E.Y+18) < H.X) then No collision
         CMP $D00F    			;Sprite 7 Y Pos
         BCC _L01
 
         LDA #$01
-        STA a58
+        STA ZP_COLLISION_DETECTED
 
+	; Why does it do the collision detection again?
 _L01    LDA $D00E    			;Sprite 7 X Pos
         SEC
-        SBC #$03
+        SBC #$03 			;if ((H.x-3) > E.X) then No collsion
         CMP $D000,X  			;Sprite 0 X Pos
         BCS _L02
+
         LDA $D00F    			;Sprite 7 Y Pos
         SEC
-        SBC #$02
+        SBC #$02 			;if ((H.y-2) > E.Y) then No collision
         CMP $D001,X  			;Sprite 0 Y Pos
         BCS _L02
+
         LDA $D00E    			;Sprite 7 X Pos
         CLC
-        ADC #$11
+        ADC #17 			;if ((H.x+17) < E.Y) then No collision
         CMP $D000,X  			;Sprite 0 X Pos
         BCC _L02
+
         LDA $D00F    			;Sprite 7 Y Pos
         CLC
-        ADC #$14
+        ADC #20 			;if ((H.y+20) < E.Y) then No collision
         CMP $D001,X  			;Sprite 0 Y Pos
         BCC _L02
 
         LDA #$01
-        STA a58
+        STA ZP_COLLISION_DETECTED
 
-_L02    DEY
+_L02    DEY 				;Compare it with sprites 0-3
         BPL _L00
 
         LDA a13
@@ -2664,10 +2688,10 @@ _L04    LDA PASSED_CARS_POS_LO,Y
         LDA PASSED_CARS_POS_HI,Y
         STA ZP_SCREEN_PTR_HI
         STY a49
-        LDX #$03     ;#%00000011
+        LDX #$03
 _L05    CPY a6F
         BCC _L06
-        LDA #$20     ;#%00100000
+        LDA #$20 			;Space
         BNE _L07
 _L06    LDA PASSED_CARS_CHAR_TBL,X
 _L07    LDY PASSED_CARS_OFFSET,X
@@ -2734,14 +2758,14 @@ _L13    LDA a55
         BEQ _L17
         DEC a55
         LDA a55
-        AND #$10     ;#%00010000
+        AND #$10
         BEQ _L15
 
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA a67
 
         ; Print "EXTENDED TIME" message
-        LDY #$07     ;#%00000111
+        LDY #$07
 _L14    LDA EXTENDED_MSG,Y
         STA SCREEN_RAM+40*14+32,Y
         LDA TIME2_MSG,Y
@@ -2844,7 +2868,7 @@ _L01    INC a13
         STA $D015               ;Sprite display Enable
 
         LDA #$00
-        STA a58
+        STA ZP_COLLISION_DETECTED
         STA a59
         STA a64
         STA a65
@@ -2993,9 +3017,9 @@ bF5D9   CMP #$02     ;#%00000010
 bF5EA   JMP jF667
 
 bF5ED   LDA a13
-        CMP #$02     ;#%00000010
+        CMP #$02
         BCC bF632
-        CMP #$03     ;#%00000011
+        CMP #$03
         BEQ bF616
         CMP #$04     ;#%00000100
         BEQ jF667
@@ -3049,6 +3073,7 @@ bF64E   ASL a2E
         STA $D401    ;Voice 1: Frequency Control - High-Byte
         LDA #$41     ;#%01000001
         STA $D404    ;Voice 1: Control Register
+
 jF667   LDA a67
         BNE bF6CD
         LDA a65
@@ -3098,6 +3123,7 @@ bF6B8   CMP #$02     ;#%00000010
         LDA #$F4     ;#%11110100
         STA $D417    ;Filter Resonance Control / Voice Input Control
         BNE jF704
+
 bF6CD   LDA #$50     ;#%01010000
         STA $D40F    ;Voice 3: Frequency Control - High-Byte
         LDA #$21     ;#%00100001
@@ -3122,7 +3148,7 @@ jF6F3   LDA #$6E     ;#%01101110
         ORA a77
         STA $D417    ;Filter Resonance Control / Voice Input Control
 jF704   LDA a13
-        CMP #$02     ;#%00000010
+        CMP #$02
         BCC bF70D
         JMP jF793
 
