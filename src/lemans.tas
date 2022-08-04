@@ -1814,7 +1814,7 @@ ROAD_STATE_TBL
         .BYTE $00,$02,$03,$05,$00,$01,$04,$06
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-;Collision (?)
+;Collision detected, do the collision animation (?)
 jECF3   LDY #$02     ;#%00000010
         STY a42
         DEY
@@ -2599,54 +2599,61 @@ jF2FB
 _L00    TYA
         ASL A 				;Y *= 2
         TAX 				;X = Y
-        LDA $D000,X  ;Sprite 0 X Pos
+
+        LDA $D000,X  			;Sprite 0 X Pos
         SEC
-        SBC #$05     ;#%00000101
-        CMP $D00E    ;Sprite 7 X Pos
+        SBC #$05
+        CMP $D00E    			;Sprite 7 X Pos
         BCS _L01
-        LDA $D001,X  ;Sprite 0 Y Pos
+
+        LDA $D001,X  			;Sprite 0 Y Pos
         SEC
-        SBC #$04     ;#%00000100
-        CMP $D00F    ;Sprite 7 Y Pos
+        SBC #$04
+        CMP $D00F    			;Sprite 7 Y Pos
         BCS _L01
-        LDA $D000,X  ;Sprite 0 X Pos
+
+        LDA $D000,X  			;Sprite 0 X Pos
         CLC
-        ADC #$0F     ;#%00001111
-        CMP $D00E    ;Sprite 7 X Pos
+        ADC #$0F
+        CMP $D00E    			;Sprite 7 X Pos
         BCC _L01
-        LDA $D001,X  ;Sprite 0 Y Pos
+
+        LDA $D001,X  			;Sprite 0 Y Pos
         CLC
-        ADC #$12     ;#%00010010
-        CMP $D00F    ;Sprite 7 Y Pos
+        ADC #$12
+        CMP $D00F    			;Sprite 7 Y Pos
         BCC _L01
-        LDA #$01     ;#%00000001
+
+        LDA #$01
         STA a58
 
-_L01    LDA $D00E    ;Sprite 7 X Pos
+_L01    LDA $D00E    			;Sprite 7 X Pos
         SEC
-        SBC #$03     ;#%00000011
-        CMP $D000,X  ;Sprite 0 X Pos
+        SBC #$03
+        CMP $D000,X  			;Sprite 0 X Pos
         BCS _L02
-        LDA $D00F    ;Sprite 7 Y Pos
+        LDA $D00F    			;Sprite 7 Y Pos
         SEC
-        SBC #$02     ;#%00000010
-        CMP $D001,X  ;Sprite 0 Y Pos
+        SBC #$02
+        CMP $D001,X  			;Sprite 0 Y Pos
         BCS _L02
-        LDA $D00E    ;Sprite 7 X Pos
+        LDA $D00E    			;Sprite 7 X Pos
         CLC
-        ADC #$11     ;#%00010001
-        CMP $D000,X  ;Sprite 0 X Pos
+        ADC #$11
+        CMP $D000,X  			;Sprite 0 X Pos
         BCC _L02
-        LDA $D00F    ;Sprite 7 Y Pos
+        LDA $D00F    			;Sprite 7 Y Pos
         CLC
-        ADC #$14     ;#%00010100
-        CMP $D001,X  ;Sprite 0 Y Pos
+        ADC #$14
+        CMP $D001,X  			;Sprite 0 Y Pos
         BCC _L02
-        LDA #$01     ;#%00000001
+
+        LDA #$01
         STA a58
 
 _L02    DEY
         BPL _L00
+
         LDA a13
         BEQ _L03
         JMP _L13
