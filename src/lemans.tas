@@ -40,8 +40,8 @@ ZP_ROAD_STATE = $1A
 a1B = $1B
 a1C = $1C
 a1D = $1D
-a1E = $1E
-a1F = $1F
+SHOULDER_LEFT_IDX = $1E
+SHOULDER_RIGHT_IDX = $1F
 a20 = $20
 ZP_DIGIT_TO_PRINT = $21         ;Digit to print. Values from 0 to 9
 ZP_BCD_TO_PRINT = $22           ;Encoded in BCD
@@ -342,9 +342,9 @@ _L01    STA $D000,Y             ;Sprite Pos
         DEY
         BPL _L01
 
-        STA a1E
+        STA SHOULDER_LEFT_IDX
         LDA #$64
-        STA a1F
+        STA SHOULDER_RIGHT_IDX
         LDA #$07
         STA ZP_ROAD_STATE
         JSR INIT_SCREEN
@@ -447,7 +447,7 @@ INIT_GAME
         STX $D01B               ;Sprite to Background Display Priority
         STX $D01D               ;Sprites Expand 2x Horizontal (X)
         STX $D026               ;Sprite Multi-Color Register 1
-        STX a1E
+        STX SHOULDER_LEFT_IDX
 
         INX
 
@@ -467,8 +467,8 @@ INIT_GAME
         STA ZP_TICKS_PER_SECOND
         LDA #$60                ;Initial time: 60 seconds (BCD)
         STA ZP_TIME
-        LDA #$64                ;#%01100100
-        STA a1F
+        LDA #$64
+        STA SHOULDER_RIGHT_IDX
         LDA #$70                ;#%01110000
         STA a2A
         LDA #$8F                ;#%10001111
@@ -1272,14 +1272,15 @@ _L02    STA COLOR_RAM,X
 
         ; Road State 00-04
 _STATES_00_04
-        LDA a1E
-        CMP #$10     ;#%00010000
+        LDA SHOULDER_LEFT_IDX
+        CMP #$10
         BCS _L04
-        INC a1E
-_L04    LDA a1F
-        CMP #$54     ;#%01010100
+        INC SHOULDER_LEFT_IDX
+
+_L04    LDA SHOULDER_RIGHT_IDX
+        CMP #$54
         BCS _L05
-        INC a1F
+        INC SHOULDER_RIGHT_IDX
         JMP DRAW_SHOULDERS
 
 _L05    INC a1B
@@ -1309,76 +1310,82 @@ _STATES_00_01
         BEQ _L09
         CMP #$01     ;#%00000001
         BNE _L10
-        LDA a1E
+
+        ;SHOULDER_LEFT_IDX--
+        LDA SHOULDER_LEFT_IDX
         SEC
-        SBC #$01     ;#%00000001
-        CMP #$10     ;#%00010000
+        SBC #$01
+        CMP #$10
         BCS _L07
-        LDA #$10     ;#%00010000
-_L07    STA a1E
-        LDA a1F
+        LDA #$10
+_L07    STA SHOULDER_LEFT_IDX
+
+        ;SHOULDER_RIGHT_IDX++
+        LDA SHOULDER_RIGHT_IDX
         CLC
-        ADC #$01     ;#%00000001
-        CMP #$64     ;#%01100100
+        ADC #$01
+        CMP #$64
         BCC _L08
-        LDA #$64     ;#%01100100
-_L08    STA a1F
+        LDA #$64
+_L08    STA SHOULDER_RIGHT_IDX
+
 _L09    JMP DRAW_SHOULDERS
 
-_L10    LDA a1E
+_L10    LDA SHOULDER_LEFT_IDX
         CLC
-        ADC #$01     ;#%00000001
-        CMP #$20     ;#%00100000
+        ADC #$01
+        CMP #$20
         BCC _L11
-        LDA #$20     ;#%00100000
-_L11    STA a1E
-        LDA a1F
+        LDA #$20
+_L11    STA SHOULDER_LEFT_IDX
+
+        LDA SHOULDER_RIGHT_IDX
         SEC
-        SBC #$01     ;#%00000001
-        CMP #$54     ;#%01010100
+        SBC #$01
+        CMP #$54
         BCS _L08
-        LDA #$54     ;#%01010100
+        LDA #$54
         BNE _L08
 
 _STATES_03_04
-        CMP #$03     ;#%00000011
+        CMP #$03
         BNE _STATE_04
 
         ; Road State 03
         LDA #$00     ;#%00000000
         STA a1C
-        LDA a1E
+        LDA SHOULDER_LEFT_IDX
         CMP #$11     ;#%00010001
         BCC _L13
-        DEC a1E
+        DEC SHOULDER_LEFT_IDX
 _L13    CMP #$10     ;#%00010000
         BCS _L14
-        INC a1E
-_L14    LDA a1F
+        INC SHOULDER_LEFT_IDX
+_L14    LDA SHOULDER_RIGHT_IDX
         CMP #$54     ;#%01010100
         BCC _L15
-        DEC a1F
+        DEC SHOULDER_RIGHT_IDX
 _L15    CMP #$53     ;#%01010011
         BCS _L09
-        INC a1F
+        INC SHOULDER_RIGHT_IDX
         JMP DRAW_SHOULDERS
 
         ; Road State 04
 _STATE_04
-        LDA a1E
+        LDA SHOULDER_LEFT_IDX
         CMP #$11     ;#%00010001
         BCC _L17
-        DEC a1E
+        DEC SHOULDER_LEFT_IDX
 _L17    CMP #$10     ;#%00010000
         BCS _L18
-        INC a1E
-_L18    LDA a1F
+        INC SHOULDER_LEFT_IDX
+_L18    LDA SHOULDER_RIGHT_IDX
         CMP #$65     ;#%01100101
         BCC _L19
-        DEC a1F
+        DEC SHOULDER_RIGHT_IDX
 _L19    CMP #$64     ;#%01100100
         BCS DRAW_SHOULDERS
-        INC a1F
+        INC SHOULDER_RIGHT_IDX
         JMP DRAW_SHOULDERS
 
         ; Road States: 05-08
@@ -1396,11 +1403,11 @@ _STATES_05_08
         LDA fEAF4,Y
         CLC
         ADC #$10     ;#%00010000
-        STA a1E
+        STA SHOULDER_LEFT_IDX
         LDA fEAF4,Y
         CLC
         ADC #$53     ;#%01010011
-        STA a1F
+        STA SHOULDER_RIGHT_IDX
         JMP DRAW_SHOULDERS
 
 _STATES_06_08
@@ -1413,9 +1420,9 @@ _STATES_07_08
         BNE _STATE_08
 
         ; Road State 07
-        LDA a1E
+        LDA SHOULDER_LEFT_IDX
         BEQ DRAW_SHOULDERS
-        DEC a1E
+        DEC SHOULDER_LEFT_IDX
         JMP DRAW_SHOULDERS
 
         ; Road State 08
@@ -1425,7 +1432,7 @@ _STATE_08
         DEC a52
         JMP DRAW_SHOULDERS
 
-_L20    LDA a1E
+_L20    LDA SHOULDER_LEFT_IDX
         CMP #$0F     ;#%00001111
         BCC _L21
 
@@ -1433,41 +1440,41 @@ _L20    LDA a1E
         STA ZP_ROAD_STATE
         BNE DRAW_SHOULDERS
 
-_L21    INC a1E
+_L21    INC SHOULDER_LEFT_IDX
 
         ; Fallthrough
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; All DRAW functions seems to call this function when they end.
 DRAW_SHOULDERS
-        LDA a1E
+        LDA SHOULDER_LEFT_IDX
         ASL A
         CLC
-        ADC #$18     ;#%00011000
+        ADC #$18
         STA a79
-        LDA a1F
+        LDA SHOULDER_RIGHT_IDX
         ASL A
         CLC
-        ADC #$18     ;#%00011000
+        ADC #$18
         STA a92
-        LDA a1F
+        LDA SHOULDER_RIGHT_IDX
         LSR A
         LSR A
         STA a1D
         INC a1D
-        LDA a1E
+        LDA SHOULDER_LEFT_IDX
         LSR A
         LSR A
         TAY
         INY
         LDA ZP_ROAD_STATE
         STA aAB
-        CMP #$07     ;#%00000111
+        CMP #$07
         BCC _L00
-        CPY #$06     ;#%00000110
+        CPY #$06
         BCS _L00
 
-        LDY #$06     ;#%00000110
+        LDY #$06
 
 _L00    LDX ZP_ROAD_STATE
         LDA ROAD_COLOR2_TBL,X
@@ -1476,15 +1483,17 @@ _L01    STA COLOR_RAM+1,Y
         CPY a1D
         BCC _L01
 
-        LDA a1E
-        LSR A
-        LSR A
-        STA ZP_TMP_PTR_LO
+        ; Left Shoulder
+        ; Setup Screen ptr
+        LDA SHOULDER_LEFT_IDX
+        LSR A                           ;SHOULDER_LEFT_IDX /= 4
+        LSR A                           ;Since we draw 4 char shoulders
+        STA ZP_TMP_PTR_LO               ;in this loop (?)
         LDA #$04
         STA ZP_TMP_PTR_HI
 
         ; Draw shoulder (4 chars)
-        LDA a1E
+        LDA SHOULDER_LEFT_IDX           ;Use the 2-LSB to index the pattern to print
         AND #$03
         TAY
         LDX SHOULDER_PATTERN_IDX_TBL,Y
@@ -1497,10 +1506,12 @@ _L03    LDA SHOULDER_PATTERN_B0,X
 _L04    STA (ZP_TMP_PTR_LO),Y
         INX
         INY
-        CPY #$04
+        CPY #$04                        ;Draw 4 shoulder chars
         BCC _L02
 
-        LDA a1F
+        ; Right Shoulder
+        ; Setup Screen ptr
+        LDA SHOULDER_RIGHT_IDX
         LSR A
         LSR A
         STA ZP_TMP_PTR_LO
@@ -1508,7 +1519,7 @@ _L04    STA (ZP_TMP_PTR_LO),Y
         STA ZP_TMP_PTR_HI
 
         ; Draw shoulder (4 chars)
-        LDA a1F
+        LDA SHOULDER_RIGHT_IDX
         AND #$03
         TAY
         LDX SHOULDER_PATTERN_IDX_TBL,Y
@@ -2862,14 +2873,14 @@ _L08    STA f07B8,Y
 _L09    STX ZP_TMP_REG_00
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
-        LDA a1F
+        LDA SHOULDER_RIGHT_IDX
         CMP #$64     ;#%01100100
         BEQ _L11
         BCC _L10
-        DEC a1F
+        DEC SHOULDER_RIGHT_IDX
         JMP _L11
 
-_L10    INC a1F
+_L10    INC SHOULDER_RIGHT_IDX
 _L11    LDY #$01
         JSR DELAY_01
         LDX ZP_TMP_REG_00
