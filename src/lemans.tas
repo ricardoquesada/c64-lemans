@@ -149,25 +149,11 @@ f0678 = $0678
 f07B8 = $07B8
 f07E0 = $07E0
 COLOR_RAM = $D800
-fD870 = $D870
-fD8E8 = $D8E8
-fD938 = $D938
-fD960 = $D960
 fDA34 = $DA34
 fDA5C = $DA5C
-fDAA0 = $DAA0
-fDAC8 = $DAC8
-fDAF0 = $DAF0
-fDB18 = $DB18
-fDB40 = $DB40
-fDB68 = $DB68
-fDBB8 = $DBB8
-fDBE0 = $DBE0
 ;
 ; **** ABSOLUTE ADRESSES ****
 ;
-ZP_TMP_PTR_HIDE = $05DE
-ZP_TMP_PTR_HIDF = $05DF
 a0606 = $0606
 a0607 = $0607
 SPR_FRAME_PTR_00 = $07F8
@@ -646,12 +632,14 @@ bE2D0   STX ZP_TMP_REG_00
 
         LDA fE344,X
         STA $D408    ;Voice 2: Frequency Control - High-Byte
-        LDA #$11     ;#%00010001
+        LDA #$11
         STA $D40B    ;Voice 2: Control Register
-        LDA #$08     ;#%00001000
-        LDY #$07     ;#%00000111
-bE2E6   STA fDA34,Y
-        STA fDA5C,Y
+
+        ; Print "Flashlight" background color
+        LDA #$08                ;Orange
+        LDY #$07                ;Number of columns to print
+bE2E6   STA COLOR_RAM+40*14+4,Y
+        STA COLOR_RAM+40*15+4,Y
         DEY
         BPL bE2E6
 
@@ -659,9 +647,10 @@ bE2E6   STA fDA34,Y
         STA ZP_TMP_PTR_LO
         LDA COLOR_RAM_POS_HI,X
         STA ZP_TMP_PTR_HI
+
         LDA fE340,X
-        LDX #$03     ;#%00000011
-bE2FE   LDY fF43A,X
+        LDX #$03
+bE2FE   LDY PASSED_CARS_OFFSET,X
         STA (ZP_TMP_PTR_LO),Y
         DEX
         BPL bE2FE
@@ -884,60 +873,66 @@ _L03    LDA SCORE_MSG,Y
         STA SCREEN_RAM+40*10+32,Y
 
         LDA #$01                        ;White
-        STA COLOR_RAM+40*1+32,Y         ;Color for Score
-        STA COLOR_RAM+40*10+32,Y        ;Color for Speed
-        STA COLOR_RAM+40*14+32,Y        ;Color for XXX?
-        STA COLOR_RAM+40*15+32,Y        ;Color for XXX?
+        STA COLOR_RAM+40*1+32,Y         ;Color for 'Score' txt
+        STA COLOR_RAM+40*10+32,Y        ;Color for 'Speed' txt
+        STA COLOR_RAM+40*14+32,Y        ;Color for ?
+        STA COLOR_RAM+40*15+32,Y        ;Color for ?
 
-        LDA #$03                ;Cyan
-        STA COLOR_RAM+40*4+32,Y         ;Color for Time
-        STA COLOR_RAM+40*11+32,Y        ;Color for Speed value row0
-        STA COLOR_RAM+40*12+32,Y        ;Color for Speed value row1
+        LDA #$03                        ;Cyan
+        STA COLOR_RAM+40*4+32,Y         ;Color for 'Time' txt
+        STA COLOR_RAM+40*11+32,Y        ;Color for Speed Dashboard top
+        STA COLOR_RAM+40*12+32,Y        ;Color for Speed Dashboard bottom
 
-        LDA #$04                ;Purple
-        STA fDAA0,Y
-        STA fDAC8,Y
-        STA fDAF0,Y
-        STA fDB18,Y
-        STA fDB40,Y
-        STA fDB68,Y
+        LDA #$04                        ;Purple
+        STA COLOR_RAM+40*16+32,Y        ;Color to count the passed cars
+        STA COLOR_RAM+40*17+32,Y        ;These is a grid of 3x3 cars
+        STA COLOR_RAM+40*18+32,Y
+        STA COLOR_RAM+40*19+32,Y
+        STA COLOR_RAM+40*20+32,Y
+        STA COLOR_RAM+40*21+32,Y
 
-        LDA #$05                ;Green
-        STA fD938,Y
+        LDA #$05                        ;Green
+        STA COLOR_RAM+40*7+32,Y         ;Color for Hi-Score txt
 
-        LDA #$07                ;Yellow
-        STA fD870,Y
-        STA fD8E8,Y
-        STA fD960,Y
-        STA fDBB8,Y
-        STA fDBE0,Y
+        LDA #$07                        ;Yellow color for...
+        STA COLOR_RAM+40*2+32,Y         ;... for Score value
+        STA COLOR_RAM+40*5+32,Y         ;... for Time value
+        STA COLOR_RAM+40*8+32,Y         ;... for Hi-Score value
+        STA COLOR_RAM+40*23+32,Y        ;... for 'Bonus' txt
+        STA COLOR_RAM+40*24+32,Y        ;... for '1000 PTS' txt
         DEY
         BPL _L03
 
-        LDY #$71     ;#%01110001
-        STY ZP_TMP_PTR_HIDE
+        ; Print "KM/H"
+        LDY #$71
+        STY SCREEN_RAM+40*11+38         ;Place "K" of KM/H
         INY
-        STY ZP_TMP_PTR_HIDF
+        STY SCREEN_RAM+40*11+39         ;Place "M" of KM/H
         INY
-        STY a0606
+        STY SCREEN_RAM+40*12+38         ;Place "/" of KM/H
         INY
-        STY a0607
+        STY SCREEN_RAM+40*12+39         ;Place "H" of KM/H
+
         JSR PRINT_SCORE_AND_TIME
         JSR PRINT_SPEED
+
         LDA #<SCREEN_RAM
         STA ZP_TMP_PTR_LO
         LDA #>SCREEN_RAM
         STA ZP_TMP_PTR_HI
-        LDX #$18     ;#%00011000
-_L04    LDY #$03     ;#%00000011
-_L05    CPY #$00     ;#%00000000
+
+        LDX #$18                        ;x=24
+_L04    LDY #$03                        ;y=3
+_L05    CPY #$00
         BNE _L06
+
         TXA
         AND #$03     ;#%00000011
         BNE _L06
         LDA #$57     ;#%01010111
         BNE _L07
-_L06    LDA fEAE0,Y
+
+_L06    LDA SHOULDER_PATTERN_01,Y
 _L07    STA (ZP_TMP_PTR_LO),Y
         DEY
         BPL _L05
@@ -1497,7 +1492,7 @@ bEA0C   LDA a20
         BNE bEA15
         LDA fEAD0,X
         BNE bEZP_TICKS_PER_SECOND
-bEA15   LDA fEAE0,X
+bEA15   LDA SHOULDER_PATTERN_01,X
 bEZP_TICKS_PER_SECOND   STA (ZP_TMP_PTR_LO),Y
         INX
         INY
@@ -1550,7 +1545,7 @@ _L01    LDA a20
         STA p0419,Y
         BNE _L03
 
-_L02    LDA fEAE0,Y
+_L02    LDA SHOULDER_PATTERN_01,Y
         STA SCREEN_RAM+4,Y
         LDA fEAE4,Y
         STA SCREEN_RAM+16,Y
@@ -1585,7 +1580,8 @@ fEACC   .BYTE $43,$45,$45,$4D
 fEAD0   .BYTE $57,$52,$52,$51
 fEAD4   .BYTE $56,$52,$52,$50,$55,$54,$52,$4F
         .BYTE $44,$53,$52,$4E
-fEAE0   .BYTE $5A,$52,$52,$51
+SHOULDER_PATTERN_01
+        .BYTE $5A,$52,$52,$51
 fEAE4   .BYTE $59,$52,$52,$50,$44,$54,$52,$4F
         .BYTE $44,$58,$52,$4E
 fEAF0   .BYTE $00,$04,$08,$0C
@@ -2631,8 +2627,8 @@ bF37A   CPY a6F
         BCC bF382
         LDA #$20     ;#%00100000
         BNE bF385
-bF382   LDA fF43E,X
-bF385   LDY fF43A,X
+bF382   LDA PASSED_CARS_CHAR_TBL,X
+bF385   LDY PASSED_CARS_OFFSET,X
         STA (ZP_SCREEN_PTR_LO),Y
         LDY a49
         DEX
@@ -2716,8 +2712,12 @@ fF428   .BYTE $A1,$A3,$A5,$F1,$F3,$F5,$41,$43
         .BYTE $45
 fF431   .BYTE $06,$06,$06,$06,$06,$06,$07,$07
         .BYTE $07
-fF43A   .BYTE $00,$01,$28,$29
-fF43E   .BYTE $75,$76,$77,$78
+        ; Offset to print the passed cars
+PASSED_CARS_OFFSET
+        .BYTE $00,$01,$28,$29
+        ; Passed chars char idx
+PASSED_CARS_CHAR_TBL
+        .BYTE $75,$76,$77,$78
 fF442   .BYTE $20,$02,$0F,$15,$0E,$13,$20,$20
 fF44A   .BYTE $22,$21,$21,$21,$20,$10,$14,$13
 fF452   .BYTE $05,$18,$14,$05,$0E,$04,$05,$04
