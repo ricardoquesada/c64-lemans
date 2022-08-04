@@ -144,10 +144,6 @@ f00AB = $00AB
 f00AC = $00AC
 SCREEN_RAM = $0400
 f0601 = $0601
-f0650 = $0650
-f0678 = $0678
-f07B8 = $07B8
-f07E0 = $07E0
 COLOR_RAM = $D800
 fDA34 = $DA34
 fDA5C = $DA5C
@@ -874,8 +870,8 @@ _L03    LDA SCORE_MSG,Y
         LDA #$01                        ;White
         STA COLOR_RAM+40*1+32,Y         ;Color for 'Score' txt
         STA COLOR_RAM+40*10+32,Y        ;Color for 'Speed' txt
-        STA COLOR_RAM+40*14+32,Y        ;Color for ?
-        STA COLOR_RAM+40*15+32,Y        ;Color for ?
+        STA COLOR_RAM+40*14+32,Y        ;Color for 'Extended' txt
+        STA COLOR_RAM+40*15+32,Y        ;Color for 'Time' txt
 
         LDA #$03                        ;Cyan
         STA COLOR_RAM+40*4+32,Y         ;Color for 'Time' txt
@@ -2597,81 +2593,84 @@ fF2F3   .BYTE $00,$00,$40,$08
 fF2F7   .BYTE $03,$01,$00,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Check for passed cars (?)
 jF2FB   LDY #$03     ;#%00000011
-bF2FD   TYA
+_L00    TYA
         ASL A
         TAX
         LDA $D000,X  ;Sprite 0 X Pos
         SEC
         SBC #$05     ;#%00000101
         CMP $D00E    ;Sprite 7 X Pos
-        BCS bF330
+        BCS _L01
         LDA $D001,X  ;Sprite 0 Y Pos
         SEC
         SBC #$04     ;#%00000100
         CMP $D00F    ;Sprite 7 Y Pos
-        BCS bF330
+        BCS _L01
         LDA $D000,X  ;Sprite 0 X Pos
         CLC
         ADC #$0F     ;#%00001111
         CMP $D00E    ;Sprite 7 X Pos
-        BCC bF330
+        BCC _L01
         LDA $D001,X  ;Sprite 0 Y Pos
         CLC
         ADC #$12     ;#%00010010
         CMP $D00F    ;Sprite 7 Y Pos
-        BCC bF330
+        BCC _L01
         LDA #$01     ;#%00000001
         STA a58
-bF330   LDA $D00E    ;Sprite 7 X Pos
+
+_L01    LDA $D00E    ;Sprite 7 X Pos
         SEC
         SBC #$03     ;#%00000011
         CMP $D000,X  ;Sprite 0 X Pos
-        BCS bF360
+        BCS _L02
         LDA $D00F    ;Sprite 7 Y Pos
         SEC
         SBC #$02     ;#%00000010
         CMP $D001,X  ;Sprite 0 Y Pos
-        BCS bF360
+        BCS _L02
         LDA $D00E    ;Sprite 7 X Pos
         CLC
         ADC #$11     ;#%00010001
         CMP $D000,X  ;Sprite 0 X Pos
-        BCC bF360
+        BCC _L02
         LDA $D00F    ;Sprite 7 Y Pos
         CLC
         ADC #$14     ;#%00010100
         CMP $D001,X  ;Sprite 0 Y Pos
-        BCC bF360
+        BCC _L02
         LDA #$01     ;#%00000001
         STA a58
-bF360   DEY
-        BPL bF2FD
-        LDA a13
-        BEQ bF36A
-        JMP jF3F1
 
-bF36A   LDY #$08     ;#%00001000
-bF36C   LDA PASSED_CARS_POS_LO,Y
+_L02    DEY
+        BPL _L00
+        LDA a13
+        BEQ _L03
+        JMP _L13
+
+_L03    LDY #$08
+_L04    LDA PASSED_CARS_POS_LO,Y
         STA ZP_SCREEN_PTR_LO
         LDA PASSED_CARS_POS_HI,Y
         STA ZP_SCREEN_PTR_HI
         STY a49
         LDX #$03     ;#%00000011
-bF37A   CPY a6F
-        BCC bF382
+_L05    CPY a6F
+        BCC _L06
         LDA #$20     ;#%00100000
-        BNE bF385
-bF382   LDA PASSED_CARS_CHAR_TBL,X
-bF385   LDY PASSED_CARS_OFFSET,X
+        BNE _L07
+_L06    LDA PASSED_CARS_CHAR_TBL,X
+_L07    LDY PASSED_CARS_OFFSET,X
         STA (ZP_SCREEN_PTR_LO),Y
         LDY a49
         DEX
-        BPL bF37A
+        BPL _L05
         DEY
-        BPL bF36C
+        BPL _L04
         LDA a70
-        BEQ bF3CA
+        BEQ _L10
         LDA #>p2800  ;#%00101000
         STA a71
         LDA #<p2800  ;#%00000000
@@ -2687,62 +2686,73 @@ bF385   LDY PASSED_CARS_OFFSET,X
         CLD
         LDA ZP_SCORE_02
         AND #$1F     ;#%00011111
-        BNE bF3B9
+        BNE _L08
         INC a53
         LDA #$5F     ;#%01011111
         STA a55
 
-bF3B9   LDY #$07     ;#%00000111
-bF3BB   LDA BONUS_MSG,Y
-        STA f07B8,Y
+        ; Print "BONUS 1000 PTS" message
+_L08    LDY #$07     ;#%00000111
+_L09    LDA BONUS_MSG,Y
+        STA SCREEN_RAM+40*23+32,Y
         LDA THOUSAND_PTS_MSG,Y
-        STA f07E0,Y
+        STA SCREEN_RAM+40*24+32,Y
         DEY
-        BPL bF3BB
-bF3CA   LDA a71
-        BEQ jF3F1
+        BPL _L09
+
+_L10    LDA a71
+        BEQ _L13
         DEC a71
         LDA a71
         AND #$04     ;#%00000100
-        BEQ bF3DC
+        BEQ _L11
         LDA #$01     ;#%00000001
         STA a66
-        BNE jF3F1
-bF3DC   LDA #$00     ;#%00000000
+        BNE _L13
+_L11    LDA #$00     ;#%00000000
         STA a66
         LDA a71
-        BNE jF3F1
-        LDY #$07     ;#%00000111
-        LDA #$20     ;#%00100000
-bF3E8   STA f07B8,Y
-        STA f07E0,Y
+        BNE _L13
+
+        ; Erase "BONUS 1000 PTS" message
+        LDY #$07
+        LDA #$20
+_L12    STA SCREEN_RAM+40*23+32,Y
+        STA SCREEN_RAM+40*24+32,Y
         DEY
-        BPL bF3E8
-jF3F1   LDA a55
-        BEQ bF425
+        BPL _L12
+
+_L13    LDA a55
+        BEQ _L17
         DEC a55
         LDA a55
         AND #$10     ;#%00010000
-        BEQ bF414
+        BEQ _L15
+
         LDA #$01     ;#%00000001
         STA a67
+
+        ; Print "EXTENDED TIME" message
         LDY #$07     ;#%00000111
-bF403   LDA EXTENDED_MSG,Y
-        STA f0650,Y
+_L14    LDA EXTENDED_MSG,Y
+        STA SCREEN_RAM+40*14+32,Y
         LDA TIME2_MSG,Y
-        STA f0678,Y
+        STA SCREEN_RAM+40*15+32,Y
         DEY
-        BPL bF403
-        BMI bF425
-bF414   LDA #$00     ;#%00000000
+        BPL _L14
+        BMI _L17
+
+        ; Erase "EXTENDED TIME" message
+_L15    LDA #$00
         STA a67
-        LDY #$07     ;#%00000111
-        LDA #$20     ;#%00100000
-bF41C   STA f0650,Y
-        STA f0678,Y
+        LDY #$07
+        LDA #$20
+_L16    STA SCREEN_RAM+40*14+32,Y
+        STA SCREEN_RAM+40*15+32,Y
         DEY
-        BPL bF41C
-bF425   JMP IRQ_HANDLER_MAIN
+        BPL _L16
+
+_L17    JMP IRQ_HANDLER_MAIN
 
         ; Screen location of where to print the passed cars
 PASSED_CARS_POS_LO
@@ -2896,8 +2906,8 @@ _L06    CMP #$08     ;#%00001000
 
 _L07    LDY #$07     ;#%00000111
         LDA #$20     ;#%00100000
-_L08    STA f07B8,Y
-        STA f07E0,Y
+_L08    STA SCREEN_RAM+40*23+32,Y
+        STA SCREEN_RAM+40*24+32,Y
         DEY
         BPL _L08
 
