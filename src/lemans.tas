@@ -1280,7 +1280,7 @@ _L04    LDA a1F
         CMP #$54     ;#%01010100
         BCS _L05
         INC a1F
-        JMP DRAW_EPILOG
+        JMP DRAW_SHOULDERS
 
 _L05    INC a1B
         LDA a1B
@@ -1323,7 +1323,7 @@ _L07    STA a1E
         BCC _L08
         LDA #$64     ;#%01100100
 _L08    STA a1F
-_L09    JMP DRAW_EPILOG
+_L09    JMP DRAW_SHOULDERS
 
 _L10    LDA a1E
         CLC
@@ -1361,7 +1361,7 @@ _L14    LDA a1F
 _L15    CMP #$53     ;#%01010011
         BCS _L09
         INC a1F
-        JMP DRAW_EPILOG
+        JMP DRAW_SHOULDERS
 
         ; Road State 04
 _STATE_04
@@ -1377,9 +1377,9 @@ _L18    LDA a1F
         BCC _L19
         DEC a1F
 _L19    CMP #$64     ;#%01100100
-        BCS DRAW_EPILOG
+        BCS DRAW_SHOULDERS
         INC a1F
-        JMP DRAW_EPILOG
+        JMP DRAW_SHOULDERS
 
         ; Road States: 05-08
 _STATES_05_08
@@ -1401,7 +1401,7 @@ _STATES_05_08
         CLC
         ADC #$53     ;#%01010011
         STA a1F
-        JMP DRAW_EPILOG
+        JMP DRAW_SHOULDERS
 
 _STATES_06_08
         CMP #$06     ;#%00000110
@@ -1414,16 +1414,16 @@ _STATES_07_08
 
         ; Road State 07
         LDA a1E
-        BEQ DRAW_EPILOG
+        BEQ DRAW_SHOULDERS
         DEC a1E
-        JMP DRAW_EPILOG
+        JMP DRAW_SHOULDERS
 
         ; Road State 08
 _STATE_08
         LDA a52
         BEQ _L20
         DEC a52
-        JMP DRAW_EPILOG
+        JMP DRAW_SHOULDERS
 
 _L20    LDA a1E
         CMP #$0F     ;#%00001111
@@ -1431,7 +1431,7 @@ _L20    LDA a1E
 
         LDA #$00     ;#%00000000
         STA ZP_ROAD_STATE
-        BNE DRAW_EPILOG
+        BNE DRAW_SHOULDERS
 
 _L21    INC a1E
 
@@ -1439,7 +1439,7 @@ _L21    INC a1E
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; All DRAW functions seems to call this function when they end.
-DRAW_EPILOG
+DRAW_SHOULDERS
         LDA a1E
         ASL A
         CLC
@@ -1463,61 +1463,67 @@ DRAW_EPILOG
         LDA ZP_ROAD_STATE
         STA aAB
         CMP #$07     ;#%00000111
-        BCC bE9EB
+        BCC _L00
         CPY #$06     ;#%00000110
-        BCS bE9EB
+        BCS _L00
 
         LDY #$06     ;#%00000110
 
-bE9EB   LDX ZP_ROAD_STATE
+_L00    LDX ZP_ROAD_STATE
         LDA ROAD_COLOR2_TBL,X
-bE9F0   STA COLOR_RAM+1,Y
+_L01    STA COLOR_RAM+1,Y
         INY
         CPY a1D
-        BCC bE9F0
+        BCC _L01
 
         LDA a1E
         LSR A
         LSR A
         STA ZP_TMP_PTR_LO
-        LDA #$04     ;#%00000100
+        LDA #$04
         STA ZP_TMP_PTR_HI
+
+        ; Draw shoulder (4 chars)
         LDA a1E
-        AND #$03     ;#%00000011
+        AND #$03
         TAY
-        LDX fEAF0,Y
-        LDY #$00     ;#%00000000
-bEA0C   LDA a20
-        BNE bEA15
+        LDX SHOULDER_PATTERN_IDX_TBL,Y
+        LDY #$00
+_L02    LDA a20
+        BNE _L03
         LDA SHOULDER_PATERN_A0,X
-        BNE bEA18
-bEA15   LDA SHOULDER_PATTERN_B0,X
-bEA18   STA (ZP_TMP_PTR_LO),Y
+        BNE _L04
+_L03    LDA SHOULDER_PATTERN_B0,X
+_L04    STA (ZP_TMP_PTR_LO),Y
         INX
         INY
-        CPY #$04     ;#%00000100
-        BCC bEA0C
+        CPY #$04
+        BCC _L02
+
         LDA a1F
         LSR A
         LSR A
         STA ZP_TMP_PTR_LO
-        LDA #$04     ;#%00000100
+        LDA #$04
         STA ZP_TMP_PTR_HI
+
+        ; Draw shoulder (4 chars)
         LDA a1F
-        AND #$03     ;#%00000011
+        AND #$03
         TAY
-        LDX fEAF0,Y
-        LDY #$00     ;#%00000000
-bEA34   LDA a20
-        BNE bEA3D
+        LDX SHOULDER_PATTERN_IDX_TBL,Y
+        LDY #$00
+_L05    LDA a20
+        BNE _L06
         LDA SHOULDER_PATTERN_A3,X
-        BNE bEA40
-bEA3D   LDA SHOULDER_PATTERN_B3,X
-bEA40   STA (ZP_TMP_PTR_LO),Y
+        BNE _L07
+_L06    LDA SHOULDER_PATTERN_B3,X
+_L07    STA (ZP_TMP_PTR_LO),Y
         INX
         INY
-        CPY #$04     ;#%00000100
-        BCC bEA34
+        CPY #$04
+        BCC _L05
+
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -1594,7 +1600,11 @@ SHOULDER_PATTERN_B1
         .BYTE $59,$52,$52,$50,$44,$54,$52,$4F
         .BYTE $44,$58,$52,$4E
 
-fEAF0   .BYTE $00,$04,$08,$0C
+SHOULDER_PATTERN_IDX_TBL
+        .BYTE $00,$04,$08,$0C
+
+        ; Used to draw the "turns".
+        ; Offset to the byte to draw (?)
 fEAF4   .BYTE $00,$00,$01,$01,$01,$02,$02,$02
         .BYTE $03,$03,$04,$04,$05,$06,$07,$08
         .BYTE $09,$0A,$0B,$0C,$0D,$0D,$0E,$0E
