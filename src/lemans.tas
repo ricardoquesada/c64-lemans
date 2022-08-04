@@ -125,8 +125,8 @@ a75 = $75
 a76 = $76
 a77 = $77
 a78 = $78
-a79 = $79
-a92 = $92
+ZP_UNUSED_00 = $79
+ZP_UNUSED_01 = $92
 aAB = $AB
 aC3 = $C3
 ;
@@ -1445,28 +1445,31 @@ _L21    INC SHOULDER_LEFT_IDX
         ; Fallthrough
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; All DRAW functions seems to call this function when they end.
 DRAW_SHOULDERS
-        LDA SHOULDER_LEFT_IDX
-        ASL A
+        LDA SHOULDER_LEFT_IDX           ;A = SHOULDER_LEFT_IDX
+        ASL A                           ;A *= 2
         CLC
-        ADC #$18
-        STA a79
-        LDA SHOULDER_RIGHT_IDX
-        ASL A
+        ADC #24                         ;A += 24
+        STA ZP_UNUSED_00
+
+        LDA SHOULDER_RIGHT_IDX          ;A = SHOULDER_RIGHT_IDX
+        ASL A                           ;A *= 2
         CLC
-        ADC #$18
-        STA a92
-        LDA SHOULDER_RIGHT_IDX
+        ADC #24                         ;A += 24
+        STA ZP_UNUSED_01
+
+        LDA SHOULDER_RIGHT_IDX          ;A = SHOULDER_RIGHT_IDX
         LSR A
-        LSR A
+        LSR A                           ;A /= 4
         STA a1D
         INC a1D
-        LDA SHOULDER_LEFT_IDX
+
+        LDA SHOULDER_LEFT_IDX           ;A = SHOULDER_LEFT_IDX
         LSR A
-        LSR A
+        LSR A                           ;A /= 4
         TAY
         INY
+
         LDA ZP_ROAD_STATE
         STA aAB
         CMP #$07
@@ -1506,15 +1509,15 @@ _L03    LDA SHOULDER_PATTERN_B0,X
 _L04    STA (ZP_TMP_PTR_LO),Y
         INX
         INY
-        CPY #$04                        ;Draw 4 shoulder chars
-        BCC _L02
+        CPY #$04                        ;Draw 4 shoulder chars;
+        BCC _L02                        ;No, loop until we do so
 
         ; Right Shoulder
         ; Setup Screen ptr
         LDA SHOULDER_RIGHT_IDX
-        LSR A
-        LSR A
-        STA ZP_TMP_PTR_LO
+        LSR A                           ;SHOULDER_RIGHT_IDX /= 4
+        LSR A                           ;Since we draw 4 char shoulders
+        STA ZP_TMP_PTR_LO               ;in this loop
         LDA #$04
         STA ZP_TMP_PTR_HI
 
@@ -1532,8 +1535,8 @@ _L06    LDA SHOULDER_PATTERN_B3,X
 _L07    STA (ZP_TMP_PTR_LO),Y
         INX
         INY
-        CPY #$04
-        BCC _L05
+        CPY #$04                        ;Draw 4 shoulder chars?
+        BCC _L05                        ;No, loop until we do so
 
         RTS
 
@@ -1572,11 +1575,11 @@ _L02    LDA SHOULDER_PATTERN_B0,Y
 _L03    DEY
         BPL _L01
 
-        LDA #$38     ;#%00111000
-        STA a79
-        LDA #$E0     ;#%11100000
-        STA a92
-        LDA #$06     ;#%00000110
+        LDA #$38
+        STA ZP_UNUSED_00
+        LDA #$E0
+        STA ZP_UNUSED_01
+        LDA #$06
         STA aAB
         RTS
 
@@ -2593,6 +2596,7 @@ fF2EF   .BYTE $51,$6B,$B3,$CD
 fF2F3   .BYTE $00,$00,$40,$08
 fF2F7   .BYTE $03,$01,$00,$00
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 jF2FB   LDY #$03     ;#%00000011
 bF2FD   TYA
         ASL A
@@ -2648,9 +2652,9 @@ bF360   DEY
         JMP jF3F1
 
 bF36A   LDY #$08     ;#%00001000
-bF36C   LDA fF428,Y
+bF36C   LDA PASSED_CARS_POS_LO,Y
         STA ZP_SCREEN_PTR_LO
-        LDA fF431,Y
+        LDA PASSED_CARS_POS_HI,Y
         STA ZP_SCREEN_PTR_HI
         STY a49
         LDX #$03     ;#%00000011
@@ -2687,10 +2691,11 @@ bF385   LDY PASSED_CARS_OFFSET,X
         INC a53
         LDA #$5F     ;#%01011111
         STA a55
+
 bF3B9   LDY #$07     ;#%00000111
-bF3BB   LDA fF442,Y
+bF3BB   LDA BONUS_MSG,Y
         STA f07B8,Y
-        LDA fF44A,Y
+        LDA THOUSAND_PTS_MSG,Y
         STA f07E0,Y
         DEY
         BPL bF3BB
@@ -2722,9 +2727,9 @@ jF3F1   LDA a55
         LDA #$01     ;#%00000001
         STA a67
         LDY #$07     ;#%00000111
-bF403   LDA fF452,Y
+bF403   LDA EXTENDED_MSG,Y
         STA f0650,Y
-        LDA fF45A,Y
+        LDA TIME2_MSG,Y
         STA f0678,Y
         DEY
         BPL bF403
@@ -2739,20 +2744,50 @@ bF41C   STA f0650,Y
         BPL bF41C
 bF425   JMP IRQ_HANDLER_MAIN
 
-fF428   .BYTE $A1,$A3,$A5,$F1,$F3,$F5,$41,$43
-        .BYTE $45
-fF431   .BYTE $06,$06,$06,$06,$06,$06,$07,$07
-        .BYTE $07
-        ; Offset to print the passed cars
+        ; Screen location of where to print the passed cars
+PASSED_CARS_POS_LO
+        .BYTE <(SCREEN_RAM+40*16+33)
+        .BYTE <(SCREEN_RAM+40*16+35)
+        .BYTE <(SCREEN_RAM+40*16+37)
+        .BYTE <(SCREEN_RAM+40*18+33)
+        .BYTE <(SCREEN_RAM+40*18+35)
+        .BYTE <(SCREEN_RAM+40*18+37)
+        .BYTE <(SCREEN_RAM+40*20+33)
+        .BYTE <(SCREEN_RAM+40*20+35)
+        .BYTE <(SCREEN_RAM+40*20+37)
+PASSED_CARS_POS_HI
+        .BYTE >(SCREEN_RAM+40*16+33)
+        .BYTE >(SCREEN_RAM+40*16+35)
+        .BYTE >(SCREEN_RAM+40*16+37)
+        .BYTE >(SCREEN_RAM+40*18+33)
+        .BYTE >(SCREEN_RAM+40*18+35)
+        .BYTE >(SCREEN_RAM+40*18+37)
+        .BYTE >(SCREEN_RAM+40*20+33)
+        .BYTE >(SCREEN_RAM+40*20+35)
+        .BYTE >(SCREEN_RAM+40*20+37)
+
+        ; Offset to print one passed car, using
+        ; PASSED_CARS_POS as reference
 PASSED_CARS_OFFSET
         .BYTE $00,$01,$28,$29
+
+        ; One Passed car is represented with 4 chars:
+        ;   $75,$76
+        ;   $77,$78
         ; Passed chars char idx
 PASSED_CARS_CHAR_TBL
         .BYTE $75,$76,$77,$78
-fF442   .BYTE $20,$02,$0F,$15,$0E,$13,$20,$20
-fF44A   .BYTE $22,$21,$21,$21,$20,$10,$14,$13
-fF452   .BYTE $05,$18,$14,$05,$0E,$04,$05,$04
-fF45A   .BYTE $20,$20,$14,$09,$0D,$05,$20,$20
+
+        .ENC "screen"
+BONUS_MSG
+        .TEXT " BOUNS  "                ;Notice the misspell.
+THOUSAND_PTS_MSG
+        .BYTE $22,$21,$21,$21           ;1000
+        .TEXT " PTS"
+EXTENDED_MSG
+        .TEXT "EXTENDED"
+TIME2_MSG
+        .TEXT "  TIME  "
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Called when time is 0.
