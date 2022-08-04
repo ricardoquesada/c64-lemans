@@ -1208,6 +1208,8 @@ _L00    LDA ZP_DIGIT_TO_PRINT
 _L01    TAY
         LDA #$01        ;'0' is '0'
         STA ZP_ZERO_IS_ZERO
+
+	; Update Speed Dashboard
 _L02    LDA fE85D,Y
         STA SCREEN_RAM+40*11+32,X
         LDA fE868,Y
@@ -1220,12 +1222,16 @@ _L02    LDA fE85D,Y
         INX
 _L03    RTS
 
+	; Speed Dashboard top-left
 fE85D   .BYTE $5B,$6D,$61,$61,$67,$6B,$6B,$5B
         .BYTE $6B,$6B,$6D
+	; Speed Dashboard top-right
 fE868   .BYTE $5C,$5F,$62,$62,$68,$6C,$6C,$5C
         .BYTE $62,$62,$6E
+	; Speed Dashboard bottom-left
 fE873   .BYTE $5D,$6F,$63,$65,$69,$65,$63,$6F
         .BYTE $63,$65,$6F
+	; Speed Dashboard bottom-right
 fE87E   .BYTE $5E,$60,$64,$66,$6A,$66,$66,$60
         .BYTE $66,$66,$70
 
@@ -2588,10 +2594,11 @@ fF2F7   .BYTE $03,$01,$00,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Check for passed cars (?)
-jF2FB   LDY #$03     ;#%00000011
+jF2FB
+	LDY #$03 			;Y = 4 (compare with sprites 0-3)
 _L00    TYA
-        ASL A
-        TAX
+        ASL A 				;Y *= 2
+        TAX 				;X = Y
         LDA $D000,X  ;Sprite 0 X Pos
         SEC
         SBC #$05     ;#%00000101
