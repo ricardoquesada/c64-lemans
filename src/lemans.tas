@@ -187,9 +187,9 @@ HI_SCORE_OFFSET = SCREEN_RAM + 40 * 8 + 32
 ;
 ; Sprites:
 ; 0-3: Enemy cars
-; 4: PIT
-; 6: Split road ahead
-; 4,5,6: Headlights
+; 4: PIT / Top-Left Headlight
+; 5: Top-Right Headlight
+; 6: Split road ahead / Central Headlight
 ; 7: Hero car
 ;
 ; Road states (ZP_ROAD_STATE)
@@ -531,7 +531,7 @@ jE205   STX ZP_TMP_REG_00
         BNE bE26B
 
         LDY #$1F     ;#%00011111
-bE219   LDA fECAB,Y
+bE219   LDA START_BOTTOM_ROW_BANNER,Y
         STA SCREEN_RAM,Y
         LDA #$0A     ;#%00001010
         STA COLOR_RAM,Y
@@ -564,7 +564,7 @@ bE246   TYA
         BPL bE246
         BMI bE26E
 bE259   LDY #$1F     ;#%00011111
-bE25B   LDA fEC8B,Y
+bE25B   LDA START_TOP_ROW_BANNER,Y
         STA SCREEN_RAM,Y
         LDA #$0A     ;#%00001010
         STA COLOR_RAM,Y
@@ -1731,10 +1731,10 @@ _L06    LDA f00AB,Y
         BCC _L07
         JMP jECF3
 
-        ;Update car X position based on Paddle reading
 _L07    LDY ZP_PIXELS_TO_MOVE_CAR
 _L08
 .IF USE_JOYSTICK == 0
+        ;Update car X position based on Paddle reading
         LDA ZP_PADDLE_1_VALUE_INV
         CMP $D00E    ;Sprite 7 X Pos
         BCS _L09
@@ -1746,6 +1746,7 @@ _L08
         ; Move Hero to the right
 _L09    INC $D00E    ;Sprite 7 X Pos
 .ELSE
+        ;Update car X position based on Joystick #1
         LDA ZP_PADDLE_1_VALUE_INV
         AND #%00000100                  ;Left (Active Low)
         BNE _TEST_RIGHT
@@ -1765,51 +1766,59 @@ _L10    DEY
 
 _L11    LDA a25
         BEQ _L13
-        CMP #$01     ;#%00000001
+        CMP #$01
         BNE _L12
-        LDA $D015    ;Sprite display Enable
-        AND #$8F     ;#%10001111
-        STA $D015    ;Sprite display Enable
+
+        ; Turn off headlights (sprites 4-6)
+        LDA $D015                       ;Sprite display Enable
+        AND #$8F                        ;#%10001111
+        STA $D015                       ;Sprite display Enable
         JMP _L13
 
-_L12    LDA $D015    ;Sprite display Enable
-        ORA #$70     ;#%01110000
-        STA $D015    ;Sprite display Enable
-        LDA #$70     ;#%01110000
-        STA $D017    ;Sprites Expand 2x Vertical (Y)
-        STA $D01D    ;Sprites Expand 2x Horizontal (X)
-        LDA $D01C    ;Sprites Multi-Color Mode Select
-        AND #$8F     ;#%10001111
-        STA $D01C    ;Sprites Multi-Color Mode Select
-        LDA #$0C     ;#%00001100
-        STA $D02B    ;Sprite 4 Color
-        STA $D02C    ;Sprite 5 Color
-        LDA #$0F     ;#%00001111
-        STA $D02D    ;Sprite 6 Color
-        LDY #$FC        ;Headlight top-left
+        ; Turn On Headlights (sprites 4-6)
+_L12    LDA $D015                       ;Sprite display Enable
+        ORA #$70                        ;#%01110000
+        STA $D015                       ;Sprite display Enable
+        LDA #$70                        ;#%01110000
+        STA $D017                       ;Sprites Expand 2x Vertical (Y)
+        STA $D01D                       ;Sprites Expand 2x Horizontal (X)
+        LDA $D01C                       ;Sprites Multi-Color Mode Select
+        AND #$8F                        ;#%10001111
+        STA $D01C                       ;Sprites Multi-Color Mode Select
+        LDA #$0C                        ;Color Grey 2
+        STA $D02B                       ;Sprite 4 Color
+        STA $D02C                       ;Sprite 5 Color
+        LDA #$0F                        ;Color Grey 3
+        STA $D02D                       ;Sprite 6 Color
+        LDY #$FC                        ;Headlight top-left
         STY SPR_FRAME_PTR_04
-        INY             ;Headlight top-right
+        INY                             ;Headlight top-right
         STY SPR_FRAME_PTR_05
-        INY             ;Headlight center
+        INY                             ;Headlight center
         STY SPR_FRAME_PTR_06
-        LDA $D00F    ;Sprite 7 Y Pos
+
+        ; Adjust headlights sprites based on Car's position
+        ; Adjust Y position
+        LDA $D00F                       ;Sprite 7 Y Pos
         SEC
-        SBC #$2A     ;#%00101010
-        STA $D00D    ;Sprite 6 Y Pos
+        SBC #42                         ;Sprite 6.Y = Car.Y - 42
+        STA $D00D                       ;Sprite 6 Y Pos (Central Headlight)
         SEC
-        SBC #$20     ;#%00100000
-        STA $D00B    ;Sprite 5 Y Pos
-        STA $D009    ;Sprite 4 Y Pos
-        LDA $D00E    ;Sprite 7 X Pos
+        SBC #32                         ;Sprite 5/4.Y = Car.Y - 74 (-42 - 32)
+        STA $D00B                       ;Sprite 5 Y Pos (Top-Right headlight)
+        STA $D009                       ;Sprite 4 Y Pos (Top-Left headlight)
+
+        ; Adjust X position
+        LDA $D00E                       ;Sprite 7 X Pos
         CLC
-        ADC #$0A     ;#%00001010
-        STA $D00A    ;Sprite 5 X Pos
+        ADC #10                         ;Sprite 5.X = Hero.X + 10
+        STA $D00A                       ;Sprite 5 X Pos (Top-Right headlight)
         SEC
-        SBC #$18     ;#%00011000
-        STA $D00C    ;Sprite 6 X Pos
+        SBC #24                         ;Sprite 6.X = Hero.X - 14 (10 - 24 )
+        STA $D00C                       ;Sprite 6 X Pos (Central Headlight)
         SEC
-        SBC #$18     ;#%00011000
-        STA $D008    ;Sprite 4 X Pos
+        SBC #24                         ;Sprite 6.X = Hero.X - 38 (10 - 24 - 24)
+        STA $D008                       ;Sprite 4 X Pos (Top-Left headlight)
 
 _L13    LDA ZP_IS_GAME_OVER
         BEQ _L14
@@ -1822,12 +1831,14 @@ _L14    LDA ZP_COLLISION_DETECTED
 _L15    JMP jEB34
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-fEC8B   .BYTE $79,$79,$79,$79,$79,$79,$79,$91
+START_TOP_ROW_BANNER
+        .BYTE $79,$79,$79,$79,$79,$79,$79,$91
         .BYTE $92,$79,$79,$95,$96,$79,$79,$7A
         .BYTE $7E,$79,$79,$85,$8E,$79,$79,$95
         .BYTE $96,$79,$79,$79,$79,$79,$79,$79
 
-fECAB   .BYTE $79,$79,$79,$79,$79,$79,$79,$93
+START_BOTTOM_ROW_BANNER
+        .BYTE $79,$79,$79,$79,$79,$79,$79,$93
         .BYTE $94,$79,$79,$97,$79,$79,$79,$7F
         .BYTE $80,$79,$79,$8F,$90,$79,$79,$97
         .BYTE $79,$79,$79,$79,$79,$79,$79,$79
