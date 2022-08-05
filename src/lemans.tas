@@ -91,8 +91,8 @@ a45 = $45
 a46 = $46
 a47 = $47
 a48 = $48
-a49 = $49
-ZP_TMP = $4A
+ZP_TMP_49 = $49
+ZP_TMP_4A = $4A
 a4B = $4B
 a4C = $4C
 a4D = $4D
@@ -1038,7 +1038,7 @@ _L02    LDA f0079,Y
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sE734   STY ZP_TMP
+sE734   STY ZP_TMP_4A
         LDY #$05     ;#%00000101
 _L00    ASL a08
         ROL a09
@@ -1055,7 +1055,7 @@ _L00    ASL a08
         STA a08
         DEY
         BPL _L00
-        LDY ZP_TMP
+        LDY ZP_TMP_4A
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -2145,21 +2145,24 @@ _L04    LDA ZP_SPEED_LO
         STA ZP_SPEED_HI
         JMP _L06
 
-_L05    LDY ZP_SPEED_HI
-        LDA fF2F3,Y
+_L05    LDY ZP_SPEED_HI                 ;Values from 0 to 3 (0xx, 1xx, 2xx, 3xx)
+        LDA ACCELERATION_TBL_LO,Y
         STA a68
-        LDA fF2F7,Y
+        LDA ACCELERATION_TBL_HI,Y
         STA a69
+
         LDA a29
         CLC
         ADC a68
         STA a29
+
         LDA ZP_SPEED_LO
         ADC a69
         STA ZP_SPEED_LO
         LDA ZP_SPEED_HI
-        ADC #$00     ;#%00000000
+        ADC #$00
         STA ZP_SPEED_HI
+
 _L06    LDA #$20     ;#%00100000
         SEC
         SBC ZP_SPEED_LO
@@ -2365,37 +2368,41 @@ _L21    LDA #$00     ;#%00000000
         STA a2D
         JSR sF227
 
-_L22    LDX #$03                ; Compare with sprites 0-3
+_L22    LDX #$03                ;Compare with sprites 0-3
 _L23    TXA
-        ASL A
-        STA a49
+        ASL A                   ;A = X * 2
+        STA ZP_TMP_49           ;Store value in tmp variable
         TAY
-        LDA $D001,Y  ;Sprite 0 Y Pos
-        CMP #$1D     ;#%00011101
-        BCC _L26
-        CMP #$32     ;#%00110010
-        BCC _L25
+        LDA $D001,Y             ;Sprite 0 Y Pos
+        CMP #29
+        BCC _L26                ;EnemyCar.Y < 29
+        CMP #50
+        BCC _L25                ;EnemyCar.Y < 50
+
         CPX a5A
         BNE _L24
-        LDA #$04     ;#%00000100
+        LDA #$04
         STA a5A
 _L24    JMP _L30
 
-_L25    STX a5A
+
+        ; 29 <= EnemyCar.Y < 50
+_L25    STX a5A                 ;X has Sprite Index
         JMP _L30
 
-_L26    LDA #$00     ;#%00000000
+        ; EnemyCar.Y < 29
+_L26    LDA #$00
         STA f6B,X
         CPX a5A
         BNE _L28
         LDA f30,X
         BNE _L30
-        LDA #$04     ;#%00000100
+        LDA #$04
         STA a5A
 _L27    JMP _L32
 
 _L28    LDA a5A
-        CMP #$04     ;#%00000100
+        CMP #$04
         BNE _L27
         LDA f30,X
         BEQ _L27
@@ -2406,9 +2413,9 @@ _L28    LDA a5A
         STX a5A
         JSR sE734
         LDA a08
-        AND #$07     ;#%00000111
+        AND #$07
         TAY
-        LDA fF29B,Y
+        LDA ENEMY_CAR_COLOR_TBL,Y
         STA $D027,X  ;Sprite 0 Color
         LDA aAB
         CMP #$06     ;#%00000110
@@ -2421,7 +2428,7 @@ _L28    LDA a5A
         AND #$3F     ;#%00111111
         CLC
         ADC #$6E     ;#%01101110
-        LDY a49
+        LDY ZP_TMP_49
         STA $D000,Y  ;Sprite 0 X Pos
         JSR sE734
         LDA a08
@@ -2440,11 +2447,11 @@ _L29    JSR sE734
         AND #$03     ;#%00000011
         TAY
         LDA fF2EF,Y
-        LDY a49
+        LDY ZP_TMP_49
         STA $D000,Y  ;Sprite 0 X Pos
         LDA #$01     ;#%00000001
         STA f5D,X
-_L30    LDY a49
+_L30    LDY ZP_TMP_49
         LDA a4D
         BNE _L31
         LDA f34,X
@@ -2465,7 +2472,7 @@ _L31    LDA f34,X
         STA $D001,Y  ;Sprite 0 Y Pos
         JMP _L33
 
-_L32    LDY a49
+_L32    LDY ZP_TMP_49
         LDA #$19     ;#%00011001
         STA $D001,Y  ;Sprite 0 Y Pos
 _L33    LDA ZP_ROAD_STATE
@@ -2506,7 +2513,7 @@ _L35    CMP #$B7     ;#%10110111
         BCC _L36
         LDA #$FF     ;#%11111111
         STA f4E,X
-_L36    LDY a49
+_L36    LDY ZP_TMP_49
         LDA $D001,Y  ;Sprite 0 Y Pos
         LSR A
         LSR A
@@ -2522,32 +2529,32 @@ _L36    LDY a49
         BNE _L38
 _L37    LDA #$F6        ;Enemy Car 00
         STA SPR_FRAME_PTR_00,X
-_L38    LDY a49
+_L38    LDY ZP_TMP_49
         LDA $D001,Y  ;Sprite 0 Y Pos
         CMP #$32     ;#%00110010
         BCC _L39
         CMP #$3C     ;#%00111100
         BCS _L39
 
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA f6B,X
-_L39    LDA $D001,Y  ;Sprite 0 Y Pos
-        CMP $D00F    ;Sprite 7 Y Pos
+_L39    LDA $D001,Y                     ;Sprite 0 Y Pos
+        CMP $D00F                       ;Sprite 7 Y Pos
         BCC _L40
 
         LDA f6B,X
         BEQ _L40
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA f6B,X
 
         INC ZP_PASSED_CARS_TOTAL
         LDA ZP_PASSED_CARS_TOTAL
-        CMP #10                 ;Passed cars >  10
+        CMP #10                         ;Passed cars >=  10
         BCC _L40
-        LDY #$00                ;Passed cars = 0
+        LDY #$00                        ;Passed cars = 0
         STY ZP_PASSED_CARS_TOTAL
         INY
-        STY ZP_ADD_1000_PTS                 ;Trigger Bonus Points (???)
+        STY ZP_ADD_1000_PTS             ;Trigger Bonus Points (???)
 _L40    DEX
         BMI _L41
         JMP _L23
@@ -2676,7 +2683,9 @@ bF27C   LSR a2D
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-fF29B   .BYTE $02,$03,$05,$07,$08,$09,$0A,$0D
+        ; Colors of the enemy car
+ENEMY_CAR_COLOR_TBL
+        .BYTE $02,$03,$05,$07,$08,$09,$0A,$0D
 fF2A3   .BYTE $00,$00,$00,$00,$00,$00,$80,$00
         .BYTE $80,$00,$80,$00,$80,$30,$00,$A0
         .BYTE $60,$20,$00,$D0,$98,$70,$35,$10
@@ -2688,8 +2697,11 @@ fF2C3   .BYTE $10,$0C,$0A,$09,$08,$07,$06,$06
 fF2E3   .BYTE $00,$0A,$14,$1E,$FE,$FD,$FB,$F7
         .BYTE $01,$02,$04,$08
 fF2EF   .BYTE $51,$6B,$B3,$CD
-fF2F3   .BYTE $00,$00,$40,$08
-fF2F7   .BYTE $03,$01,$00,$00
+        ; Related to Speed
+ACCELERATION_TBL_LO
+        .BYTE $00,$00,$40,$08
+ACCELERATION_TBL_HI
+        .BYTE $03,$01,$00,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Check for passed cars (?)
@@ -2771,7 +2783,7 @@ _L04    LDA PASSED_CARS_POS_LO,Y
         STA ZP_SCREEN_PTR_LO
         LDA PASSED_CARS_POS_HI,Y
         STA ZP_SCREEN_PTR_HI
-        STY a49
+        STY ZP_TMP_49
         LDX #$03
 _L05    CPY ZP_PASSED_CARS_TOTAL
         BCC _L06
@@ -2780,7 +2792,7 @@ _L05    CPY ZP_PASSED_CARS_TOTAL
 _L06    LDA PASSED_CARS_CHAR_TBL,X
 _L07    LDY PASSED_CARS_OFFSET,X
         STA (ZP_SCREEN_PTR_LO),Y
-        LDY a49
+        LDY ZP_TMP_49
         DEX
         BPL _L05
         DEY
