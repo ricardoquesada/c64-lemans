@@ -83,7 +83,7 @@ a3B = $3B
 a3C = $3C
 a3D = $3D
 a3E = $3E
-a41 = $41
+ZP_PIXELS_TO_MOVE_CAR = $41
 a42 = $42
 ZP_FRAME_PTR_IDX = $43
 a44 = $44
@@ -453,7 +453,7 @@ INIT_GAME
         LDA #$04
         STA a5A
         LDA #$06
-        STA a41
+        STA ZP_PIXELS_TO_MOVE_CAR
         LDA #$07
         STA ZP_ROAD_STATE
         LDA #$0F
@@ -1689,13 +1689,13 @@ _L02    JSR DRAW_ROAD_TOP_ROW
         CMP $D00E    ;Sprite 7 X Pos
         BCC _L03
         LDA #$05    ;#%00000101
-        STA a41
+        STA ZP_PIXELS_TO_MOVE_CAR
         LDA #$00
         STA a42
         STA a64
         BEQ _L05
 _L03    LDA #$01
-        STA a41
+        STA ZP_PIXELS_TO_MOVE_CAR
         STA a42
         STA a64
         BNE _L05
@@ -1704,11 +1704,11 @@ _L04    JMP jECF3
 _L05    LDA f00AB,Y
         CMP #$01
         BNE _L06
-        LDA a41
+        LDA ZP_PIXELS_TO_MOVE_CAR
         CMP #$05     ;#%00000101
         BNE _L06
         LDA #$02     ;#%00000010
-        STA a41
+        STA ZP_PIXELS_TO_MOVE_CAR
         STA a64
 _L06    LDA f00AB,Y
         CMP #$06     ;#%00000110
@@ -1720,7 +1720,7 @@ _L06    LDA f00AB,Y
         CMP $D00E    ;Sprite 7 X Pos
         BCC _L07
         LDA #$01     ;#%00000001
-        STA a41
+        STA ZP_PIXELS_TO_MOVE_CAR
         STA a42
         STA a64
         LDA #$81     ;#%10000001
@@ -1732,8 +1732,10 @@ _L06    LDA f00AB,Y
         JMP jECF3
 
         ;Update car X position based on Paddle reading
-_L07    LDY a41
-_L08    LDA ZP_PADDLE_1_VALUE_INV
+_L07    LDY ZP_PIXELS_TO_MOVE_CAR
+_L08
+.IF USE_JOYSTICK == 0
+        LDA ZP_PADDLE_1_VALUE_INV
         CMP $D00E    ;Sprite 7 X Pos
         BCS _L09
 
@@ -1743,6 +1745,21 @@ _L08    LDA ZP_PADDLE_1_VALUE_INV
 
         ; Move Hero to the right
 _L09    INC $D00E    ;Sprite 7 X Pos
+.ELSE
+        LDA ZP_PADDLE_1_VALUE_INV
+        AND #%00000100                  ;Left (Active Low)
+        BNE _TEST_RIGHT
+
+        ; Move Hero to the left
+        DEC $D00E    ;Sprite 7 X Pos
+        JMP _L10
+
+_TEST_RIGHT
+        LDA ZP_PADDLE_1_VALUE_INV
+        AND #%00001000                  ;Right (Active Low)
+        BNE _L10
+        INC $D00E    ;Sprite 7 X Pos
+.ENDIF
 _L10    DEY
         BPL _L08
 
@@ -2024,11 +2041,7 @@ IRQ_HANDLER_GAME_LOOP
 _L00    LDA #$40                ;#%01000000
         STA $DC00               ;CIA1: Data Port Register A
 
-.IF USE_JOYSTICK == 1
-        LDA $DC01
-        STA ZP_PADDLE_1_VALUE_INV
-        JMP _TEST_BUTTON
-.ELSE
+.IF USE_JOYSTICK == 0
         LDA $D419               ;Analog/Digital Converter: Game Paddle 1
         STA ZP_PADDLE_1_VALUE
 
@@ -2045,15 +2058,19 @@ _L01    LDA #$EC
         LDA a42
         CMP #$02
         BCS _L02
+.ELSE
+        LDA $DC01
+        STA ZP_PADDLE_1_VALUE_INV
+        JMP _TEST_BUTTON
 .ENDIF
 
 _TEST_BUTTON
 
         LDA $DC01               ;CIA1: Data Port Register B
-.IF USE_JOYSTICK == 1
-        AND #%00010000
-.ELSE
+.IF USE_JOYSTICK == 0
         AND #%00000100
+.ELSE
+        AND #%00010000
 .ENDIF
         BNE _L07
 
