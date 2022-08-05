@@ -1639,7 +1639,7 @@ jEB34
         ; Speed is 0
         LDA #$F4     ;Sprite pointer: Stopped car
         STA SPR_FRAME_PTR_07
-        JMP jEC0E
+        JMP _L11
 
 _L00    LDA ZP_ROAD_STATE
         CMP #$08     ;#%00001000
@@ -1693,66 +1693,69 @@ _L02    JSR DRAW_ROAD_TOP_ROW
         LDA #$00
         STA a42
         STA a64
-        BEQ bEBB8
+        BEQ _L05
 _L03    LDA #$01
         STA a41
         STA a42
         STA a64
-        BNE bEBB8
+        BNE _L05
 _L04    JMP jECF3
 
-bEBB8   LDA f00AB,Y
+_L05    LDA f00AB,Y
         CMP #$01
-        BNE bEBCB
+        BNE _L06
         LDA a41
         CMP #$05     ;#%00000101
-        BNE bEBCB
+        BNE _L06
         LDA #$02     ;#%00000010
         STA a41
         STA a64
-bEBCB   LDA f00AB,Y
+_L06    LDA f00AB,Y
         CMP #$06     ;#%00000110
-        BNE bEBF9
+        BNE _L07
         LDA #$6C     ;#%01101100
         CMP $D00E    ;Sprite 7 X Pos
-        BCS bEBF9
+        BCS _L07
         LDA #$B3     ;#%10110011
         CMP $D00E    ;Sprite 7 X Pos
-        BCC bEBF9
+        BCC _L07
         LDA #$01     ;#%00000001
         STA a41
         STA a42
         STA a64
         LDA #$81     ;#%10000001
         CMP $D00E    ;Sprite 7 X Pos
-        BCS bEBF9
+        BCS _L07
         LDA #$9E     ;#%10011110
         CMP $D00E    ;Sprite 7 X Pos
-        BCC bEBF9
+        BCC _L07
         JMP jECF3
 
         ;Update car X position based on Paddle reading
-bEBF9   LDY a41
-bEBFB   LDA ZP_PADDLE_1_VALUE_INV
+_L07    LDY a41
+_L08    LDA ZP_PADDLE_1_VALUE_INV
         CMP $D00E    ;Sprite 7 X Pos
-        BCS bEC08
+        BCS _L09
+
+        ; Move Hero to the left
         DEC $D00E    ;Sprite 7 X Pos
-        JMP jEC0B
+        JMP _L10
 
-bEC08   INC $D00E    ;Sprite 7 X Pos
-jEC0B   DEY
-        BPL bEBFB
+        ; Move Hero to the right
+_L09    INC $D00E    ;Sprite 7 X Pos
+_L10    DEY
+        BPL _L08
 
-jEC0E   LDA a25
-        BEQ bEC7A
+_L11    LDA a25
+        BEQ _L13
         CMP #$01     ;#%00000001
-        BNE bEC21
+        BNE _L12
         LDA $D015    ;Sprite display Enable
         AND #$8F     ;#%10001111
         STA $D015    ;Sprite display Enable
-        JMP bEC7A
+        JMP _L13
 
-bEC21   LDA $D015    ;Sprite display Enable
+_L12    LDA $D015    ;Sprite display Enable
         ORA #$70     ;#%01110000
         STA $D015    ;Sprite display Enable
         LDA #$70     ;#%01110000
@@ -1791,15 +1794,15 @@ bEC21   LDA $D015    ;Sprite display Enable
         SBC #$18     ;#%00011000
         STA $D008    ;Sprite 4 X Pos
 
-bEC7A   LDA ZP_IS_GAME_OVER
-        BEQ bEC81
+_L13    LDA ZP_IS_GAME_OVER
+        BEQ _L14
         JSR GAME_OVER
 
-bEC81   LDA ZP_COLLISION_DETECTED
-        BEQ bEC88
+_L14    LDA ZP_COLLISION_DETECTED
+        BEQ _L15
         JMP jECF3
 
-bEC88   JMP jEB34
+_L15    JMP jEB34
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 fEC8B   .BYTE $79,$79,$79,$79,$79,$79,$79,$91
