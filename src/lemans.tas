@@ -68,10 +68,10 @@ a2C = $2C
 a2D = $2D
 a2E = $2E
 a2F = $2F
-a30 = $30
-a31 = $31
-a32 = $32
-a33 = $33
+ZP_UNUSED_30 = $30
+ZP_UNUSED_31 = $31
+ZP_UNUSED_32 = $32
+ZP_UNUSED_33 = $33
 a34 = $34
 a35 = $35
 a36 = $36
@@ -135,8 +135,8 @@ a75 = $75
 a76 = $76
 a77 = $77
 a78 = $78
-ZP_UNUSED_00 = $79
-ZP_UNUSED_01 = $92
+ZP_UNUSED_79 = $79
+ZP_UNUSED_92 = $92
 aAB = $AB
 aC3 = $C3
 ;
@@ -434,10 +434,10 @@ INIT_GAME
         STX a35
         STX a36
         STX a37
-        STX a30
-        STX a31
-        STX a32
-        STX a33
+        STX ZP_UNUSED_30
+        STX ZP_UNUSED_31
+        STX ZP_UNUSED_32
+        STX ZP_UNUSED_33
         STX $D017               ;Sprites Expand 2x Vertical (Y)
         STX $D01B               ;Sprite to Background Display Priority
         STX $D01D               ;Sprites Expand 2x Horizontal (X)
@@ -1248,7 +1248,7 @@ DRAW_ROAD_TOP_ROW
         DEC ZP_HEADLIGHT_DURATION
 
         ; Paint top row with "full" characters
-_L00    LDY #$1F                ;32 columns
+_L00    LDY #31                 ;32 columns
         LDA #$44                ;"Full" character
 _L01    STA SCREEN_RAM,Y
         DEY
@@ -1256,7 +1256,7 @@ _L01    STA SCREEN_RAM,Y
 
         LDY ZP_ROAD_STATE
         LDA ROAD_COLOR_TBL,Y
-        LDX #$1F                ;32 columns
+        LDX #31                 ;32 columns
 _L02    STA COLOR_RAM,X
         DEX
         BPL _L02
@@ -1451,13 +1451,13 @@ DRAW_SHOULDERS
         ASL A                           ;A *= 2
         CLC
         ADC #24                         ;A += 24
-        STA ZP_UNUSED_00
+        STA ZP_UNUSED_79
 
         LDA SHOULDER_RIGHT_IDX          ;A = SHOULDER_RIGHT_IDX
         ASL A                           ;A *= 2
         CLC
         ADC #24                         ;A += 24
-        STA ZP_UNUSED_01
+        STA ZP_UNUSED_92
 
         LDA SHOULDER_RIGHT_IDX          ;A = SHOULDER_RIGHT_IDX
         LSR A
@@ -1577,9 +1577,9 @@ _L03    DEY
         BPL _L01
 
         LDA #$38
-        STA ZP_UNUSED_00
+        STA ZP_UNUSED_79
         LDA #$E0
-        STA ZP_UNUSED_01
+        STA ZP_UNUSED_92
         LDA #$06
         STA aAB
         RTS
@@ -1664,16 +1664,16 @@ _L01    STY ZP_TMP_REG_00
         STA ZP_ROAD_STATE
 _L02    JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
-        JSR sEE10
+        JSR INCREMENT_SCORE
         JSR sEDDF
 
         ; Check collision with shoulder
-        LDA $D00F               ; A = Sprite 7 Y Pos
+        LDA $D00F               ;A = Sprite 7 Y Pos
         LSR A
         LSR A
-        LSR A                   ; A /= 8
+        LSR A                   ;A /= 8
         SEC
-        SBC #$05                ; A -= 5
+        SBC #$05                ;A -= 5
         TAY
         LDA f0079,Y
         CMP $D00E               ;Sprite 7 X Pos
@@ -1698,15 +1698,20 @@ _L02    JSR DRAW_ROAD_TOP_ROW
         LDA #$05
         STA ZP_PIXELS_TO_MOVE_CAR
 
+        ; Car is not colliding with shoulder
+        ; NOTE(riq): Disable Rumble here
         LDA #$00
         STA ZP_BRAKE_FORCE
         STA ZP_SOUND_EFFECT_TO_PLAY
         BEQ _L05
 
+        ; Car is colliding with shoulder,
+        ; but this is not a crash yet, just warning.
+        ; NOTE(riq): Enable Rumble here
 _L03    LDA #$01
-        STA ZP_PIXELS_TO_MOVE_CAR
-        STA ZP_BRAKE_FORCE
-        STA ZP_SOUND_EFFECT_TO_PLAY
+        STA ZP_PIXELS_TO_MOVE_CAR       ;Limit car horizontal movement
+        STA ZP_BRAKE_FORCE              ;Apply brake, so car cannot speed up
+        STA ZP_SOUND_EFFECT_TO_PLAY     ;Play noise
         BNE _L05
 
 _L04    JMP DO_COLLISION
@@ -1910,7 +1915,7 @@ _L00    STY ZP_TMP_REG_01
 
 _L01    JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
-        JSR sEE10
+        JSR INCREMENT_SCORE
         JSR sEDDF
         LDY ZP_TMP_REG_01
         DEY
@@ -1926,7 +1931,7 @@ _L03    CPY #$32        ;#%00110010
         STY $D00E    ;Sprite 7 X Pos
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
-        JSR sEE10
+        JSR INCREMENT_SCORE
         JSR sEDDF
 
         LDA ZP_IS_GAME_OVER
@@ -1942,7 +1947,7 @@ _L05    LDA ZP_SPEED_LO
         BEQ _L07
 _L06    JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
-        JSR sEE10
+        JSR INCREMENT_SCORE
         JSR sEDDF
 
         LDA ZP_IS_GAME_OVER
@@ -1985,22 +1990,23 @@ _L09    LDA #$FA     ;#%11111010
         JMP MAIN_LOOP
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Called after SCROLL_DOWN
 sEDDF   LDA a3A
         STA a3D
         LDA a3B
         STA a3E
-bEDE7   LDA a3D
+_L00    LDA a3D
         SEC
         SBC #$01     ;#%00000001
         STA a3D
         LDA a3E
         SBC #$00     ;#%00000000
         STA a3E
-        BCS bEDE7
+        BCS _L00
         LDY a44
         INY
         CPY #$02     ;#%00000010
-        BCC bEE0D
+        BCC _L01
         LDY #$00     ;#%00000000
 
         ; Switch between "stopped car" and "moving car"
@@ -2012,45 +2018,59 @@ bEDE7   LDA a3D
         ADC #$F4     ;#%11110100
         STA SPR_FRAME_PTR_07
 
-bEE0D   STY a44
+_L01    STY a44
         RTS
 
-sEE10   SED
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+INCREMENT_SCORE
+        ; Score++
+        SED
         LDA ZP_SCORE_01
         CLC
-        ADC #$01     ;#%00000001
+        ADC #$01
         STA ZP_SCORE_01
         LDA ZP_SCORE_02
-        ADC #$00     ;#%00000000
+        ADC #$00
         STA ZP_SCORE_02
         LDA ZP_SCORE_03
-        ADC #$00     ;#%00000000
+        ADC #$00
         STA ZP_SCORE_03
+
         CLD
         LDA ZP_SCORE_01
-        BNE bEE35
+        BNE _L00
         LDA ZP_SCORE_02
-        AND #$1F     ;#%00011111
-        BNE bEE35
+        AND #$1F
+        BNE _L00
+
         INC a53
-        LDA #$5F     ;#%01011111
+        LDA #$5F
         STA a55
-bEE35   LDY #$01     ;#%00000001
+
+        ; Unused / Incomplete code
+        ; Possible incomplete code about rewarding something
+        ; when certain points were reached
+
+_L00    LDY #$01
         LDA ZP_SCORE_02
-        CMP #$40     ;#%01000000
-        BEQ bEE4B
-        CMP #$20     ;#%00100000
-        BEQ bEE4D
-        CMP #$05     ;#%00000101
-        BEQ bEE4F
-        CMP #$02     ;#%00000010
-        BEQ bEE51
-        BNE bEE53
-bEE4B   STY a33
-bEE4D   STY a32
-bEE4F   STY a31
-bEE51   STY a30
-bEE53   RTS
+        CMP #$40
+        BEQ _L01
+
+        CMP #$20
+        BEQ _L02
+
+        CMP #$05
+        BEQ _L03
+
+        CMP #$02
+        BEQ _L04
+        BNE _L05
+
+_L01    STY ZP_UNUSED_33                 ;Score is 40xx ? (unused)
+_L02    STY ZP_UNUSED_32                 ;Score is 20xx ? (unused)
+_L03    STY ZP_UNUSED_31                 ;Score is 05xx ? (unused)
+_L04    STY ZP_UNUSED_30                 ;Score is 02xx ? (unused)
+_L05    RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 IRQ_HANDLER_GAME_LOOP
@@ -2945,14 +2965,14 @@ _L01    INC a13
         STA ZP_SOUND_EFFECT_TO_PLAY
         STA a65
         STA a66
-        STA a30
-        STA a31
-        STA a32
-        STA a33
+        STA ZP_UNUSED_30
+        STA ZP_UNUSED_31
+        STA ZP_UNUSED_32
+        STA ZP_UNUSED_33
         LDA #$F0                ;#%11110000
         STA $D417               ;Filter Resonance Control / Voice Input Control
 
-        LDY #$4B                ;75 rows to scroll down
+        LDY #75                 ;75 rows to scroll down
 _L02    STY ZP_TMP_REG_01
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
@@ -2961,10 +2981,10 @@ _L02    STY ZP_TMP_REG_01
         DEY
         BNE _L02
 
-        LDY #$1F     ;#%00011111
-_L03    LDA fF589,Y
+        LDY #31                 ;32 columns
+_L03    LDA RACE_OVER_BOTTOM_ROW_BANNER,Y
         STA SCREEN_RAM,Y
-        LDA #$0A     ;#%00001010
+        LDA #$0A                ;Color Light Red
         STA COLOR_RAM,Y
         DEY
         BPL _L03
@@ -2972,15 +2992,15 @@ _L03    LDA fF589,Y
         JSR SCROLL_DOWN
         JSR sEDDF
 
-        LDY #$1F     ;#%00011111
-_L04    LDA fF569,Y
+        LDY #31                 ;32 columns
+_L04    LDA RACE_OVER_TOP_ROW_BANNER,Y
         STA SCREEN_RAM,Y
         DEY
         BPL _L04
 
         JSR SCROLL_DOWN
         JSR sEDDF
-        LDY #$0A     ;#%00001010
+        LDY #10
 _L05    STY ZP_TMP_REG_01
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
@@ -3046,11 +3066,13 @@ _L00    STA $D000,X  ;Sprite 0 X Pos
         JMP SET_IRQ_TO_WAIT_BUTTON
 
 fF564   .BYTE $40,$3A,$34,$2F,$22
-fF569   .BYTE $79,$79,$79,$79,$79,$79,$85,$8E
+RACE_OVER_TOP_ROW_BANNER
+        .BYTE $79,$79,$79,$79,$79,$79,$85,$8E
         .BYTE $7A,$7E,$7A,$7B,$85,$86,$79,$79
         .BYTE $79,$79,$7A,$7E,$8A,$8B,$85,$86
         .BYTE $85,$8E,$79,$79,$79,$79,$79,$79
-fF589   .BYTE $79,$79,$79,$79,$79,$79,$8F,$90
+RACE_OVER_BOTTOM_ROW_BANNER
+        .BYTE $79,$79,$79,$79,$79,$79,$8F,$90
         .BYTE $7F,$80,$7C,$7D,$87,$88,$79,$79
         .BYTE $79,$79,$7C,$89,$8C,$8D,$87,$88
         .BYTE $8F,$90,$79,$79,$79,$79,$79,$79
