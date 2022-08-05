@@ -1,3 +1,13 @@
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; LeMans for Commodore 64                                                      ;
+; Disassembly                                                                  ;
+;
+; by riq / L.I.A
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+
+; Compile-time variables
+USE_JOYSTICK .var 0             ;Set it to 1 to use Joystick instead of Paddle
+
 ;
 ; **** ZP FIELDS ****
 ;
@@ -115,8 +125,8 @@ a6B = $6B
 a6C = $6C
 a6D = $6D
 a6E = $6E
-a6F = $6F
-a70 = $70
+ZP_PASSED_CARS_TOTAL = $6F
+ZP_ADD_1000_PTS = $70
 a71 = $71
 a72 = $72
 a73 = $73
@@ -129,10 +139,6 @@ ZP_UNUSED_00 = $79
 ZP_UNUSED_01 = $92
 aAB = $AB
 aC3 = $C3
-;
-; **** ZP POINTERS ****
-;
-
 ;
 ; **** FIELDS ****
 ;
@@ -159,8 +165,6 @@ p0002 = $0002
 SCORE_OFFSET = SCREEN_RAM + 40 * 2 + 32
 TIME_OFFSET = SCREEN_RAM + 40 * 5 + 35
 HI_SCORE_OFFSET = SCREEN_RAM + 40 * 8 + 32
-p2800 = $2800
-pD807 = $D807
 
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -380,6 +384,7 @@ _L00    LDA #<IRQ_HANDLER_MAIN  ;#%00001000
 
 _L01    JMP IRQ_HANDLER_MAIN
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 INIT_GAME
         SEI
         LDX #$FA                ;Stack
@@ -420,8 +425,8 @@ INIT_GAME
         STX a6C
         STX a6D
         STX a6E
-        STX a6F
-        STX a70
+        STX ZP_PASSED_CARS_TOTAL
+        STX ZP_ADD_1000_PTS
         STX a71
         STX a55
         STX a77
@@ -663,12 +668,12 @@ bE2FE   LDY PASSED_CARS_OFFSET,X
         LDA #$90     ;#%10010000
         STA $D40C    ;Voice 2: Attack / Decay Cycle Control
         SEI
-        LDA #<IRQ_HANDLER_PADDLE
+        LDA #<IRQ_HANDLER_GAME_LOOP
         STA ZP_IRQ_LO
-        LDA #>IRQ_HANDLER_PADDLE
+        LDA #>IRQ_HANDLER_GAME_LOOP
         STA ZP_IRQ_HI
         CLI
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA a11
         JMP jEB34
 
@@ -865,7 +870,7 @@ _L03    LDA SCORE_MSG,Y
         STA COLOR_RAM+40*1+32,Y         ;Color for 'Score' txt
         STA COLOR_RAM+40*10+32,Y        ;Color for 'Speed' txt
         STA COLOR_RAM+40*14+32,Y        ;Color for 'Extended' txt
-        STA COLOR_RAM+40*15+32,Y        ;Color for 'Time' txt
+        STA COLOR_RAM+40*15+32,Y        ;Color for '    Time' txt
 
         LDA #$03                        ;Cyan
         STA COLOR_RAM+40*4+32,Y         ;Color for 'Time' txt
@@ -960,9 +965,9 @@ _L11    STA (ZP_TMP_PTR_LO),Y
         STA ZP_TMP_PTR_HI
         DEX
         BPL _L08
-        LDA #<pD807  ;#%00000111
+        LDA #<COLOR_RAM+7  ;#%00000111
         STA ZP_TMP_PTR_LO
-        LDA #>pD807  ;#%11011000
+        LDA #>COLOR_RAM+7  ;#%11011000
         STA ZP_TMP_PTR_HI
         LDX #$18     ;#%00011000
 _L12    LDY #$13     ;#%00010011
@@ -1541,7 +1546,7 @@ _L07    STA (ZP_TMP_PTR_LO),Y
 DRAW_SPLIT_SCREEN
         LDY #$05     ;#%00000101
         LDA #$0E     ;#%00001110
-_L00    STA pD807,Y
+_L00    STA COLOR_RAM+7,Y
         STA COLOR_RAM+19,Y
         DEY
         BPL _L00
@@ -1625,7 +1630,8 @@ fEAF4   .BYTE $00,$00,$01,$01,$01,$02,$02,$02
         .BYTE $02,$02,$02,$01,$01,$01,$00,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-jEB34   LDA ZP_SPEED_LO
+jEB34
+        LDA ZP_SPEED_LO
         BNE _L00
         LDA ZP_SPEED_HI
         BNE _L00
@@ -1637,25 +1643,25 @@ jEB34   LDA ZP_SPEED_LO
 
 _L00    LDA ZP_ROAD_STATE
         CMP #$08     ;#%00001000
-        BEQ bEB66
+        BEQ _L02
 
         INC ZP_TMP_REG_01
         LDA ZP_TMP_REG_01
         CMP #$FA     ;#%11111010
-        BCC bEB66
+        BCC _L02
 
         LDA #$00     ;#%00000000
         STA ZP_TMP_REG_01
         LDY ZP_TMP_REG_00
         INY
         CPY #$28     ;#%00101000
-        BCC bEB5F
+        BCC _L01
 
         LDY #$20     ;#%00100000
-bEB5F   STY ZP_TMP_REG_00
+_L01    STY ZP_TMP_REG_00
         LDA ROAD_STATE_TBL,Y
         STA ZP_ROAD_STATE
-bEB66   JSR DRAW_ROAD_TOP_ROW
+_L02    JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
         JSR sEE10
         JSR sEDDF
@@ -1668,35 +1674,35 @@ bEB66   JSR DRAW_ROAD_TOP_ROW
         TAY
         LDA f0079,Y
         CMP $D00E    ;Sprite 7 X Pos
-        BCS bEBB5
+        BCS _L04
         CLC
         ADC #$18     ;#%00011000
         CMP $D00E    ;Sprite 7 X Pos
-        BCS bEBAB
+        BCS _L03
         LDA f0092,Y
         CLC
         ADC #$02     ;#%00000010
         CMP $D00E    ;Sprite 7 X Pos
-        BCC bEBB5
+        BCC _L04
         SEC
         SBC #$16     ;#%00010110
         CMP $D00E    ;Sprite 7 X Pos
-        BCC bEBAB
+        BCC _L03
         LDA #$05    ;#%00000101
         STA a41
-        LDA #$00    ;#%00000000
+        LDA #$00
         STA a42
         STA a64
         BEQ bEBB8
-bEBAB   LDA #$01     ;#%00000001
+_L03    LDA #$01
         STA a41
         STA a42
         STA a64
         BNE bEBB8
-bEBB5   JMP jECF3
+_L04    JMP jECF3
 
 bEBB8   LDA f00AB,Y
-        CMP #$01     ;#%00000001
+        CMP #$01
         BNE bEBCB
         LDA a41
         CMP #$05     ;#%00000101
@@ -1918,7 +1924,7 @@ _L07    LDA $D015    ;Sprite display Enable
         STA a42
         STA a59
         STA ZP_COLLISION_DETECTED
-        STA a6F
+        STA ZP_PASSED_CARS_TOTAL
         STA a77
         LDA #$3C     ;#%00111100
         STA a52
@@ -2006,7 +2012,7 @@ bEE51   STY a30
 bEE53   RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-IRQ_HANDLER_PADDLE
+IRQ_HANDLER_GAME_LOOP
         LDA a13
         BEQ _L00
         SED
@@ -2284,7 +2290,7 @@ _L21    LDA #$00     ;#%00000000
         STA a2D
         JSR sF227
 
-_L22    LDX #$03     ;#%00000011
+_L22    LDX #$03                ; Compare with sprites 0-3
 _L23    TXA
         ASL A
         STA a49
@@ -2447,23 +2453,26 @@ _L38    LDY a49
         BCC _L39
         CMP #$3C     ;#%00111100
         BCS _L39
+
         LDA #$01     ;#%00000001
         STA f6B,X
 _L39    LDA $D001,Y  ;Sprite 0 Y Pos
         CMP $D00F    ;Sprite 7 Y Pos
         BCC _L40
+
         LDA f6B,X
         BEQ _L40
         LDA #$00     ;#%00000000
         STA f6B,X
-        INC a6F
-        LDA a6F
-        CMP #$0A     ;#%00001010
+
+        INC ZP_PASSED_CARS_TOTAL
+        LDA ZP_PASSED_CARS_TOTAL
+        CMP #10                 ;Passed cars >  10
         BCC _L40
-        LDY #$00     ;#%00000000
-        STY a6F
+        LDY #$00                ;Passed cars = 0
+        STY ZP_PASSED_CARS_TOTAL
         INY
-        STY a70
+        STY ZP_ADD_1000_PTS                 ;Trigger Bonus Points (???)
 _L40    DEX
         BMI _L41
         JMP _L23
@@ -2689,7 +2698,7 @@ _L04    LDA PASSED_CARS_POS_LO,Y
         STA ZP_SCREEN_PTR_HI
         STY a49
         LDX #$03
-_L05    CPY a6F
+_L05    CPY ZP_PASSED_CARS_TOTAL
         BCC _L06
         LDA #$20                        ;Space
         BNE _L07
@@ -2701,30 +2710,38 @@ _L07    LDY PASSED_CARS_OFFSET,X
         BPL _L05
         DEY
         BPL _L04
-        LDA a70
+
+        LDA ZP_ADD_1000_PTS
         BEQ _L10
-        LDA #>p2800  ;#%00101000
+
+        ; Score += 100
+        ; The player sees +1000, but the rightmost zero
+        ; doesn't get updated.
+        LDA #40
         STA a71
-        LDA #<p2800  ;#%00000000
-        STA a70
+        LDA #$00
+        STA ZP_ADD_1000_PTS
+
         SED
         LDA ZP_SCORE_02
         CLC
-        ADC #$01     ;#%00000001
+        ADC #$01                        ;Score_02 += 01
         STA ZP_SCORE_02
         LDA ZP_SCORE_03
-        ADC #$00     ;#%00000000
+        ADC #$00                        ;Add possible carry
         STA ZP_SCORE_03
+
         CLD
         LDA ZP_SCORE_02
-        AND #$1F     ;#%00011111
+        AND #$1F                        ;#%00011111
         BNE _L08
+
         INC a53
-        LDA #$5F     ;#%01011111
+        LDA #$5F                        ;#%01011111
         STA a55
 
         ; Print "BONUS 1000 PTS" message
-_L08    LDY #$07     ;#%00000111
+_L08    LDY #$07
 _L09    LDA BONUS_MSG,Y
         STA SCREEN_RAM+40*23+32,Y
         LDA THOUSAND_PTS_MSG,Y
@@ -2736,12 +2753,12 @@ _L10    LDA a71
         BEQ _L13
         DEC a71
         LDA a71
-        AND #$04     ;#%00000100
+        AND #$04
         BEQ _L11
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA a66
         BNE _L13
-_L11    LDA #$00     ;#%00000000
+_L11    LDA #$00
         STA a66
         LDA a71
         BNE _L13
