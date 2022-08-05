@@ -57,7 +57,7 @@ ZP_DIGIT_TO_PRINT = $21         ;Digit to print. Values from 0 to 9
 ZP_BCD_TO_PRINT = $22           ;Encoded in BCD
 ZP_TMP_REG_00 = $23
 ZP_TMP_REG_01 = $24
-a25 = $25
+ZP_HEADLIGHT_DURATION = $25
 a26 = $26
 ZP_SPEED_LO = $27
 ZP_SPEED_HI = $28
@@ -188,8 +188,8 @@ HI_SCORE_OFFSET = SCREEN_RAM + 40 * 8 + 32
 ; Sprites:
 ; 0-3: Enemy cars
 ; 4: PIT / Top-Left Headlight
-; 5: Top-Right Headlight
-; 6: Split road ahead / Central Headlight
+; 5: Top-Right Headlight / Flame 01
+; 6: Split road ahead / Central Headlight / Flame 02
 ; 7: Hero car
 ;
 ; Road states (ZP_ROAD_STATE)
@@ -403,7 +403,7 @@ INIT_GAME
         STX a26
         STX ZP_SPEED_LO
         STX ZP_SPEED_HI
-        STX a25
+        STX ZP_HEADLIGHT_DURATION
         STX a20
         STX a42
         STX ZP_FRAME_PTR_IDX
@@ -675,7 +675,7 @@ bE2FE   LDY PASSED_CARS_OFFSET,X
         CLI
         LDA #$01
         STA a11
-        JMP jEB34
+        JMP MAIN_LOOP
 
         ; FIXME: What is this about
 COLOR_RAM_POS_LO
@@ -1243,9 +1243,9 @@ fE87E   .BYTE $5E,$60,$64,$66,$6A,$66,$66,$60
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Draw road (?)
 DRAW_ROAD_TOP_ROW
-        LDA a25
+        LDA ZP_HEADLIGHT_DURATION
         BEQ _L00
-        DEC a25
+        DEC ZP_HEADLIGHT_DURATION
 
         ; Paint top row with "full" characters
 _L00    LDY #$1F                ;32 columns
@@ -1298,8 +1298,8 @@ _L05    INC a1B
         BNE _STATES_00_01
 
         ; Road State 02: Night
-        LDA #$14     ;#%00010100
-        STA a25
+        LDA #20
+        STA ZP_HEADLIGHT_DURATION
 
         ; Road States 00, 01
 _STATES_00_01
@@ -1630,7 +1630,8 @@ fEAF4   .BYTE $00,$00,$01,$01,$01,$02,$02,$02
         .BYTE $02,$02,$02,$01,$01,$01,$00,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-jEB34
+; Not 100% sure that is the the main loop, but looks like it
+MAIN_LOOP
         LDA ZP_SPEED_LO
         BNE _L00
         LDA ZP_SPEED_HI
@@ -1657,7 +1658,7 @@ _L00    LDA ZP_ROAD_STATE
         CPY #$28     ;#%00101000
         BCC _L01
 
-        LDY #$20     ;#%00100000
+        LDY #32
 _L01    STY ZP_TMP_REG_00
         LDA ROAD_STATE_TBL,Y
         STA ZP_ROAD_STATE
@@ -1665,41 +1666,50 @@ _L02    JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
         JSR sEE10
         JSR sEDDF
-        LDA $D00F    ;Sprite 7 Y Pos
+
+        ; Check collision with shoulder
+        LDA $D00F               ; A = Sprite 7 Y Pos
         LSR A
         LSR A
-        LSR A
+        LSR A                   ; A /= 8
         SEC
-        SBC #$05     ;#%00000101
+        SBC #$05                ; A -= 5
         TAY
         LDA f0079,Y
-        CMP $D00E    ;Sprite 7 X Pos
+        CMP $D00E               ;Sprite 7 X Pos
         BCS _L04
+
         CLC
-        ADC #$18     ;#%00011000
-        CMP $D00E    ;Sprite 7 X Pos
+        ADC #24
+        CMP $D00E               ;Sprite 7 X Pos
         BCS _L03
+
         LDA f0092,Y
         CLC
-        ADC #$02     ;#%00000010
-        CMP $D00E    ;Sprite 7 X Pos
+        ADC #$02
+        CMP $D00E               ;Sprite 7 X Pos
         BCC _L04
+
         SEC
-        SBC #$16     ;#%00010110
-        CMP $D00E    ;Sprite 7 X Pos
+        SBC #22
+        CMP $D00E               ;Sprite 7 X Pos
         BCC _L03
-        LDA #$05    ;#%00000101
+
+        LDA #$05
         STA ZP_PIXELS_TO_MOVE_CAR
+
         LDA #$00
         STA a42
         STA a64
         BEQ _L05
+
 _L03    LDA #$01
         STA ZP_PIXELS_TO_MOVE_CAR
         STA a42
         STA a64
         BNE _L05
-_L04    JMP jECF3
+
+_L04    JMP DO_COLLISION
 
 _L05    LDA f00AB,Y
         CMP #$01
@@ -1729,13 +1739,12 @@ _L06    LDA f00AB,Y
         LDA #$9E     ;#%10011110
         CMP $D00E    ;Sprite 7 X Pos
         BCC _L07
-        JMP jECF3
+        JMP DO_COLLISION
 
 _L07    LDY ZP_PIXELS_TO_MOVE_CAR
-_L08
 .IF USE_JOYSTICK == 0
         ;Update car X position based on Paddle reading
-        LDA ZP_PADDLE_1_VALUE_INV
+_L08    LDA ZP_PADDLE_1_VALUE_INV
         CMP $D00E    ;Sprite 7 X Pos
         BCS _L09
 
@@ -1747,7 +1756,7 @@ _L08
 _L09    INC $D00E    ;Sprite 7 X Pos
 .ELSE
         ;Update car X position based on Joystick #1
-        LDA ZP_PADDLE_1_VALUE_INV
+_L08    LDA ZP_PADDLE_1_VALUE_INV
         AND #%00000100                  ;Left (Active Low)
         BNE _TEST_RIGHT
 
@@ -1764,7 +1773,7 @@ _TEST_RIGHT
 _L10    DEY
         BPL _L08
 
-_L11    LDA a25
+_L11    LDA ZP_HEADLIGHT_DURATION
         BEQ _L13
         CMP #$01
         BNE _L12
@@ -1826,9 +1835,9 @@ _L13    LDA ZP_IS_GAME_OVER
 
 _L14    LDA ZP_COLLISION_DETECTED
         BEQ _L15
-        JMP jECF3
+        JMP DO_COLLISION
 
-_L15    JMP jEB34
+_L15    JMP MAIN_LOOP
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 START_TOP_ROW_BANNER
@@ -1852,7 +1861,8 @@ ROAD_STATE_TBL
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ;Collision detected, do the collision animation (?)
-jECF3   LDY #$02
+DO_COLLISION
+        LDY #$02
         STY a42
         DEY
         STY a59
@@ -1862,7 +1872,7 @@ jECF3   LDY #$02
         STY a65
         STY $D017                       ;Sprites Expand 2x Vertical (Y)
         STY $D01D                       ;Sprites Expand 2x Horizontal (X)
-        STY a25
+        STY ZP_HEADLIGHT_DURATION
 
         ; Turn off headlights sprites
         ; And turn on "Flames" sprites
@@ -1877,9 +1887,9 @@ jECF3   LDY #$02
         STA $D01C                       ;Sprites Multi-Color Mode Select
 
         ; Set color for "Flames" sprites
-        LDA #$0F
+        LDA #$0F                        ;Color Grey 3
         STA $D02D                       ;Sprite 6 Color
-        LDA #$0C
+        LDA #$0C                        ;Color Grey 2
         STA $D02C                       ;Sprite 5 Color
 
         ; Set correct sprite frames for "Flames" sprites
@@ -1972,7 +1982,7 @@ _L07    LDA $D015    ;Sprite display Enable
 _L08    DEC ZP_TMP_REG_00
 _L09    LDA #$FA     ;#%11111010
         STA ZP_TMP_REG_01
-        JMP jEB34
+        JMP MAIN_LOOP
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sEDDF   LDA a3A
