@@ -9,17 +9,6 @@
 USE_JOYSTICK .VAR 0             ;Set it to 1 to use Joystick instead of Paddle
 
 ;
-; **** ZP FIELDS ****
-;
-f30 = $30
-f34 = $34
-f4E = $4E
-f5D = $5D
-f6B = $6B
-ZP_ROAD_X_LEFT_ROW_TBL = $79
-ZP_ROAD_X_RIGHT_ROW_TBL = $92
-ZP_ROAD_STATE_ROW_TBL = $AB
-;
 ; **** ZP ABSOLUTE ADRESSES ****
 ;
 ZP_IRQ_LO = $02
@@ -68,14 +57,8 @@ a2C = $2C
 a2D = $2D
 a2E = $2E
 a2F = $2F
-ZP_UNUSED_30 = $30
-ZP_UNUSED_31 = $31
-ZP_UNUSED_32 = $32
-ZP_UNUSED_33 = $33
-a34 = $34
-a35 = $35
-a36 = $36
-a37 = $37
+f30 = $30
+f34 = $34
 ZP_PADDLE_1_VALUE_INV = $38
 ZP_PADDLE_1_VALUE = $39
 a3A = $3A
@@ -96,10 +79,7 @@ ZP_TMP_4A = $4A
 a4B = $4B
 a4C = $4C
 a4D = $4D
-a4E = $4E
-a4F = $4F
-a50 = $50
-a51 = $51
+f4E = $4E
 ZP_LEFT_SHOULDER_ENABLED = $52
 a53 = $53
 a54 = $54
@@ -111,9 +91,10 @@ a59 = $59
 a5A = $5A
 a5B = $5B
 a5C = $5C
+f5D = $5D
 ZP_SID_FREQ_LO = $61
 ZP_SID_FREQ_HI = $62
-a63 = $63
+ZP_SOUND_EFFECT_01_DELAY = $63
 ZP_SOUND_EFFECT_TO_PLAY = $64
 ZP_PLAY_SPLIT_ROAD_SOUND = $65
 ZP_PLAY_PASS_CAR_SOUND = $66
@@ -121,6 +102,7 @@ ZP_PLAY_EXTENDED_TIME_SOUND = $67
 ZP_TMP_68 = $68
 ZP_TMP_69 = $69
 ZP_PRINT_SPEED_DELAY = $6A
+f6B = $6B
 ZP_PASSED_CARS_TOTAL = $6F
 ZP_ADD_1000_PTS = $70
 a71 = $71
@@ -128,9 +110,12 @@ a72 = $72
 a73 = $73
 a74 = $74
 a75 = $75
-a76 = $76
+ZP_SID_CUTOFF_FREQ_HI = $76
 a77 = $77
 ZP_DISPLAY_PIT_DELAY = $78
+ZP_ROAD_X_LEFT_ROW_TBL = $79
+ZP_ROAD_X_RIGHT_ROW_TBL = $92
+ZP_ROAD_STATE_ROW_TBL = $AB
 ;
 ; **** FIELDS ****
 ;
@@ -415,14 +400,14 @@ INIT_GAME
         STX a71
         STX a55
         STX a77
-        STX a34
-        STX a35
-        STX a36
-        STX a37
-        STX ZP_UNUSED_30
-        STX ZP_UNUSED_31
-        STX ZP_UNUSED_32
-        STX ZP_UNUSED_33
+        STX f34
+        STX f34+1
+        STX f34+2
+        STX f34+3
+        STX f30
+        STX f30+1
+        STX f30+2
+        STX f30+3
         STX $D017                       ;Sprites Expand 2x Vertical (Y)
         STX $D01B                       ;Sprite to Background Display Priority
         STX $D01D                       ;Sprites Expand 2x Horizontal (X)
@@ -432,8 +417,8 @@ INIT_GAME
         INX
 
         STX a2B
-        STX a4E
-        STX a4F
+        STX f4E
+        STX f4E+1
 
         LDA #$04
         STA a5A
@@ -458,8 +443,8 @@ INIT_GAME
         LDA #$FF                        ;#%11111111
         STA $D01C                       ;Sprites Multi-Color Mode Select
 
-        STA a50
-        STA a51
+        STA f4E+2
+        STA f4E+3
 
         ; Init SID
         LDA #$00
@@ -2090,10 +2075,10 @@ _L00    LDY #$01
         BEQ _L04
         BNE _L05
 
-_L01    STY ZP_UNUSED_33                 ;Score is 40xx ? (unused)
-_L02    STY ZP_UNUSED_32                 ;Score is 20xx ? (unused)
-_L03    STY ZP_UNUSED_31                 ;Score is 05xx ? (unused)
-_L04    STY ZP_UNUSED_30                 ;Score is 02xx ? (unused)
+_L01    STY f30+3                       ;Score is 40xx ? (unused)
+_L02    STY f30+2                       ;Score is 20xx ? (unused)
+_L03    STY f30+1                       ;Score is 05xx ? (unused)
+_L04    STY f30+0                       ;Score is 02xx ? (unused)
 _L05    RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -3017,10 +3002,10 @@ _L01    INC a13
         STA ZP_SOUND_EFFECT_TO_PLAY
         STA ZP_PLAY_SPLIT_ROAD_SOUND
         STA ZP_PLAY_PASS_CAR_SOUND
-        STA ZP_UNUSED_30
-        STA ZP_UNUSED_31
-        STA ZP_UNUSED_32
-        STA ZP_UNUSED_33
+        STA f30
+        STA f30+1
+        STA f30+2
+        STA f30+3
         LDA #$F0                ;#%11110000
         STA $D417               ;Filter Resonance Control / Voice Input Control
 
@@ -3135,218 +3120,225 @@ RACE_OVER_BOTTOM_ROW_BANNER
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 PLAY_AUDIO
         LDA a59
-        BEQ bF5ED
-        CMP #$01     ;#%00000001
-        BNE bF5D9
-        LDA #$00     ;#%00000000
-        STA $D400    ;Voice 1: Frequency Control - Low-Byte
-        STA $D415    ;Filter Cutoff Frequency: Low-Nybble
-        LDA #$09     ;#%00001001
-        STA $D401    ;Voice 1: Frequency Control - High-Byte
-        LDA #$1F     ;#%00011111
-        STA $D418    ;Select Filter Mode and Volume
-        LDA #$F1     ;#%11110001
-        STA $D417    ;Filter Resonance Control / Voice Input Control
-        LDA #$C8     ;#%11001000
-        STA $D416    ;Filter Cutoff Frequency: High-Byte
-        STA a76
-        LDA #$81     ;#%10000001
-        STA $D404    ;Voice 1: Control Register
+        BEQ _L03
+        CMP #$01
+        BNE _L00
+        LDA #$00
+        STA $D400                       ;Voice 1: Frequency Control - Low-Byte
+        STA $D415                       ;Filter Cutoff Frequency: Low-Nybble
+        LDA #$09
+        STA $D401                       ;Voice 1: Frequency Control - High-Byte
+        LDA #$1F                        ;#%00011111
+        STA $D418                       ;Select Filter Mode and Volume
+        LDA #$F1                        ;#%11110001
+        STA $D417                       ;Filter Resonance Control / Voice Input Control
+        LDA #$C8                        ;#%11001000
+        STA $D416                       ;Filter Cutoff Frequency: High-Byte
+        STA ZP_SID_CUTOFF_FREQ_HI
+        LDA #$81                        ;#%10000001
+        STA $D404                       ;Voice 1: Control Register
         INC a59
-        JMP jF667
+        JMP _L08
 
-bF5D9   CMP #$02     ;#%00000010
-        BNE bF5EA
-        DEC a76
-        LDA a76
-        STA $D416    ;Filter Cutoff Frequency: High-Byte
-        CMP #$96     ;#%10010110
-        BCS bF5EA
+_L00    CMP #$02
+        BNE _L02
+        DEC ZP_SID_CUTOFF_FREQ_HI
+        LDA ZP_SID_CUTOFF_FREQ_HI
+        STA $D416                       ;Filter Cutoff Frequency: High-Byte
+        CMP #$96
+        BCS _L02
         INC a59
-bF5EA   JMP jF667
+_L02    JMP _L08
 
-bF5ED   LDA a13
+_L03    LDA a13
         CMP #$02
-        BCC bF632
+        BCC _L05
         CMP #$03
-        BEQ bF616
-        CMP #$04     ;#%00000100
-        BEQ jF667
-        LDA #$40     ;#%01000000
-        STA $D404    ;Voice 1: Control Register
-        LDA #$00     ;#%00000000
-        STA $D40B    ;Voice 2: Control Register
-        STA $D412    ;Voice 3: Control Register
+        BEQ _L04
+        CMP #$04
+        BEQ _L08
+        LDA #$40                        ;#%01000000
+        STA $D404                       ;Voice 1: Control Register
+        LDA #$00
+        STA $D40B                       ;Voice 2: Control Register
+        STA $D412                       ;Voice 3: Control Register
         STA ZP_SID_FREQ_LO
-        STA $D400    ;Voice 1: Frequency Control - Low-Byte
-        LDA #$0D     ;#%00001101
+        STA $D400                       ;Voice 1: Frequency Control - Low-Byte
+        LDA #$0D
         STA ZP_SID_FREQ_HI
-        STA $D401    ;Voice 1: Frequency Control - High-Byte
+        STA $D401                       ;Voice 1: Frequency Control - High-Byte
         INC a13
-bF616   LDA ZP_SID_FREQ_LO
+_L04    LDA ZP_SID_FREQ_LO
         SEC
-        SBC #$1E     ;#%00011110
+        SBC #$1E
         STA ZP_SID_FREQ_LO
-        STA $D400    ;Voice 1: Frequency Control - Low-Byte
+        STA $D400                       ;Voice 1: Frequency Control - Low-Byte
         LDA ZP_SID_FREQ_HI
-        SBC #$00     ;#%00000000
+        SBC #$00
         STA ZP_SID_FREQ_HI
-        STA $D401    ;Voice 1: Frequency Control - High-Byte
-        CMP #$0A     ;#%00001010
-        BNE jF667
+        STA $D401                       ;Voice 1: Frequency Control - High-Byte
+        CMP #$0A
+        BNE _L08
         INC a13
-        JMP jF667
+        JMP _L08
 
-bF632   LDA ZP_SPEED_LO
-        BNE bF641
+_L05    LDA ZP_SPEED_LO
+        BNE _L06
         LDA ZP_SPEED_HI
-        BNE bF641
-        LDA #$00     ;#%00000000
-        STA $D404    ;Voice 1: Control Register
-        BEQ jF667
-bF641   LDA ZP_SPEED_LO
+        BNE _L06
+        LDA #$00
+        STA $D404                       ;Voice 1: Control Register
+        BEQ _L08
+_L06    LDA ZP_SPEED_LO
         STA a2C
         LDA ZP_SPEED_HI
         STA a2D
         JSR sF227
-        LDY #$02     ;#%00000010
-bF64E   ASL a2E
+
+        LDY #$02
+_L07    ASL a2E
         ROL a2F
         DEY
-        BPL bF64E
+        BPL _L07
+
         LDA a2E
-        STA $D400    ;Voice 1: Frequency Control - Low-Byte
+        STA $D400                       ;Voice 1: Frequency Control - Low-Byte
         LDA a2F
         CLC
-        ADC #$03     ;#%00000011
-        STA $D401    ;Voice 1: Frequency Control - High-Byte
-        LDA #$41     ;#%01000001
-        STA $D404    ;Voice 1: Control Register
+        ADC #$03
+        STA $D401                       ;Voice 1: Frequency Control - High-Byte
+        LDA #$41                        ;#%01000001
+        STA $D404                       ;Voice 1: Control Register
 
-jF667   LDA ZP_PLAY_EXTENDED_TIME_SOUND
-        BNE bF6CD
+_L08    LDA ZP_PLAY_EXTENDED_TIME_SOUND
+        BNE _L15
         LDA ZP_PLAY_SPLIT_ROAD_SOUND
-        BEQ bF672
-        JMP jF6F3
+        BEQ _L09
+        JMP _L17
 
-bF672   LDA ZP_PLAY_PASS_CAR_SOUND
-        BNE bF6E0
+_L09    LDA ZP_PLAY_PASS_CAR_SOUND
+        BNE _L16
         LDA ZP_SOUND_EFFECT_TO_PLAY
-        BNE bF682
+        BNE _L10
         STA $D412    ;Voice 3: Control Register
-        BNE bF682
-        JMP jF704
+        BNE _L10
+        JMP _L18
 
-bF682   CMP #$01     ;#%00000001
-        BNE bF6B8
-        LDY a63
+_L10    CMP #$01     ;#%00000001
+        BNE _L14
+
+        LDY ZP_SOUND_EFFECT_01_DELAY
         INY
-        CPY #$03     ;#%00000011
-        BCC bF68F
-        LDY #$00     ;#%00000000
-bF68F   STY a63
-        CPY #$01     ;#%00000001
-        BCS bF6B1
-        LDA ZP_SPEED_LO
-        BNE bF6A0
-        LDA ZP_SPEED_HI
-        BNE bF6A0
-        JMP jF704
+        CPY #$03
+        BCC _L11
+        LDY #$00
+_L11    STY ZP_SOUND_EFFECT_01_DELAY
+        CPY #$01
+        BCS _L13
 
-bF6A0   LDA #$04     ;#%00000100
-        STA $D40F    ;Voice 3: Frequency Control - High-Byte
-        LDA #$81     ;#%10000001
-        STA $D412    ;Voice 3: Control Register
-        LDA #$F0     ;#%11110000
-        STA $D417    ;Filter Resonance Control / Voice Input Control
-        BNE jF704
-bF6B1   LDA $00                 ;BUG? Should be LDA #$00 instead of LDA $00
-        STA $D412    ;Voice 3: Control Register
-        BEQ jF704
-bF6B8   CMP #$02     ;#%00000010
-        BNE jF704
+        LDA ZP_SPEED_LO
+        BNE _L12
+        LDA ZP_SPEED_HI
+        BNE _L12
+        JMP _L18
+
+_L12    LDA #$04
+        STA $D40F               ;Voice 3: Frequency Control - High-Byte
+        LDA #$81                ;#%10000001
+        STA $D412               ;Voice 3: Control Register
+        LDA #$F0                ;#%11110000
+        STA $D417               ;Filter Resonance Control / Voice Input Control
+        BNE _L18
+
+_L13    LDA $00                 ;BUG? Should be LDA #$00 instead of LDA $00
+        STA $D412               ;Voice 3: Control Register
+        BEQ _L18
+
+_L14    CMP #$02
+        BNE _L18
         LDA #$1E     ;#%00011110
         STA $D40F    ;Voice 3: Frequency Control - High-Byte
         LDA #$81     ;#%10000001
         STA $D412    ;Voice 3: Control Register
         LDA #$F4     ;#%11110100
         STA $D417    ;Filter Resonance Control / Voice Input Control
-        BNE jF704
+        BNE _L18
 
-bF6CD   LDA #$50     ;#%01010000
+_L15    LDA #$50     ;#%01010000
         STA $D40F    ;Voice 3: Frequency Control - High-Byte
         LDA #$21     ;#%00100001
         STA $D412    ;Voice 3: Control Register
         LDA #$F0     ;#%11110000
         ORA a77
         STA $D417    ;Filter Resonance Control / Voice Input Control
-        BNE jF704
-bF6E0   LDA #$82     ;#%10000010
+        BNE _L18
+_L16    LDA #$82     ;#%10000010
         STA $D40F    ;Voice 3: Frequency Control - High-Byte
         LDA #$21     ;#%00100001
         STA $D412    ;Voice 3: Control Register
         LDA #$F0     ;#%11110000
         ORA a77
         STA $D417    ;Filter Resonance Control / Voice Input Control
-        BNE jF704
+        BNE _L18
 
         ; Play Warning "Split Road" ahead sound
-jF6F3   LDA #$6E     ;#%01101110
+_L17    LDA #$6E     ;#%01101110
         STA $D40F    ;Voice 3: Frequency Control - High-Byte
         LDA #$21     ;#%00100001
         STA $D412    ;Voice 3: Control Register
         LDA #$F0     ;#%11110000
         ORA a77
         STA $D417    ;Filter Resonance Control / Voice Input Control
-jF704   LDA a13
+
+_L18    LDA a13
         CMP #$02
-        BCC bF70D
+        BCC _L19
         JMP jF793
 
-bF70D   LDA a3C
+_L19    LDA a3C
         CMP #$10     ;#%00010000
-        BCS bF720
+        BCS _L20
         LDA a3C
         SEC
         SBC #$10     ;#%00010000
         STA a74
         LDA #$01     ;#%00000001
         STA a75
-        BNE bF72B
-bF720   LDA #$10     ;#%00010000
+        BNE _L21
+_L20    LDA #$10     ;#%00010000
         SEC
         SBC a3C
         STA a74
         LDA #$00     ;#%00000000
         STA a75
-bF72B   LDA #$FF     ;#%11111111
+_L21    LDA #$FF     ;#%11111111
         STA a72
         LDX #$03     ;#%00000011
-bF731   TXA
+_L22    TXA
         ASL A
         TAY
         LDA $D001,Y  ;Sprite 0 Y Pos
         CMP $D00F    ;Sprite 7 Y Pos
-        BCC bF74F
+        BCC _L23
         LDA $D001,Y  ;Sprite 0 Y Pos
         SEC
         SBC $D00F    ;Sprite 7 Y Pos
         CMP a72
-        BCS bF760
+        BCS _L24
         STA a72
         LDA #$00     ;#%00000000
         STA a73
-        BEQ bF760
-bF74F   LDA $D00F    ;Sprite 7 Y Pos
+        BEQ _L24
+_L23    LDA $D00F    ;Sprite 7 Y Pos
         SEC
         SBC $D001,Y  ;Sprite 0 Y Pos
         CMP a72
-        BCS bF760
+        BCS _L24
         STA a72
         LDA #$01     ;#%00000001
         STA a73
-bF760   DEX
-        BPL bF731
+_L24    DEX
+        BPL _L22
         LDA a72
         CMP #$20     ;#%00100000
         BCC bF770
