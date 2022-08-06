@@ -37,7 +37,7 @@ ZP_ZERO_IS_ZERO = $0D           ;If 1, print "0" as "0", otherwise as " "
 ZP_HI_SCORE_01 = $0E
 ZP_HI_SCORE_02 = $0F
 ZP_HI_SCORE_03 = $10
-a11 = $11
+ZP_SOUND_ENABLED = $11
 ZP_IS_GAME_OVER = $12
 a13 = $13
 a14 = $14
@@ -100,7 +100,7 @@ a4E = $4E
 a4F = $4F
 a50 = $50
 a51 = $51
-a52 = $52
+ZP_LEFT_SHOULDER_ENABLED = $52
 a53 = $53
 a54 = $54
 a55 = $55
@@ -221,7 +221,7 @@ IRQ_HANDLER
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Interrupt is triggered by Timer A
 IRQ_HANDLER_MAIN
-        LDA a11
+        LDA ZP_SOUND_ENABLED
         BEQ _L00
 
         JSR PLAY_AUDIO
@@ -407,7 +407,7 @@ INIT_GAME
         STX a20
         STX ZP_BRAKE_FORCE
         STX ZP_FRAME_PTR_IDX
-        STX a11
+        STX ZP_SOUND_ENABLED
         STX ZP_IS_GAME_OVER
         STX a13
         STX a4B
@@ -683,8 +683,8 @@ _L15    LDY TWO_BY_TWO_OFFSET_TBL,X
 
         LDA #$00
         STA ZP_TMP_REG_00
-        LDA #$3C                        ;#%00111100
-        STA a52
+        LDA #60                         ;For how long the left shoulder will be drawn
+        STA ZP_LEFT_SHOULDER_ENABLED
         LDA #$08
         STA ZP_ROAD_STATE
 
@@ -697,7 +697,7 @@ _L15    LDY TWO_BY_TWO_OFFSET_TBL,X
         STA ZP_IRQ_HI
         CLI
         LDA #$01
-        STA a11
+        STA ZP_SOUND_ENABLED
         JMP MAIN_LOOP
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -1427,13 +1427,13 @@ _STATES_05_08
         AND #$3F     ;#%00111111
         STA a1C
         TAY
-        LDA fEAF4,Y
+        LDA TURN_OFFSET_TBL,Y
         CLC
-        ADC #$10     ;#%00010000
+        ADC #16
         STA SHOULDER_LEFT_IDX
-        LDA fEAF4,Y
+        LDA TURN_OFFSET_TBL,Y
         CLC
-        ADC #$53     ;#%01010011
+        ADC #83
         STA SHOULDER_RIGHT_IDX
         JMP DRAW_SHOULDERS
 
@@ -1454,9 +1454,9 @@ _STATES_07_08
 
         ; Road State 08
 _STATE_08
-        LDA a52
+        LDA ZP_LEFT_SHOULDER_ENABLED
         BEQ _L20
-        DEC a52
+        DEC ZP_LEFT_SHOULDER_ENABLED
         JMP DRAW_SHOULDERS
 
 _L20    LDA SHOULDER_LEFT_IDX
@@ -1646,7 +1646,8 @@ SHOULDER_PATTERN_IDX_TBL
 
         ; Used to draw the "turns".
         ; Offset to the byte to draw (?)
-fEAF4   .BYTE $00,$00,$01,$01,$01,$02,$02,$02
+TURN_OFFSET_TBL
+        .BYTE $00,$00,$01,$01,$01,$02,$02,$02
         .BYTE $03,$03,$04,$04,$05,$06,$07,$08
         .BYTE $09,$0A,$0B,$0C,$0D,$0D,$0E,$0E
         .BYTE $0F,$0F,$0F,$10,$10,$10,$11,$11
@@ -1998,9 +1999,9 @@ _L07    LDA $D015    ;Sprite display Enable
         STA ZP_COLLISION_DETECTED
         STA ZP_PASSED_CARS_TOTAL
         STA a77
-        LDA #$3C     ;#%00111100
-        STA a52
-        LDA #$08     ;#%00001000
+        LDA #60
+        STA ZP_LEFT_SHOULDER_ENABLED
+        LDA #$08
         STA ZP_ROAD_STATE
         LDY ZP_TMP_REG_00
         LDA ROAD_STATE_TBL,Y
@@ -2242,7 +2243,7 @@ _L11    LDA ZP_SPEED_LO
         STA a3A
         LDA fF2C3,Y
         STA a3B
-        LDA a11
+        LDA ZP_SOUND_ENABLED
         BEQ _L12
         LDA #$C3     ;#%11000011
         SEC
@@ -2336,7 +2337,7 @@ _L16    LDA $D015    ;Sprite display Enable
 _L17    STY a47
 
         ; Remaining of Road States
-_L18    LDA a11
+_L18    LDA ZP_SOUND_ENABLED
         BEQ _L20
 
         LDA ZP_TIME
