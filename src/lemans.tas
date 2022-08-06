@@ -16,9 +16,9 @@ f34 = $34
 f4E = $4E
 f5D = $5D
 f6B = $6B
-f79 = $79
-f92 = $92
-fAB = $AB
+ZP_ROAD_LIMIT_LEFT_TBL = $79
+ZP_ROAD_LIMIT_RIGHT_TBL = $92
+ZP_ROAD_STATE_AT_ROW = $AB
 ;
 ; **** ZP ABSOLUTE ADRESSES ****
 ;
@@ -135,19 +135,9 @@ a75 = $75
 a76 = $76
 a77 = $77
 a78 = $78
-ZP_UNUSED_79 = $79
-ZP_UNUSED_92 = $92
-aAB = $AB
-aC3 = $C3
 ;
 ; **** FIELDS ****
 ;
-f0079 = $0079
-f007A = $007A
-f0092 = $0092
-f0093 = $0093
-f00AB = $00AB
-f00AC = $00AC
 SCREEN_RAM = $0400
 COLOR_RAM = $D800
 ;
@@ -1012,12 +1002,12 @@ _L13    STA (ZP_TMP_PTR_LO),Y
         BPL _L12
 
         LDX #24
-_L14    LDA #$1A
-        STA f79,X
-        LDA #$E0
-        STA f92,X
-        LDA #$07
-        STA fAB,X
+_L14    LDA #26
+        STA ZP_ROAD_LIMIT_LEFT_TBL,X
+        LDA #224
+        STA ZP_ROAD_LIMIT_RIGHT_TBL,X
+        LDA #$07                        ;Regular "road mode"
+        STA ZP_ROAD_STATE_AT_ROW,X
         DEX
         BPL _L14
         RTS
@@ -1054,12 +1044,12 @@ _L00
         JMP _L00
 
 _L01    LDY #23
-_L02    LDA f0079,Y
-        STA f007A,Y
-        LDA f0092,Y
-        STA f0093,Y
-        LDA f00AB,Y
-        STA f00AC,Y
+_L02    LDA ZP_ROAD_LIMIT_LEFT_TBL,Y
+        STA ZP_ROAD_LIMIT_LEFT_TBL+1,Y
+        LDA ZP_ROAD_LIMIT_RIGHT_TBL,Y
+        STA ZP_ROAD_LIMIT_RIGHT_TBL+1,Y
+        LDA ZP_ROAD_STATE_AT_ROW,Y
+        STA ZP_ROAD_STATE_AT_ROW+1,Y
         DEY
         BPL _L02
         RTS
@@ -1480,13 +1470,13 @@ DRAW_SHOULDERS
         ASL A                           ;A *= 2
         CLC
         ADC #24                         ;A += 24
-        STA ZP_UNUSED_79
+        STA ZP_ROAD_LIMIT_LEFT_TBL
 
         LDA SHOULDER_RIGHT_IDX          ;A = SHOULDER_RIGHT_IDX
         ASL A                           ;A *= 2
         CLC
         ADC #24                         ;A += 24
-        STA ZP_UNUSED_92
+        STA ZP_ROAD_LIMIT_RIGHT_TBL
 
         LDA SHOULDER_RIGHT_IDX          ;A = SHOULDER_RIGHT_IDX
         LSR A
@@ -1501,7 +1491,7 @@ DRAW_SHOULDERS
         INY
 
         LDA ZP_ROAD_STATE
-        STA aAB
+        STA ZP_ROAD_STATE_AT_ROW
         CMP #$07
         BCC _L00
         CPY #$06
@@ -1605,12 +1595,12 @@ _L02    LDA SHOULDER_PATTERN_B0,Y
 _L03    DEY
         BPL _L01
 
-        LDA #$38
-        STA ZP_UNUSED_79
-        LDA #$E0
-        STA ZP_UNUSED_92
+        LDA #56
+        STA ZP_ROAD_LIMIT_LEFT_TBL
+        LDA #224
+        STA ZP_ROAD_LIMIT_RIGHT_TBL
         LDA #$06
-        STA aAB
+        STA ZP_ROAD_STATE_AT_ROW
         RTS
 
 ROAD_COLOR_TBL
@@ -1705,7 +1695,7 @@ _L02    JSR DRAW_ROAD_TOP_ROW
         SEC
         SBC #$05                ;A -= 5
         TAY
-        LDA f0079,Y
+        LDA ZP_ROAD_LIMIT_LEFT_TBL,Y
         CMP $D00E               ;Sprite 7 X Pos
         BCS _L04
 
@@ -1714,7 +1704,7 @@ _L02    JSR DRAW_ROAD_TOP_ROW
         CMP $D00E               ;Sprite 7 X Pos
         BCS _L03
 
-        LDA f0092,Y
+        LDA ZP_ROAD_LIMIT_RIGHT_TBL,Y
         CLC
         ADC #$02
         CMP $D00E               ;Sprite 7 X Pos
@@ -1746,9 +1736,11 @@ _L03    LDA #$01
 
 _L04    JMP DO_COLLISION
 
-_L05    LDA f00AB,Y
+_L05    LDA ZP_ROAD_STATE_AT_ROW,Y
         CMP #$01
         BNE _L06
+
+        ; Ice
         LDA ZP_PIXELS_TO_MOVE_CAR
         CMP #$05
         BNE _L06
@@ -1756,7 +1748,7 @@ _L05    LDA f00AB,Y
         STA ZP_PIXELS_TO_MOVE_CAR
         STA ZP_SOUND_EFFECT_TO_PLAY
 
-_L06    LDA f00AB,Y
+_L06    LDA ZP_ROAD_STATE_AT_ROW,Y
         CMP #$06
         BNE _L07
         LDA #108
@@ -2447,12 +2439,12 @@ _L28    LDA a5A
         AND #$07
         TAY
         LDA ENEMY_CAR_COLOR_TBL,Y
-        STA $D027,X  ;Sprite 0 Color
-        LDA aAB
-        CMP #$06     ;#%00000110
+        STA $D027,X                     ;Sprite 0 Color
+        LDA ZP_ROAD_STATE_AT_ROW
+        CMP #$06
         BEQ _L29
-        LDA aC3
-        CMP #$06     ;#%00000110
+        LDA ZP_ROAD_STATE_AT_ROW+24
+        CMP #$06
         BEQ _L29
         JSR sE734
         LDA a08
@@ -2498,22 +2490,22 @@ _L31    LDA f34,X
         SEC
         SBC a2C
         STA f34,X
-        LDA $D001,Y  ;Sprite 0 Y Pos
+        LDA $D001,Y                     ;Sprite 0 Y Pos
         SBC a2D
-        STA $D001,Y  ;Sprite 0 Y Pos
+        STA $D001,Y                     ;Sprite 0 Y Pos
         JMP _L33
 
 _L32    LDY ZP_TMP_49
-        LDA #$19     ;#%00011001
-        STA $D001,Y  ;Sprite 0 Y Pos
+        LDA #25
+        STA $D001,Y                     ;Sprite 0 Y Pos
 _L33    LDA ZP_ROAD_STATE
-        CMP #$04     ;#%00000100
+        CMP #$04
         BNE _L34
         LDA ZP_TMP_REG_01
-        CMP #$C8     ;#%11001000
+        CMP #200
         BCC _L34
-        LDA $D000,Y  ;Sprite 0 X Pos
-        CMP #$6B     ;#%01101011
+        LDA $D000,Y                     ;Sprite 0 X Pos
+        CMP #107
         BCC _L36
         CMP #$B3     ;#%10110011
         BCS _L36
@@ -2526,33 +2518,33 @@ _L33    LDA ZP_ROAD_STATE
 _L34    LDA f5D,X
         BNE _L36
         LDA ZP_ROAD_STATE
-        CMP #$06     ;#%00000110
+        CMP #$06
         BEQ _L36
-        LDA aC3
-        CMP #$06     ;#%00000110
+        LDA ZP_ROAD_STATE_AT_ROW+24
+        CMP #$06
         BEQ _L36
-        LDA $D000,Y  ;Sprite 0 X Pos
+        LDA $D000,Y                     ;Sprite 0 X Pos
         CLC
         ADC f4E,X
-        STA $D000,Y  ;Sprite 0 X Pos
-        CMP #$67     ;#%01100111
+        STA $D000,Y                     ;Sprite 0 X Pos
+        CMP #103
         BCS _L35
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA f4E,X
         BNE _L36
-_L35    CMP #$B7     ;#%10110111
+_L35    CMP #183
         BCC _L36
-        LDA #$FF     ;#%11111111
+        LDA #$FF
         STA f4E,X
 _L36    LDY ZP_TMP_49
-        LDA $D001,Y  ;Sprite 0 Y Pos
+        LDA $D001,Y                     ;Sprite 0 Y Pos
         LSR A
         LSR A
         LSR A
         SEC
         SBC #$05
         TAY
-        LDA f00AB,Y
+        LDA ZP_ROAD_STATE_AT_ROW,Y
         CMP #$02
         BNE _L37
         LDA #$FA                        ;Enemy Night car frame
