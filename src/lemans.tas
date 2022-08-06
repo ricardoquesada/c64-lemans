@@ -69,7 +69,7 @@ a3E = $3E
 ZP_PIXELS_TO_MOVE_CAR = $41
 ZP_BRAKE_FORCE = $42
 ZP_FRAME_PTR_IDX = $43
-a44 = $44
+ZP_CAR_ANIM_DELAY = $44
 ZP_FLAME_ANIM_DELAY = $45
 ZP_FLAME_FRAME_IDX = $46
 a47 = $47
@@ -87,7 +87,7 @@ a55 = $55
 a56 = $56
 a57 = $57
 ZP_COLLISION_DETECTED = $58
-a59 = $59
+ZP_PLAY_CRASH_SOUND = $59
 a5A = $5A
 a5B = $5B
 a5C = $5C
@@ -111,7 +111,7 @@ a73 = $73
 a74 = $74
 a75 = $75
 ZP_SID_CUTOFF_FREQ_HI = $76
-a77 = $77
+ZP_SID_VOICE_FILTER_MASK = $77
 ZP_DISPLAY_PIT_DELAY = $78
 ZP_ROAD_X_LEFT_ROW_TBL = $79
 ZP_ROAD_X_RIGHT_ROW_TBL = $92
@@ -386,7 +386,7 @@ INIT_GAME
         STX a53
         STX a54
         STX ZP_COLLISION_DETECTED
-        STX a59
+        STX ZP_PLAY_CRASH_SOUND
         STX ZP_SOUND_EFFECT_TO_PLAY
         STX ZP_PLAY_SPLIT_ROAD_SOUND
         STX ZP_PLAY_PASS_CAR_SOUND
@@ -399,7 +399,7 @@ INIT_GAME
         STX ZP_ADD_1000_PTS
         STX a71
         STX a55
-        STX a77
+        STX ZP_SID_VOICE_FILTER_MASK
         STX f34
         STX f34+1
         STX f34+2
@@ -1879,8 +1879,8 @@ DO_COLLISION
         LDY #$02
         STY ZP_BRAKE_FORCE
         DEY
-        STY a59
-        STY a77
+        STY ZP_PLAY_CRASH_SOUND
+        STY ZP_SID_VOICE_FILTER_MASK    ;Filter Voice #1
         DEY
         STY ZP_SOUND_EFFECT_TO_PLAY
         STY ZP_PLAY_SPLIT_ROAD_SOUND
@@ -1964,23 +1964,25 @@ _L06    JSR DRAW_ROAD_TOP_ROW
         JSR GAME_OVER
         JMP _L05
 
-_L07    LDA $D015    ;Sprite display Enable
-        AND #$8F     ;#%10001111
-        STA $D015    ;Sprite display Enable
-        LDA #$2F     ;#%00101111
-        STA $D418    ;Select Filter Mode and Volume
-        LDA #$BE     ;#%10111110
-        STA $D416    ;Filter Cutoff Frequency: High-Byte
-        LDA #$F0     ;#%11110000
-        STA $D417    ;Filter Resonance Control / Voice Input Control
-        LDA #$00     ;#%00000000
+_L07    LDA $D015                       ;Sprite display Enable
+        AND #$8F                        ;#%10001111
+        STA $D015                       ;Sprite display Enable
+        LDA #$2F                        ;#%00101111
+        STA $D418                       ;Select Filter Mode and Volume
+        LDA #$BE
+        STA $D416                       ;Filter Cutoff Frequency: High-Byte
+        ; Don't filter any voice
+        LDA #$F0                        ;#%11110000
+        STA $D417                       ;Filter Resonance Control / Voice Input Control
+
+        LDA #$00
         STA ZP_FRAME_PTR_IDX
-        STA a44
+        STA ZP_CAR_ANIM_DELAY
         STA ZP_BRAKE_FORCE
-        STA a59
+        STA ZP_PLAY_CRASH_SOUND
         STA ZP_COLLISION_DETECTED
         STA ZP_PASSED_CARS_TOTAL
-        STA a77
+        STA ZP_SID_VOICE_FILTER_MASK
         LDA #60
         STA ZP_LEFT_SHOULDER_ENABLED
         LDA #$08
@@ -2000,34 +2002,37 @@ _L09    LDA #$FA     ;#%11111010
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Called after SCROLL_DOWN
-sEDDF   LDA a3A
+sEDDF
+        LDA a3A
         STA a3D
         LDA a3B
         STA a3E
+
 _L00    LDA a3D
         SEC
-        SBC #$01     ;#%00000001
+        SBC #$01
         STA a3D
         LDA a3E
-        SBC #$00     ;#%00000000
+        SBC #$00
         STA a3E
         BCS _L00
-        LDY a44
+
+        LDY ZP_CAR_ANIM_DELAY
         INY
-        CPY #$02     ;#%00000010
+        CPY #$02
         BCC _L01
-        LDY #$00     ;#%00000000
+        LDY #$00
 
         ; Switch between "stopped car" and "moving car"
         LDA ZP_FRAME_PTR_IDX
-        EOR #$01     ;#%00000001
-        AND #$01     ;#%00000001
+        EOR #$01
+        AND #$01
         STA ZP_FRAME_PTR_IDX
         CLC
-        ADC #$F4     ;#%11110100
+        ADC #$F4                        ;Hero car sprite frame
         STA SPR_FRAME_PTR_07
 
-_L01    STY a44
+_L01    STY ZP_CAR_ANIM_DELAY
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -2598,7 +2603,7 @@ _L43    DEY
 
 _L44    STY a4B
 
-        LDA a59
+        LDA ZP_PLAY_CRASH_SOUND
         BEQ _L46
         INC ZP_DISPLAY_PIT_DELAY
         LDA ZP_DISPLAY_PIT_DELAY
@@ -2978,7 +2983,7 @@ _L00    LDA fF564,Y
         STA ZP_TICKS_PER_SECOND
         INY
         STY a54
-        LDA #$60                ;Initial time: 60 seconds (BCD)
+        LDA #$60                        ;Initial time: 60 seconds (BCD)
         STA ZP_TIME
         LDA #$00
         STA ZP_IS_GAME_OVER
@@ -2992,13 +2997,13 @@ _L01    INC a13
         STA ZP_ROAD_STATE
 
         ; Turn off headlight/pits sprites, in case they are visible
-        LDA $D015               ;Sprite display Enable
-        AND #$8F                ;#%10001111
-        STA $D015               ;Sprite display Enable
+        LDA $D015                       ;Sprite display Enable
+        AND #$8F                        ;#%10001111
+        STA $D015                       ;Sprite display Enable
 
         LDA #$00
         STA ZP_COLLISION_DETECTED
-        STA a59
+        STA ZP_PLAY_CRASH_SOUND
         STA ZP_SOUND_EFFECT_TO_PLAY
         STA ZP_PLAY_SPLIT_ROAD_SOUND
         STA ZP_PLAY_PASS_CAR_SOUND
@@ -3006,10 +3011,10 @@ _L01    INC a13
         STA f30+1
         STA f30+2
         STA f30+3
-        LDA #$F0                ;#%11110000
-        STA $D417               ;Filter Resonance Control / Voice Input Control
+        LDA #$F0                        ;#%11110000
+        STA $D417                       ;Filter Resonance Control / Voice Input Control
 
-        LDY #75                 ;75 rows to scroll down
+        LDY #75                         ;75 rows to scroll down
 _L02    STY ZP_TMP_REG_01
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
@@ -3119,10 +3124,13 @@ RACE_OVER_BOTTOM_ROW_BANNER
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 PLAY_AUDIO
-        LDA a59
+        LDA ZP_PLAY_CRASH_SOUND
         BEQ _L03
+
         CMP #$01
         BNE _L00
+
+        ; ZP_PLAY_CRASH_SOUND == 1
         LDA #$00
         STA $D400                       ;Voice 1: Frequency Control - Low-Byte
         STA $D415                       ;Filter Cutoff Frequency: Low-Nybble
@@ -3132,22 +3140,25 @@ PLAY_AUDIO
         STA $D418                       ;Select Filter Mode and Volume
         LDA #$F1                        ;#%11110001
         STA $D417                       ;Filter Resonance Control / Voice Input Control
-        LDA #$C8                        ;#%11001000
+        LDA #$C8
         STA $D416                       ;Filter Cutoff Frequency: High-Byte
         STA ZP_SID_CUTOFF_FREQ_HI
         LDA #$81                        ;#%10000001
         STA $D404                       ;Voice 1: Control Register
-        INC a59
+        INC ZP_PLAY_CRASH_SOUND
         JMP _L08
 
 _L00    CMP #$02
         BNE _L02
-        DEC ZP_SID_CUTOFF_FREQ_HI
+
+        ; ZP_PLAY_CRASH_SOUND == 2
+        DEC ZP_SID_CUTOFF_FREQ_HI       ;Freq goes from $C8 to $96
         LDA ZP_SID_CUTOFF_FREQ_HI
         STA $D416                       ;Filter Cutoff Frequency: High-Byte
         CMP #$96
         BCS _L02
-        INC a59
+        INC ZP_PLAY_CRASH_SOUND
+
 _L02    JMP _L08
 
 _L03    LDA a13
@@ -3211,22 +3222,25 @@ _L07    ASL a2E
         STA $D404                       ;Voice 1: Control Register
 
 _L08    LDA ZP_PLAY_EXTENDED_TIME_SOUND
-        BNE _L15
+        BNE _PLAY_EXTENDED_TIME
         LDA ZP_PLAY_SPLIT_ROAD_SOUND
         BEQ _L09
-        JMP _L17
+        JMP _PLAY_SPLIT_ROAD
 
 _L09    LDA ZP_PLAY_PASS_CAR_SOUND
-        BNE _L16
+        BNE _PLAY_PASS_CAR
         LDA ZP_SOUND_EFFECT_TO_PLAY
-        BNE _L10
-        STA $D412    ;Voice 3: Control Register
-        BNE _L10
+        BNE _PLAY_SOUND_EFFECT
+        ; Sound Effect 00 (Do nothing)
+        STA $D412                       ;Voice 3: Control Register
+        BNE _PLAY_SOUND_EFFECT          ;Remove, never true (?)
         JMP _L18
 
-_L10    CMP #$01     ;#%00000001
+_PLAY_SOUND_EFFECT
+        CMP #$01
         BNE _L14
 
+        ; Sound Effect 01 (Soft Collision with shoulder)
         LDY ZP_SOUND_EFFECT_01_DELAY
         INY
         CPY #$03
@@ -3243,52 +3257,63 @@ _L11    STY ZP_SOUND_EFFECT_01_DELAY
         JMP _L18
 
 _L12    LDA #$04
-        STA $D40F               ;Voice 3: Frequency Control - High-Byte
-        LDA #$81                ;#%10000001
-        STA $D412               ;Voice 3: Control Register
-        LDA #$F0                ;#%11110000
-        STA $D417               ;Filter Resonance Control / Voice Input Control
+        STA $D40F                       ;Voice 3: Frequency Control - High-Byte
+        LDA #$81                        ;#%10000001
+        STA $D412                       ;Voice 3: Control Register
+        LDA #$F0                        ;#%11110000
+        STA $D417                       ;Filter Resonance Control / Voice Input Control
         BNE _L18
 
-_L13    LDA $00                 ;BUG? Should be LDA #$00 instead of LDA $00
-        STA $D412               ;Voice 3: Control Register
+_L13    LDA $00                         ;BUG? Should be LDA #$00 instead of LDA $00
+        STA $D412                       ;Voice 3: Control Register
         BEQ _L18
 
 _L14    CMP #$02
         BNE _L18
-        LDA #$1E     ;#%00011110
-        STA $D40F    ;Voice 3: Frequency Control - High-Byte
-        LDA #$81     ;#%10000001
-        STA $D412    ;Voice 3: Control Register
-        LDA #$F4     ;#%11110100
-        STA $D417    ;Filter Resonance Control / Voice Input Control
+
+        ; Sound Effect 02 (Ice)
+        LDA #$1E                        ;#%00011110
+        STA $D40F                       ;Voice 3: Frequency Control - High-Byte
+        LDA #$81                        ;#%10000001
+        STA $D412                       ;Voice 3: Control Register
+        LDA #$F4                        ;#%11110100
+        STA $D417                       ;Filter Resonance Control / Voice Input Control
         BNE _L18
 
-_L15    LDA #$50     ;#%01010000
-        STA $D40F    ;Voice 3: Frequency Control - High-Byte
-        LDA #$21     ;#%00100001
-        STA $D412    ;Voice 3: Control Register
-        LDA #$F0     ;#%11110000
-        ORA a77
-        STA $D417    ;Filter Resonance Control / Voice Input Control
-        BNE _L18
-_L16    LDA #$82     ;#%10000010
-        STA $D40F    ;Voice 3: Frequency Control - High-Byte
-        LDA #$21     ;#%00100001
-        STA $D412    ;Voice 3: Control Register
-        LDA #$F0     ;#%11110000
-        ORA a77
-        STA $D417    ;Filter Resonance Control / Voice Input Control
+        ; These sound effects are almost identical.
+        ; They only thing that changes i the Hi Frequency value
+
+        ; Sound Effect: Extended Time
+_PLAY_EXTENDED_TIME
+        LDA #$50
+        STA $D40F               ;Voice 3: Frequency Control - High-Byte
+        LDA #$21                ;#%00100001
+        STA $D412               ;Voice 3: Control Register
+        LDA #$F0                ;#%11110000
+        ORA ZP_SID_VOICE_FILTER_MASK
+        STA $D417               ;Filter Resonance Control / Voice Input Control
         BNE _L18
 
-        ; Play Warning "Split Road" ahead sound
-_L17    LDA #$6E     ;#%01101110
-        STA $D40F    ;Voice 3: Frequency Control - High-Byte
-        LDA #$21     ;#%00100001
-        STA $D412    ;Voice 3: Control Register
-        LDA #$F0     ;#%11110000
-        ORA a77
-        STA $D417    ;Filter Resonance Control / Voice Input Control
+        ; Sound Effect: Pass Car
+_PLAY_PASS_CAR
+        LDA #$82
+        STA $D40F               ;Voice 3: Frequency Control - High-Byte
+        LDA #$21                ;#%00100001
+        STA $D412               ;Voice 3: Control Register
+        LDA #$F0                ;#%11110000
+        ORA ZP_SID_VOICE_FILTER_MASK
+        STA $D417               ;Filter Resonance Control / Voice Input Control
+        BNE _L18
+
+        ; Sound Effect: "Split Road" ahead
+_PLAY_SPLIT_ROAD
+        LDA #$6E
+        STA $D40F                       ;Voice 3: Frequency Control - High-Byte
+        LDA #$21                        ;#%00100001
+        STA $D412                       ;Voice 3: Control Register
+        LDA #$F0
+        ORA ZP_SID_VOICE_FILTER_MASK
+        STA $D417                       ;Filter Resonance Control / Voice Input Control
 
 _L18    LDA a13
         CMP #$02
