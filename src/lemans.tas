@@ -3293,7 +3293,7 @@ _L17    LDA #$6E     ;#%01101110
 _L18    LDA a13
         CMP #$02
         BCC _L19
-        JMP jF793
+        JMP _L28
 
 _L19    LDA a3C
         CMP #$10     ;#%00010000
@@ -3341,28 +3341,28 @@ _L24    DEX
         BPL _L22
         LDA a72
         CMP #$20     ;#%00100000
-        BCC bF770
+        BCC _L25
         LDA #$40     ;#%01000000
         STA $D40B    ;Voice 2: Control Register
-        BNE jF793
-bF770   LDA #$41     ;#%01000001
+        BNE _L28
+_L25    LDA #$41     ;#%01000001
         STA $D40B    ;Voice 2: Control Register
         LDA a73
         EOR a75
-        BEQ bF786
+        BEQ _L26
         LDA a72
         CLC
         ADC #$20     ;#%00100000
         STA $D407    ;Voice 2: Frequency Control - Low-Byte
-        JMP jF78E
+        JMP _L27
 
-bF786   LDA #$20     ;#%00100000
+_L26    LDA #$20     ;#%00100000
         SEC
         SBC a72
         STA $D407    ;Voice 2: Frequency Control - Low-Byte
-jF78E   LDA #$0A     ;#%00001010
+_L27    LDA #$0A     ;#%00001010
         STA $D408    ;Voice 2: Frequency Control - High-Byte
-jF793   RTS
+_L28    RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Garbage
