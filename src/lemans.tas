@@ -87,8 +87,8 @@ ZP_PIXELS_TO_MOVE_CAR = $41
 ZP_BRAKE_FORCE = $42
 ZP_FRAME_PTR_IDX = $43
 a44 = $44
-a45 = $45
-a46 = $46
+ZP_FLAME_ANIM_DELAY = $45
+ZP_FLAME_FRAME_IDX = $46
 a47 = $47
 a48 = $48
 ZP_TMP_49 = $49
@@ -115,13 +115,12 @@ a61 = $61
 a62 = $62
 a63 = $63
 ZP_SOUND_EFFECT_TO_PLAY = $64
-a65 = $65
+ZP_SPLIT_ROAD_SPRITE_DISPLAYED = $65
 a66 = $66
 a67 = $67
 a68 = $68
 a69 = $69
 a6A = $6A
-a6B = $6B
 a6C = $6C
 a6D = $6D
 a6E = $6E
@@ -408,10 +407,10 @@ INIT_GAME
         STX ZP_COLLISION_DETECTED
         STX a59
         STX ZP_SOUND_EFFECT_TO_PLAY
-        STX a65
+        STX ZP_SPLIT_ROAD_SPRITE_DISPLAYED
         STX a66
         STX a67
-        STX a6B
+        STX f6B
         STX a6C
         STX a6D
         STX a6E
@@ -1903,7 +1902,7 @@ DO_COLLISION
         STY a77
         DEY
         STY ZP_SOUND_EFFECT_TO_PLAY
-        STY a65
+        STY ZP_SPLIT_ROAD_SPRITE_DISPLAYED
         STY $D017                       ;Sprites Expand 2x Vertical (Y)
         STY $D01D                       ;Sprites Expand 2x Horizontal (X)
         STY ZP_HEADLIGHT_DURATION
@@ -2136,7 +2135,7 @@ _L01    LDA #$EC
 
 _TEST_BUTTON
 
-        LDA $DC01               ;CIA1: Data Port Register B
+        LDA $DC01                       ;CIA1: Data Port Register B
 .IF USE_JOYSTICK == 0
         AND #%00000100
 .ELSE
@@ -2148,29 +2147,29 @@ _TEST_BUTTON
 _L02    SED
         LDA ZP_BRAKE_FORCE
         BEQ _L05
-        CMP #$01     ;#%00000001
+        CMP #$01
         BEQ _L03
-        CMP #$03     ;#%00000011
+        CMP #$03
         BEQ _L07
-        LDA #$50     ;#%01010000
+        LDA #$50
         SEC
         SBC ZP_SPEED_LO
-        LDA #$00     ;#%00000000
+        LDA #$00
         SBC ZP_SPEED_HI
         BCC _L04
         BCS _L09
-_L03    LDA #$50     ;#%01010000
+_L03    LDA #$50
         SEC
         SBC ZP_SPEED_LO
-        LDA #$01     ;#%00000001
+        LDA #$01
         SBC ZP_SPEED_HI
         BCS _L05
 _L04    LDA ZP_SPEED_LO
         SEC
-        SBC #$02     ;#%00000010
+        SBC #$02
         STA ZP_SPEED_LO
         LDA ZP_SPEED_HI
-        SBC #$00     ;#%00000000
+        SBC #$00
         STA ZP_SPEED_HI
         JMP _L06
 
@@ -2192,10 +2191,10 @@ _L05    LDY ZP_SPEED_HI                 ;Values from 0 to 3 (0xx, 1xx, 2xx, 3xx)
         ADC #$00
         STA ZP_SPEED_HI
 
-_L06    LDA #$20     ;#%00100000
+_L06    LDA #$20
         SEC
         SBC ZP_SPEED_LO
-        LDA #$03     ;#%00000011
+        LDA #$03
         SBC ZP_SPEED_HI
         BCS _L09
         LDA #$03
@@ -2212,23 +2211,23 @@ _L07    LDA ZP_SPEED_HI
 _L08    SED
         LDA ZP_SPEED_LO
         SEC
-        SBC #$02     ;#%00000010
+        SBC #$02
         STA ZP_SPEED_LO
         LDA ZP_SPEED_HI
-        SBC #$00     ;#%00000000
+        SBC #$00
         STA ZP_SPEED_HI
 
 _L09    LDA ZP_SPEED_HI
-        CMP #$04     ;#%00000100
+        CMP #$04
         BCC _L10
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA ZP_SPEED_LO
         STA ZP_SPEED_HI
 _L10    CLD
         JSR PRINT_SCORE_AND_TIME
         INC a6A
         LDA a6A
-        AND #$07     ;#%00000111
+        AND #$07
         BNE _L11
         JSR PRINT_SPEED
 _L11    LDA ZP_SPEED_LO
@@ -2247,45 +2246,50 @@ _L11    LDA ZP_SPEED_LO
         STA a3B
         LDA ZP_SOUND_ENABLED
         BEQ _L12
-        LDA #$C3     ;#%11000011
+        LDA #195
         SEC
         SBC a3C
-        STA $D00F    ;Sprite 7 Y Pos
+        STA $D00F                       ;Sprite 7 Y Pos
 
 _L12    LDA ZP_ROAD_STATE
-        CMP #$07     ;#%00000111
+        CMP #$07
         BNE _L14
 
         ; Road state 07: Initial state
-        LDY $D00F    ;Sprite 7 Y Pos
+        LDY $D00F                       ;Sprite 7 Y Pos
         INY
-        STY $D00D    ;Sprite 6 Y Pos
+        STY $D00D                       ;Sprite 6 Y Pos
         INY
-        STY $D00B    ;Sprite 5 Y Pos
-        LDA $D00E    ;Sprite 7 X Pos
-        STA $D00C    ;Sprite 6 X Pos
-        STA $D00A    ;Sprite 5 X Pos
-        LDY a45
+        STY $D00B                       ;Sprite 5 Y Pos
+        LDA $D00E                       ;Sprite 7 X Pos
+        STA $D00C                       ;Sprite 6 X Pos
+        STA $D00A                       ;Sprite 5 X Pos
+        LDY ZP_FLAME_ANIM_DELAY
         INY
-        CPY #$0A     ;#%00001010
+        CPY #10
         BCC _L13
-        LDY #$00     ;#%00000000
-        LDA a46
-        EOR #$01     ;#%00000001
-        AND #$01     ;#%00000001
-        STA a46
+        LDY #$00
+
+        ; Switch between Flames 00 and Flames 01 sprite pointers
+        LDA ZP_FLAME_FRAME_IDX
+        EOR #$01
+        AND #$01
+        STA ZP_FLAME_FRAME_IDX
+
         CLC
-        ADC #$F8     ;#%11111000
+        ADC #$F8                        ;Flames sprite frame
         STA SPR_FRAME_PTR_06
-        AND #$01     ;#%00000001
-        EOR #$01     ;#%00000001
+
+        AND #$01
+        EOR #$01
         CLC
-        ADC #$F8     ;#%11111000
+        ADC #$F8                        ;Flames sprite frmae
         STA SPR_FRAME_PTR_05
-_L13    STY a45
+
+_L13    STY ZP_FLAME_ANIM_DELAY
 
 _L14    LDA ZP_ROAD_STATE
-        CMP #$04     ;#%00000100
+        CMP #$04
         BNE _L18
 
         ; Road State 04: Show Split Screen sprite
@@ -2298,44 +2302,47 @@ _L14    LDA ZP_ROAD_STATE
         BNE _L15
 
         ; Show Split Screen sprite
-        LDA #$40                ;#%01000000
-        STA $D017               ;Sprites Expand 2x Vertical (Y)
-        STA $D01D               ;Sprites Expand 2x Horizontal (X)
-        LDA $D01C               ;Sprites Multi-Color Mode Select
-        ORA #$40                ;#%01000000
-        STA $D01C               ;Sprites Multi-Color Mode Select
-        LDA #$03
-        STA $D02D               ;Sprite 6 Color
-        LDA #$FB                ;Split road ahead
+        LDA #$40                        ;#%01000000
+        STA $D017                       ;Sprites Expand 2x Vertical (Y)
+        STA $D01D                       ;Sprites Expand 2x Horizontal (X)
+        LDA $D01C                       ;Sprites Multi-Color Mode Select
+        ORA #$40                        ;#%01000000
+        STA $D01C                       ;Sprites Multi-Color Mode Select
+        LDA #$03                        ;Color Cyan
+        STA $D02D                       ;Sprite 6 Color
+        LDA #$FB                        ;Split road ahead sprite frame
         STA SPR_FRAME_PTR_06
-        LDA #$3A
-        STA $D00D               ;Sprite 6 Y Pos
-        LDA #$81
-        STA $D00C               ;Sprite 6 X Pos
+        LDA #58
+        STA $D00D                       ;Sprite 6 Y Pos
+        LDA #129
+        STA $D00C                       ;Sprite 6 X Pos
         LDA #$00
         STA a47
         STA a48
 _L15    LDY a47
         INY
-        CPY #$08     ;#%00001000
+        CPY #$08
         BCC _L17
-        LDY #$00     ;#%00000000
+        LDY #$00
         LDA a48
-        EOR #$01     ;#%00000001
+        EOR #$01
         STA a48
         BEQ _L16
-        LDA $D015    ;Sprite display Enable
-        ORA #$40     ;#%01000000
-        STA $D015    ;Sprite display Enable
-        LDA #$01     ;#%00000001
-        STA a65
+
+        ; Enable "Split road" sprite
+        LDA $D015                       ;Sprite display Enable
+        ORA #$40                        ;#%01000000
+        STA $D015                       ;Sprite display Enable
+        LDA #$01
+        STA ZP_SPLIT_ROAD_SPRITE_DISPLAYED
         BNE _L17
 
-_L16    LDA $D015    ;Sprite display Enable
-        AND #$BF     ;#%10111111
-        STA $D015    ;Sprite display Enable
-        LDA #$00     ;#%00000000
-        STA a65
+        ; Disable "Split road" sprite
+_L16    LDA $D015                       ;Sprite display Enable
+        AND #$BF                        ;#%10111111
+        STA $D015                       ;Sprite display Enable
+        LDA #$00
+        STA ZP_SPLIT_ROAD_SPRITE_DISPLAYED
 
 _L17    STY a47
 
@@ -3007,7 +3014,7 @@ _L01    INC a13
         STA ZP_COLLISION_DETECTED
         STA a59
         STA ZP_SOUND_EFFECT_TO_PLAY
-        STA a65
+        STA ZP_SPLIT_ROAD_SPRITE_DISPLAYED
         STA a66
         STA ZP_UNUSED_30
         STA ZP_UNUSED_31
@@ -3217,7 +3224,7 @@ bF64E   ASL a2E
 
 jF667   LDA a67
         BNE bF6CD
-        LDA a65
+        LDA ZP_SPLIT_ROAD_SPRITE_DISPLAYED
         BEQ bF672
         JMP jF6F3
 
@@ -3282,6 +3289,7 @@ bF6E0   LDA #$82     ;#%10000010
         STA $D417    ;Filter Resonance Control / Voice Input Control
         BNE jF704
 
+        ; Play Warning "Split Road" ahead sound
 jF6F3   LDA #$6E     ;#%01101110
         STA $D40F    ;Voice 3: Frequency Control - High-Byte
         LDA #$21     ;#%00100001
