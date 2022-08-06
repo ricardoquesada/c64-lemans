@@ -519,6 +519,7 @@ _L01    STX ZP_TMP_REG_00
         DEX
         BPL _L01
 
+        ; Play "Engine" sound while we scroll down
         LDA #$0A
         STA $D401                       ;Voice 1: Frequency Control - High-Byte
         LDA #$41
@@ -598,14 +599,18 @@ _L11    JSR SCROLL_DOWN
         LDY #$01
         JSR DELAY_01
 
+        ; Instead of going from 63 to 0, the loop goes from
+        ; 250 to 187... possibly "let's tune it" hack
         DEX
         CPX #187
         BCC _L12
 
         JMP _L02
 
+        ; Turn off "engine" sound
 _L12    LDA #$00
         STA $D404                       ;Voice 1: Control Register
+
         LDY #$01
         JSR DELAY_00
 
@@ -617,6 +622,7 @@ _L12    LDA #$00
         LDY #$01
         JSR DELAY_00
 
+        ; Initi sprite's positions and frames
         LDA #$0E                        ;Color Light Blue
         STA $D02E                       ;Sprite 7 Color
         LDA #$F4                        ;Sprite pointer: Stopped car
@@ -641,12 +647,12 @@ _L13    STX ZP_TMP_REG_00
         LDY #$02
         JSR DELAY_00
 
-        LDA fE344,X
+        LDA TRAFFICLIGHT_SID_FREQ_TBL,X
         STA $D408                       ;Voice 2: Frequency Control - High-Byte
         LDA #$11
         STA $D40B                       ;Voice 2: Control Register
 
-        ; Print "Flashlight" background color
+        ; Print "trafficlight" background color
         LDA #$08                        ;Orange
         LDY #$07                        ;Number of columns to print
 _L14    STA COLOR_RAM+40*14+4,Y
@@ -654,14 +660,14 @@ _L14    STA COLOR_RAM+40*14+4,Y
         DEY
         BPL _L14
 
-        LDA COLOR_RAM_POS_LO,X
+        LDA TRAFFICLIGHT_COLOR_RAM_POS_LO,X
         STA ZP_TMP_PTR_LO
-        LDA COLOR_RAM_POS_HI,X
+        LDA TRAFFICLIGHT_COLOR_RAM_POS_HI,X
         STA ZP_TMP_PTR_HI
 
-        LDA fE340,X
+        LDA TRAFFICLIGHT_COLOR_TBL,X
         LDX #$03
-_L15    LDY PASSED_CARS_OFFSET,X
+_L15    LDY TWO_BY_TWO_OFFSET_TBL,X
         STA (ZP_TMP_PTR_LO),Y
         DEX
         BPL _L15
@@ -670,7 +676,7 @@ _L15    LDY PASSED_CARS_OFFSET,X
         JSR DELAY_01
 
         LDX ZP_TMP_REG_00
-        LDA fE348,X
+        LDA TRAFFICLIGHT_SID_CONTROL_TBL,X
         STA $D40B                       ;Voice 2: Control Register
         DEX
         BPL _L13
@@ -695,20 +701,22 @@ _L15    LDY PASSED_CARS_OFFSET,X
         JMP MAIN_LOOP
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-        ; FIXME: What is this about
-COLOR_RAM_POS_LO
+TRAFFICLIGHT_COLOR_RAM_POS_LO
         .BYTE <(COLOR_RAM+40*14+10)
         .BYTE <(COLOR_RAM+40*14+8)
         .BYTE <(COLOR_RAM+40*14+6)
         .BYTE <(COLOR_RAM+40*14+4)
-COLOR_RAM_POS_HI
+TRAFFICLIGHT_COLOR_RAM_POS_HI
         .BYTE >(COLOR_RAM+40*14+10)
         .BYTE >(COLOR_RAM+40*14+8)
         .BYTE >(COLOR_RAM+40*14+6)
         .BYTE >(COLOR_RAM+40*14+4)
-fE340   .BYTE $0B,$0F,$0A,$0A
-fE344   .BYTE $59,$2C,$2C,$2C
-fE348   .BYTE $10,$00,$00,$00
+TRAFFICLIGHT_COLOR_TBL
+        .BYTE $0B,$0F,$0A,$0A           ;Dark Grey, Light Grey, Light Red, Light Red
+TRAFFICLIGHT_SID_FREQ_TBL
+        .BYTE $59,$2C,$2C,$2C
+TRAFFICLIGHT_SID_CONTROL_TBL
+        .BYTE $10,$00,$00,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Initial screen, including the scrolling + animation
@@ -2808,7 +2816,7 @@ _L05    CPY ZP_PASSED_CARS_TOTAL
         LDA #$20                        ;Space
         BNE _L07
 _L06    LDA PASSED_CARS_CHAR_TBL,X
-_L07    LDY PASSED_CARS_OFFSET,X
+_L07    LDY TWO_BY_TWO_OFFSET_TBL,X
         STA (ZP_SCREEN_PTR_LO),Y
         LDY ZP_TMP_49
         DEX
@@ -2932,7 +2940,7 @@ PASSED_CARS_POS_HI
 
         ; Offset to print one passed car, using
         ; PASSED_CARS_POS as reference
-PASSED_CARS_OFFSET
+TWO_BY_TWO_OFFSET_TBL
         .BYTE $00,$01,$28,$29
 
         ; One Passed car is represented with 4 chars:
