@@ -438,10 +438,10 @@ INIT_GAME
         STX ZP_UNUSED_31
         STX ZP_UNUSED_32
         STX ZP_UNUSED_33
-        STX $D017               ;Sprites Expand 2x Vertical (Y)
-        STX $D01B               ;Sprite to Background Display Priority
-        STX $D01D               ;Sprites Expand 2x Horizontal (X)
-        STX $D026               ;Sprite Multi-Color Register 1
+        STX $D017                       ;Sprites Expand 2x Vertical (Y)
+        STX $D01B                       ;Sprite to Background Display Priority
+        STX $D01D                       ;Sprites Expand 2x Horizontal (X)
+        STX $D026                       ;Sprite Multi-Color Register 1
         STX SHOULDER_LEFT_IDX
 
         INX
@@ -457,55 +457,59 @@ INIT_GAME
         LDA #$07
         STA ZP_ROAD_STATE
         LDA #$0F
-        STA $D025               ;Sprite Multi-Color Register 0
-        LDA #60                 ;1 second = 60 ticks
+        STA $D025                       ;Sprite Multi-Color Register 0
+        LDA #60                         ;1 second = 60 ticks
         STA ZP_TICKS_PER_SECOND
-        LDA #$60                ;Initial time: 60 seconds (BCD)
+        LDA #$60                        ;Initial time: 60 seconds (BCD)
         STA ZP_TIME
         LDA #$64
         STA SHOULDER_RIGHT_IDX
-        LDA #$70                ;#%01110000
+        LDA #$70
         STA a2A
-        LDA #$8F                ;#%10001111
-        STA $D015               ;Sprite display Enable
-        LDA #$FF                ;#%11111111
-        STA $D01C               ;Sprites Multi-Color Mode Select
+
+        ; Only set Visible enemy cars and hero car sprites
+        LDA #$8F                        ;#%10001111
+        STA $D015                       ;Sprite display Enable
+        LDA #$FF                        ;#%11111111
+        STA $D01C                       ;Sprites Multi-Color Mode Select
+
         STA a50
         STA a51
 
         ; Init SID
-        LDA #$00                ;#%00000000
-        LDY #$18                ;#%00011000
-_L00    STA $D400,Y             ;Voice 1: Frequency Control - Low-Byte
+        LDA #$00
+        LDY #$18
+_L00    STA $D400,Y                     ;Voice 1: Frequency Control - Low-Byte
         DEY
         BPL _L00
 
         LDA #$02
-        STA $D403               ;Voice 1: Pulse Waveform Width - High-Nybble
-        STA $D40A               ;Voice 2: Pulse Waveform Width - High-Nybble
+        STA $D403                       ;Voice 1: Pulse Waveform Width - High-Nybble
+        STA $D40A                       ;Voice 2: Pulse Waveform Width - High-Nybble
         LDA #$08
-        STA $D40C               ;Voice 2: Attack / Decay Cycle Control
+        STA $D40C                       ;Voice 2: Attack / Decay Cycle Control
         LDA #$F9
-        STA $D40D               ;Voice 2: Sustain / Release Cycle Control
+        STA $D40D                       ;Voice 2: Sustain / Release Cycle Control
         LDA #$2F
-        STA $D418               ;Select Filter Mode and Volume
+        STA $D418                       ;Select Filter Mode and Volume
         LDA #$BE
-        STA $D416               ;Filter Cutoff Frequency: High-Byte
+        STA $D416                       ;Filter Cutoff Frequency: High-Byte
         LDA #$F0
-        STA $D414               ;Voice 3: Sustain / Release Cycle Control
+        STA $D414                       ;Voice 3: Sustain / Release Cycle Control
         LDA #$FB
-        STA $D406               ;Voice 1: Sustain / Release Cycle Control
+        STA $D406                       ;Voice 1: Sustain / Release Cycle Control
 
         JSR PRINT_SCORE_AND_TIME
         JSR PRINT_SPEED
-        LDA #$0E
-        STA $D027               ;Sprite 0 Color
-        LDA #$F4                ;Car pos 1
+        LDA #$0E                        ;Color Light Blue
+        STA $D027                       ;Sprite 0 Color
+        LDA #$F4                        ;Car pos 1
         STA SPR_FRAME_PTR_00
-        LDA #$89
-        STA $D000               ;Sprite 0 X Pos
+        LDA #137
+        STA $D000                       ;Sprite 0 X Pos
 
-        LDX #$0F
+        ; Scroll down 15 rows with a small delay betwen each
+        LDX #15
 _L01    STX ZP_TMP_REG_00
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
@@ -515,127 +519,140 @@ _L01    STX ZP_TMP_REG_00
         DEX
         BPL _L01
 
-        LDA #$0A     ;#%00001010
-        STA $D401    ;Voice 1: Frequency Control - High-Byte
-        LDA #$41     ;#%01000001
-        STA $D404    ;Voice 1: Control Register
-        LDX #$FA     ;#%11111010
-jE205   STX ZP_TMP_REG_00
-        CPX #$CA     ;#%11001010
-        BEQ bE259
-        CPX #$C9     ;#%11001001
-        BEQ bE229
-        CPX #$C8     ;#%11001000
-        BEQ bE241
-        CPX #$CB     ;#%11001011
-        BNE bE26B
+        LDA #$0A
+        STA $D401                       ;Voice 1: Frequency Control - High-Byte
+        LDA #$41
+        STA $D404                       ;Voice 1: Control Register
 
-        LDY #$1F     ;#%00011111
-bE219   LDA START_BOTTOM_ROW_BANNER,Y
+        ; Do the initial scroll down, where the car
+        ; goes up, and the START banner appears with the traffic lights
+        LDX #250                        ;The loop goes from 250 to 187
+_L02    STX ZP_TMP_REG_00
+        CPX #202
+        BEQ _PRINT_START_TOP
+        CPX #201
+        BEQ _PRINT_TRAFFICLIGHT_BOTTOM
+        CPX #200
+        BEQ _PRINT_TRAFFICLIGHT_TOP
+        CPX #203
+        BNE _L10
+
+        ; Print Start bottom row
+        LDY #$1F
+_L03    LDA START_BOTTOM_ROW_BANNER,Y
         STA SCREEN_RAM,Y
-        LDA #$0A     ;#%00001010
+        LDA #$0A                        ;Color Light Red
         STA COLOR_RAM,Y
         DEY
-        BPL bE219
-        BMI bE26E
+        BPL _L03
+        BMI _L11
 
-bE229   JSR DRAW_ROAD_TOP_ROW
-        LDY #$07     ;#%00000111
-bE22E   TYA
-        AND #$01     ;#%00000001
+_PRINT_TRAFFICLIGHT_BOTTOM
+        JSR DRAW_ROAD_TOP_ROW
+        LDY #$07
+_L05    TYA
+        AND #$01
         CLC
-        ADC #$2D     ;#%00101101
+        ADC #$2D                        ;Traffic light bottom-left char
         STA SCREEN_RAM+4,Y
-        LDA #$08     ;#%00001000
+        LDA #$08                        ;Color Orange
         STA COLOR_RAM+4,Y
         DEY
-        BPL bE22E
-        BMI bE26E
-bE241   JSR DRAW_ROAD_TOP_ROW
-        LDY #$07     ;#%00000111
-bE246   TYA
-        AND #$01     ;#%00000001
+        BPL _L05
+        BMI _L11
+
+_PRINT_TRAFFICLIGHT_TOP
+        JSR DRAW_ROAD_TOP_ROW
+        LDY #$07
+_L07    TYA
+        AND #$01
         CLC
-        ADC #$2B     ;#%00101011
+        ADC #$2B                        ;Traffic light top-left char
         STA SCREEN_RAM+4,Y
-        LDA #$08     ;#%00001000
+        LDA #$08                        ;Color Orange
         STA COLOR_RAM+4,Y
         DEY
-        BPL bE246
-        BMI bE26E
-bE259   LDY #$1F     ;#%00011111
-bE25B   LDA START_TOP_ROW_BANNER,Y
+        BPL _L07
+        BMI _L11
+
+_PRINT_START_TOP
+        LDY #$1F
+_L09    LDA START_TOP_ROW_BANNER,Y
         STA SCREEN_RAM,Y
-        LDA #$0A     ;#%00001010
+        LDA #$0A                        ;Color Light Red
         STA COLOR_RAM,Y
         DEY
-        BPL bE25B
-        BMI bE26E
-bE26B   JSR DRAW_ROAD_TOP_ROW
-bE26E   JSR SCROLL_DOWN
+        BPL _L09
+        BMI _L11
+
+        ; Scroll down one row
+        ; And move the Hero car 8 pixel up
+_L10    JSR DRAW_ROAD_TOP_ROW
+_L11    JSR SCROLL_DOWN
         LDX ZP_TMP_REG_00
         TXA
         CLC
-        ADC #$08     ;#%00001000
-        STA $D001    ;Sprite 0 Y Pos
+        ADC #$08
+        STA $D001                       ;Sprite 0 Y Pos
 
         LDY #$01
         JSR DELAY_01
 
         DEX
-        CPX #$BB     ;#%10111011
-        BCC bE287
+        CPX #187
+        BCC _L12
 
-        JMP jE205
+        JMP _L02
 
-bE287   LDA #$00     ;#%00000000
-        STA $D404    ;Voice 1: Control Register
+_L12    LDA #$00
+        STA $D404                       ;Voice 1: Control Register
         LDY #$01
         JSR DELAY_00
 
-        LDA #$05     ;#%00000101
-        STA $D401    ;Voice 1: Frequency Control - High-Byte
-        LDA #$40     ;#%01000000
-        STA $D404    ;Voice 1: Control Register
+        LDA #$05
+        STA $D401                       ;Voice 1: Frequency Control - High-Byte
+        LDA #$40                        ;#%01000000
+        STA $D404                       ;Voice 1: Control Register
 
         LDY #$01
         JSR DELAY_00
 
-        LDA #$0E     ;#%00001110
-        STA $D02E    ;Sprite 7 Color
-        LDA #$F4     ;Sprite pointer: Stopped car
+        LDA #$0E                        ;Color Light Blue
+        STA $D02E                       ;Sprite 7 Color
+        LDA #$F4                        ;Sprite pointer: Stopped car
         STA SPR_FRAME_PTR_07
-        LDA #$C3     ;#%11000011
-        STA $D00F    ;Sprite 7 Y Pos
-        LDA #$19     ;#%00011001
-        STA $D001    ;Sprite 0 Y Pos
-        STA $D003    ;Sprite 1 Y Pos
-        STA $D005    ;Sprite 2 Y Pos
-        STA $D007    ;Sprite 3 Y Pos
-        LDA #$89     ;#%10001001
-        STA $D00E    ;Sprite 7 X Pos
-        STA $D000    ;Sprite 0 X Pos
-        STA $D002    ;Sprite 1 X Pos
-        STA $D004    ;Sprite 2 X Pos
-        STA $D006    ;Sprite 3 X Pos
-        LDX #$03     ;#%00000011
-bE2D0   STX ZP_TMP_REG_00
+        LDA #195
+        STA $D00F                       ;Sprite 7 Y Pos
+        LDA #25
+        STA $D001                       ;Sprite 0 Y Pos
+        STA $D003                       ;Sprite 1 Y Pos
+        STA $D005                       ;Sprite 2 Y Pos
+        STA $D007                       ;Sprite 3 Y Pos
+        LDA #137
+        STA $D00E                       ;Sprite 7 X Pos
+        STA $D000                       ;Sprite 0 X Pos
+        STA $D002                       ;Sprite 1 X Pos
+        STA $D004                       ;Sprite 2 X Pos
+        STA $D006                       ;Sprite 3 X Pos
+
+        LDX #$03
+_L13    STX ZP_TMP_REG_00
 
         LDY #$02
         JSR DELAY_00
 
         LDA fE344,X
-        STA $D408    ;Voice 2: Frequency Control - High-Byte
+        STA $D408                       ;Voice 2: Frequency Control - High-Byte
         LDA #$11
-        STA $D40B    ;Voice 2: Control Register
+        STA $D40B                       ;Voice 2: Control Register
 
         ; Print "Flashlight" background color
-        LDA #$08                ;Orange
-        LDY #$07                ;Number of columns to print
-bE2E6   STA COLOR_RAM+40*14+4,Y
+        LDA #$08                        ;Orange
+        LDY #$07                        ;Number of columns to print
+_L14    STA COLOR_RAM+40*14+4,Y
         STA COLOR_RAM+40*15+4,Y
         DEY
-        BPL bE2E6
+        BPL _L14
 
         LDA COLOR_RAM_POS_LO,X
         STA ZP_TMP_PTR_LO
@@ -644,29 +661,29 @@ bE2E6   STA COLOR_RAM+40*14+4,Y
 
         LDA fE340,X
         LDX #$03
-bE2FE   LDY PASSED_CARS_OFFSET,X
+_L15    LDY PASSED_CARS_OFFSET,X
         STA (ZP_TMP_PTR_LO),Y
         DEX
-        BPL bE2FE
+        BPL _L15
 
         LDY #$0A
         JSR DELAY_01
 
         LDX ZP_TMP_REG_00
         LDA fE348,X
-        STA $D40B    ;Voice 2: Control Register
+        STA $D40B                       ;Voice 2: Control Register
         DEX
-        BPL bE2D0
+        BPL _L13
 
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA ZP_TMP_REG_00
-        LDA #$3C     ;#%00111100
+        LDA #$3C                        ;#%00111100
         STA a52
         LDA #$08
         STA ZP_ROAD_STATE
 
-        LDA #$90     ;#%10010000
-        STA $D40C    ;Voice 2: Attack / Decay Cycle Control
+        LDA #$90                        ;#%10010000
+        STA $D40C                       ;Voice 2: Attack / Decay Cycle Control
         SEI
         LDA #<IRQ_HANDLER_GAME_LOOP
         STA ZP_IRQ_LO
@@ -677,6 +694,7 @@ bE2FE   LDY PASSED_CARS_OFFSET,X
         STA a11
         JMP MAIN_LOOP
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
         ; FIXME: What is this about
 COLOR_RAM_POS_LO
         .BYTE <(COLOR_RAM+40*14+10)
@@ -2993,10 +3011,10 @@ _L02    STY ZP_TMP_REG_01
         DEY
         BNE _L02
 
-        LDY #31                 ;32 columns
+        LDY #31                         ;32 columns
 _L03    LDA RACE_OVER_BOTTOM_ROW_BANNER,Y
         STA SCREEN_RAM,Y
-        LDA #$0A                ;Color Light Red
+        LDA #$0A                        ;Color Light Red
         STA COLOR_RAM,Y
         DEY
         BPL _L03
@@ -3004,7 +3022,7 @@ _L03    LDA RACE_OVER_BOTTOM_ROW_BANNER,Y
         JSR SCROLL_DOWN
         JSR sEDDF
 
-        LDY #31                 ;32 columns
+        LDY #31                         ;32 columns
 _L04    LDA RACE_OVER_TOP_ROW_BANNER,Y
         STA SCREEN_RAM,Y
         DEY
@@ -3022,26 +3040,27 @@ _L05    STY ZP_TMP_REG_01
         BPL _L05
 
         SEI
-        LDA #<IRQ_HANDLER_MAIN  ;#%00001000
+        LDA #<IRQ_HANDLER_MAIN
         STA ZP_IRQ_LO
-        LDA #>IRQ_HANDLER_MAIN  ;#%11100000
+        LDA #>IRQ_HANDLER_MAIN
         STA ZP_IRQ_HI
         CLI
 
         INC a13
-        LDA #$A3     ;#%10100011
-_L06    CMP #$08     ;#%00001000
+        LDA #163
+_L06    CMP #$08
         BCC _L07
         SEC
-        SBC #$04     ;#%00000100
-        STA $D00F    ;Sprite 7 Y Pos
-        LDY #$01     ;#%00000001
+        SBC #$04
+        STA $D00F                       ;Sprite 7 Y Pos
+        LDY #$01
         JSR DELAY_01
-        LDA $D00F    ;Sprite 7 Y Pos
+        LDA $D00F                       ;Sprite 7 Y Pos
         BNE _L06
 
-_L07    LDY #$07     ;#%00000111
-        LDA #$20     ;#%00100000
+        ; Erase "Extended time", in case it was on
+_L07    LDY #$07
+        LDA #$20                        ;Space
 _L08    STA SCREEN_RAM+40*23+32,Y
         STA SCREEN_RAM+40*24+32,Y
         DEY
@@ -3050,12 +3069,13 @@ _L08    STA SCREEN_RAM+40*23+32,Y
         LDY #$05
         JSR DELAY_00
 
-        LDX #$1A     ;#%00011010
+        ; Scroll down 26 rows, and...
+        LDX #26
 _L09    STX ZP_TMP_REG_00
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
         LDA SHOULDER_RIGHT_IDX
-        CMP #$64     ;#%01100100
+        CMP #100
         BEQ _L11
         BCC _L10
         DEC SHOULDER_RIGHT_IDX
@@ -3068,11 +3088,12 @@ _L11    LDY #$01
         DEX
         BPL _L09
 
+        ; Disable and Reset sprites X pos
 NMI_HANDLER
-        LDA #$00     ;#%00000000
-        STA $D015    ;Sprite display Enable
-        LDX #$0F     ;#%00001111
-_L00    STA $D000,X  ;Sprite 0 X Pos
+        LDA #$00
+        STA $D015                       ;Sprite display Enable
+        LDX #$0F
+_L00    STA $D000,X                     ;Sprite 0 X Pos
         DEX
         BPL _L00
         JMP SET_IRQ_TO_WAIT_BUTTON
@@ -3246,6 +3267,7 @@ bF6E0   LDA #$82     ;#%10000010
         ORA a77
         STA $D417    ;Filter Resonance Control / Voice Input Control
         BNE jF704
+
 jF6F3   LDA #$6E     ;#%01101110
         STA $D40F    ;Voice 3: Frequency Control - High-Byte
         LDA #$21     ;#%00100001
