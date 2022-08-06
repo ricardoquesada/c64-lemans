@@ -1003,19 +1003,20 @@ _L13    STA (ZP_TMP_PTR_LO),Y
         BPL _L13
         LDA ZP_TMP_PTR_LO
         CLC
-        ADC #$28     ;#%00101000
+        ADC #40
         STA ZP_TMP_PTR_LO
         LDA ZP_TMP_PTR_HI
-        ADC #$00     ;#%00000000
+        ADC #$00
         STA ZP_TMP_PTR_HI
         DEX
         BPL _L12
-        LDX #$18     ;#%00011000
-_L14    LDA #$1A     ;#%00011010
+
+        LDX #24
+_L14    LDA #$1A
         STA f79,X
-        LDA #$E0     ;#%11100000
+        LDA #$E0
         STA f92,X
-        LDA #$07     ;#%00000111
+        LDA #$07
         STA fAB,X
         DEX
         BPL _L14
