@@ -40,12 +40,12 @@ ZP_HI_SCORE_03 = $10
 ZP_SOUND_ENABLED = $11
 ZP_IS_GAME_OVER = $12
 a13 = $13
-a14 = $14
-a15 = $15
+TIMER0_CNT = $14
+TIMER0_TRIGGERED = $15
 ZP_TIME = $16
 ZP_TICK_COUNTER = $17           ;Current number of ticks.
 ZP_TICKS_PER_SECOND = $18       ;How many ticks are in a second
-a19 = $19
+TIMER1_TRIGGERED = $19
 ZP_ROAD_STATE = $1A
 a1B = $1B
 a1C = $1C
@@ -226,19 +226,19 @@ IRQ_HANDLER_MAIN
 
         JSR PLAY_AUDIO
 
-_L00    INC a14
-        INC a14
-        LDA a14
-        CMP #$3C
+_L00    INC TIMER0_CNT
+        INC TIMER0_CNT
+        LDA TIMER0_CNT
+        CMP #60
         BCC _L01
 
         LDY #$00
-        STY a14
+        STY TIMER0_CNT
         INY
-        STY a15
+        STY TIMER0_TRIGGERED
 
 _L01    LDA #$01
-        STA a19
+        STA TIMER1_TRIGGERED
 
         LDA $DC0D               ;CIA1: CIA Interrupt Control Register
 
@@ -799,13 +799,13 @@ TITLE_ROWS_TBL
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Delay based on ticks. Register Y is number of ticks to wait
-; Uses a15
+; Uses TIMER0_TRIGGERED
 DELAY_00
 _L00
         LDA #$00
-        STA a14
-        STA a15
-_L01    LDA a15
+        STA TIMER0_CNT
+        STA TIMER0_TRIGGERED
+_L01    LDA TIMER0_TRIGGERED
         BEQ _L01
         DEY
         BNE _L00
@@ -813,12 +813,12 @@ _L01    LDA a15
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Delay based on ticks. Register Y is number of ticks to wait
-; Uses a19
+; Uses TIMER1_TRIGGERED
 DELAY_01
 _L00
         LDA #$00
-        STA a19
-_L01    LDA a19
+        STA TIMER1_TRIGGERED
+_L01    LDA TIMER1_TRIGGERED
         BEQ _L01
         DEY
         BNE _L00
