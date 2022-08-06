@@ -17,8 +17,8 @@ ZP_TMP_PTR_LO = $04
 ZP_TMP_PTR_HI = $05
 ZP_SCREEN_PTR_LO = $06
 ZP_SCREEN_PTR_HI = $07
-a08 = $08
-a09 = $09
+ZP_RANDOM_NUMBER = $08
+ZP_RANDOM_NUMBER_SEED = $09
 ZP_SCORE_01 = $0A
 ZP_SCORE_02 = $0B
 ZP_SCORE_03 = $0C
@@ -210,7 +210,7 @@ _L00    INC ZP_TIMER0_CNT
 _L01    LDA #$01
         STA ZP_TIMER1_TRIGGERED
 
-        LDA $DC0D               ;CIA1: CIA Interrupt Control Register
+        LDA $DC0D                       ;CIA1: CIA Interrupt Control Register
 
         PLA
         TAY
@@ -310,14 +310,14 @@ _L00    LDA VIC_VALUES,X
         STA ZP_TMP_REG_01
         STA ZP_SPEED_LO
         STA ZP_SPEED_HI
-        STA a08
-        STA a09
+        STA ZP_RANDOM_NUMBER
+        STA ZP_RANDOM_NUMBER_SEED
         STA ZP_TIME
-        STA $D015               ;Disable all sprites
+        STA $D015                       ;Disable all sprites
 
         ; Sprites from 0 to 5 have X & Y = 10
         LDY #$0A
-_L01    STA $D000,Y             ;Sprite Pos
+_L01    STA $D000,Y                     ;Sprite Pos
         DEY
         BPL _L01
 
@@ -332,10 +332,10 @@ _L01    STA $D000,Y             ;Sprite Pos
 
 SET_IRQ_TO_WAIT_BUTTON
         SEI
-        LDX #$FA                ;Stack
+        LDX #$FA                        ;Stack
         TXS
         LDA #$00
-        STA $D418               ;Select Filter Mode and Volume
+        STA $D418                       ;Select Filter Mode and Volume
         LDA #<IRQ_HANDLER_WAIT_BUTTON
         STA ZP_IRQ_LO
         LDA #>IRQ_HANDLER_WAIT_BUTTON
@@ -347,24 +347,24 @@ SET_IRQ_TO_WAIT_BUTTON
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 IRQ_HANDLER_WAIT_BUTTON
         ; Read button from Paddle
-        LDA #$FF                ;#%11111111
-        STA $DC00               ;CIA1: Data Port Register A
-        LDA $DC01               ;CIA1: Data Port Register B
+        LDA #$FF                        ;#%11111111
+        STA $DC00                       ;CIA1: Data Port Register A
+        LDA $DC01                       ;CIA1: Data Port Register B
         AND #$04
         BEQ _L00
 
         ; Read button from Joystick
-        LDA #$FE                ;#%11111110
-        STA $DC00               ;CIA1: Data Port Register A
-        LDA $DC01               ;CIA1: Data Port Register B
-        AND #$10                ;#%00010000
+        LDA #$FE                        ;#%11111110
+        STA $DC00                       ;CIA1: Data Port Register A
+        LDA $DC01                       ;CIA1: Data Port Register B
+        AND #$10                        ;#%00010000
         BNE _L01
 
-_L00    LDA #<IRQ_HANDLER_MAIN  ;#%00001000
+_L00    LDA #<IRQ_HANDLER_MAIN
         STA ZP_IRQ_LO
-        LDA #>IRQ_HANDLER_MAIN  ;#%11100000
+        LDA #>IRQ_HANDLER_MAIN
         STA ZP_IRQ_HI
-        LDA $DC0D               ;CIA1: CIA Interrupt Control Register
+        LDA $DC0D                       ;CIA1: CIA Interrupt Control Register
         JMP INIT_GAME
 
 _L01    JMP IRQ_HANDLER_MAIN
@@ -372,7 +372,7 @@ _L01    JMP IRQ_HANDLER_MAIN
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 INIT_GAME
         SEI
-        LDX #$FA                ;Stack
+        LDX #$FA                        ;Stack
         TXS
 
         CLD
@@ -714,16 +714,16 @@ PRINT_TITLE_SCREEN
 _L00    STX ZP_TMP_REG_00
         JSR DRAW_ROAD_TOP_ROW
 
-        LDX ZP_TMP_REG_00       ;Index of row to print
-        LDY TITLE_ROWS_TBL,X    ;Choose which row to print
+        LDX ZP_TMP_REG_00               ;Index of row to print
+        LDY TITLE_ROWS_TBL,X            ;Choose which row to print
         LDX #$00
 _L01    LDA TITLE_MSG,Y
         STA SCREEN_RAM+8,X
-        LDA #$03                ;Cyan color
+        LDA #$03                        ;Cyan color
         STA COLOR_RAM+8,X
         INY
         INX
-        CPX #16                 ;16 colums to draw per line
+        CPX #16                         ;16 colums to draw per line
         BCC _L01
 
         JSR SCROLL_DOWN
@@ -732,7 +732,7 @@ _L01    LDA TITLE_MSG,Y
 
         LDX ZP_TMP_REG_00
         INX
-        CPX #16                 ;16 rows in total (?)
+        CPX #16                         ;16 rows in total (?)
         BCC _L00
 
         ; After print the Title Message Draw 4 rows of street
@@ -754,9 +754,9 @@ _L03    LDY #$14
 
         ; Blink 'Press F1...'
         LDA COLOR_RAM + 40 * 17 + 8
-        EOR #$03                ;Switch between black and cyan
-        LDY #$0F                ;16 columns to blink
-_L04    STA COLOR_RAM+40*17+8,Y ;3 rows
+        EOR #$03                        ;Switch between black and cyan
+        LDY #$0F                        ;16 columns to blink
+_L04    STA COLOR_RAM+40*17+8,Y         ;3 rows
         STA COLOR_RAM+40*18+8,Y
         STA COLOR_RAM+40*19+8,Y
         DEY
@@ -826,15 +826,15 @@ _L00    STA SCREEN_RAM,Y
 INIT_SCREEN
         LDA #$44
         JSR CLEAR_SCREEN_RAM
-        LDA #$00                ;Black
-        STA $D020               ;Border Color
-        STA $D021               ;Background Color 0
-        LDA #$08                ;#%00001000
-        STA $D022               ;Background Color 1, Multi-Color Register 0
-        LDA #$0F                ;#%00001111
-        STA $D023               ;Background Color 2, Multi-Color Register 1
+        LDA #$00                        ;Black
+        STA $D020                       ;Border Color
+        STA $D021                       ;Background Color 0
+        LDA #$08                        ;Orange color
+        STA $D022                       ;Background Color 1, Multi-Color Register 0
+        LDA #$0F                        ;Light Grey
+        STA $D023                       ;Background Color 2, Multi-Color Register 1
 
-        LDA #$0C                ;#%00001100
+        LDA #$0C                        ;Grey
         LDY #$00
 _L00    STA COLOR_RAM,Y
         STA COLOR_RAM+$0100,Y
@@ -849,10 +849,10 @@ _L00    STA COLOR_RAM,Y
         STA ZP_TMP_PTR_HI
 
         ; Fill the right part of the screen with spaces
-        LDX #24                 ;In total 24 rows
+        LDX #24                         ;In total 24 rows
 
-_L01    LDY #$07                ;7 colums: from 32 to 39
-        LDA #$20                ;Space character
+_L01    LDY #$07                        ;7 colums: from 32 to 39
+        LDA #$20                        ;Space character
 _L02    STA (ZP_TMP_PTR_LO),Y
         DEY
         BPL _L02
@@ -867,7 +867,7 @@ _L02    STA (ZP_TMP_PTR_LO),Y
         DEX
         BPL _L01
 
-        LDY #$07                ;7 colums
+        LDY #$07                        ;7 colums
 _L03    LDA SCORE_MSG,Y
         STA SCREEN_RAM+40*1+32,Y
         LDA TIME_MSG,Y
@@ -1056,22 +1056,23 @@ _L02    LDA ZP_ROAD_X_LEFT_ROW_TBL,Y
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sE734
+; Looks like a "random" number generator
+UPDATE_RANDOM_NUMBER
         STY ZP_TMP_4A
-        LDY #$05     ;#%00000101
-_L00    ASL a08
-        ROL a09
+        LDY #$05
+_L00    ASL ZP_RANDOM_NUMBER            ;ZP_RANDOM_NUMBER *= 2
+        ROL ZP_RANDOM_NUMBER_SEED       ;ZP_RANDOM_NUMBER_SEED *= 2
         ROL A
         ROL A
-        EOR a08
+        EOR ZP_RANDOM_NUMBER
         ROL A
-        EOR a08
+        EOR ZP_RANDOM_NUMBER
         LSR A
         LSR A
-        EOR #$FF     ;#%11111111
-        AND #$01     ;#%00000001
-        ORA a08
-        STA a08
+        EOR #$FF
+        AND #$01
+        ORA ZP_RANDOM_NUMBER
+        STA ZP_RANDOM_NUMBER
         DEY
         BPL _L00
 
@@ -1324,8 +1325,8 @@ _L05    INC ZP_ROAD_STATE_DELAY
 
         ; Road States 00, 01
 _STATES_00_01
-        JSR sE734
-        LDA a08
+        JSR UPDATE_RANDOM_NUMBER
+        LDA ZP_RANDOM_NUMBER
         AND #$03
         BEQ _L09
         CMP #$03
@@ -2463,13 +2464,13 @@ _L28    LDA a5A
         BNE _L27
         LDA f30,X
         BEQ _L27
-        JSR sE734
-        LDA a08
+        JSR UPDATE_RANDOM_NUMBER
+        LDA ZP_RANDOM_NUMBER
         AND #$1F
         BNE _L27
         STX a5A
-        JSR sE734
-        LDA a08
+        JSR UPDATE_RANDOM_NUMBER
+        LDA ZP_RANDOM_NUMBER
         AND #$07
         TAY
         LDA ENEMY_CAR_COLOR_TBL,Y
@@ -2480,27 +2481,27 @@ _L28    LDA a5A
         LDA ZP_ROAD_STATE_ROW_TBL+24
         CMP #$06
         BEQ _L29
-        JSR sE734
-        LDA a08
+        JSR UPDATE_RANDOM_NUMBER
+        LDA ZP_RANDOM_NUMBER
         AND #$3F
         CLC
         ADC #110
         LDY ZP_TMP_49
         STA $D000,Y                     ;Sprite 0 X Pos
-        JSR sE734
-        LDA a08
+        JSR UPDATE_RANDOM_NUMBER
+        LDA ZP_RANDOM_NUMBER
         AND #$01
         STA f5D,X
-        JSR sE734
-        LDA a08
+        JSR UPDATE_RANDOM_NUMBER
+        LDA ZP_RANDOM_NUMBER
         AND #$02
         TAY
         DEY
         STY ZP_ENEMY_CAR_HORIZONTAL_MOV_TBL,X
         JMP _L30
 
-_L29    JSR sE734
-        LDA a08
+_L29    JSR UPDATE_RANDOM_NUMBER
+        LDA ZP_RANDOM_NUMBER
         AND #$03
         TAY
         LDA fF2EF,Y
