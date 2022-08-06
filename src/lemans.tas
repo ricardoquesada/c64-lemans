@@ -1034,7 +1034,7 @@ SPEED_MSG
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 SCROLL_DOWN
-        LDY #$1F     ;#%00011111
+        LDY #31
 _L00
         ; Screen RAM
         .FOR I:=23, I>=0, I-=1
@@ -1052,7 +1052,7 @@ _L00
         BMI _L01
         JMP _L00
 
-_L01    LDY #$17     ;#%00010111
+_L01    LDY #23
 _L02    LDA f0079,Y
         STA f007A,Y
         LDA f0092,Y
@@ -1064,7 +1064,8 @@ _L02    LDA f0079,Y
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sE734   STY ZP_TMP_4A
+sE734
+        STY ZP_TMP_4A
         LDY #$05     ;#%00000101
 _L00    ASL a08
         ROL a09
@@ -1081,6 +1082,7 @@ _L00    ASL a08
         STA a08
         DEY
         BPL _L00
+
         LDY ZP_TMP_4A
         RTS
 
@@ -1747,29 +1749,30 @@ _L05    LDA f00AB,Y
         CMP #$01
         BNE _L06
         LDA ZP_PIXELS_TO_MOVE_CAR
-        CMP #$05     ;#%00000101
+        CMP #$05
         BNE _L06
-        LDA #$02     ;#%00000010
+        LDA #$02
         STA ZP_PIXELS_TO_MOVE_CAR
         STA ZP_SOUND_EFFECT_TO_PLAY
+
 _L06    LDA f00AB,Y
-        CMP #$06     ;#%00000110
+        CMP #$06
         BNE _L07
-        LDA #$6C     ;#%01101100
-        CMP $D00E    ;Sprite 7 X Pos
+        LDA #108
+        CMP $D00E                       ;Sprite 7 X Pos
         BCS _L07
-        LDA #$B3     ;#%10110011
-        CMP $D00E    ;Sprite 7 X Pos
+        LDA #179
+        CMP $D00E                       ;Sprite 7 X Pos
         BCC _L07
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA ZP_PIXELS_TO_MOVE_CAR
         STA ZP_BRAKE_FORCE
         STA ZP_SOUND_EFFECT_TO_PLAY
-        LDA #$81     ;#%10000001
-        CMP $D00E    ;Sprite 7 X Pos
+        LDA #129
+        CMP $D00E                       ;Sprite 7 X Pos
         BCS _L07
-        LDA #$9E     ;#%10011110
-        CMP $D00E    ;Sprite 7 X Pos
+        LDA #158
+        CMP $D00E                       ;Sprite 7 X Pos
         BCC _L07
         JMP DO_COLLISION
 
@@ -2546,21 +2549,21 @@ _L36    LDY ZP_TMP_49
         LSR A
         LSR A
         SEC
-        SBC #$05     ;#%00000101
+        SBC #$05
         TAY
         LDA f00AB,Y
-        CMP #$02     ;#%00000010
+        CMP #$02
         BNE _L37
-        LDA #$FA        ;Car mask
+        LDA #$FA                        ;Enemy Night car frame
         STA SPR_FRAME_PTR_00,X
         BNE _L38
-_L37    LDA #$F6        ;Enemy Car 00
+_L37    LDA #$F6                        ;Enemy Car 00
         STA SPR_FRAME_PTR_00,X
 _L38    LDY ZP_TMP_49
-        LDA $D001,Y  ;Sprite 0 Y Pos
-        CMP #$32     ;#%00110010
+        LDA $D001,Y                     ;Sprite 0 Y Pos
+        CMP #50
         BCC _L39
-        CMP #$3C     ;#%00111100
+        CMP #60
         BCS _L39
 
         LDA #$01
@@ -2588,17 +2591,17 @@ _L40    DEX
 
 _L41    LDY a4B
         INY
-        CPY #$04     ;#%00000100
+        CPY #$04
         BCC _L44
-        LDY #$00     ;#%00000000
+        LDY #$00
         LDA a4C
-        EOR #$01     ;#%00000001
+        EOR #$01
         STA a4C
         CLC
-        ADC #$F6        ;Enemy Car 00
-        LDY #$03     ;#%00000011
+        ADC #$F6                        ;Enemy Car 00 frame
+        LDY #$03
 _L42    LDX SPR_FRAME_PTR_00,Y
-        CPX #$FA        ;Car mask
+        CPX #$FA                        ;Enemy night car frame
         BEQ _L43
         STA SPR_FRAME_PTR_00,Y
 _L43    DEY
@@ -2610,33 +2613,34 @@ _L44    STY a4B
         BEQ _L46
         INC a78
         LDA a78
-        AND #$04     ;#%00000100
+        AND #$04
         BNE _L45
-        LDA $D015    ;Sprite display Enable
-        AND #$EF     ;#%11101111
-        STA $D015    ;Sprite display Enable
+        LDA $D015                       ;Sprite display Enable
+        AND #$EF                        ;#%11101111
+        STA $D015                       ;Sprite display Enable
         JMP _L46
 
-_L45    LDA $D015    ;Sprite display Enable
-        ORA #$10     ;#%00010000
-        STA $D015    ;Sprite display Enable
-        LDA $D017    ;Sprites Expand 2x Vertical (Y)
-        ORA #$10     ;#%00010000
-        STA $D017    ;Sprites Expand 2x Vertical (Y)
-        LDA $D01C    ;Sprites Multi-Color Mode Select
-        ORA #$10     ;#%00010000
-        STA $D01C    ;Sprites Multi-Color Mode Select
-        LDA $D01D    ;Sprites Expand 2x Horizontal (X)
-        ORA #$10     ;#%00010000
-        STA $D01D    ;Sprites Expand 2x Horizontal (X)
-        LDA #$02     ;#%00000010
-        STA $D02B    ;Sprite 4 Color
-        LDA #$F3     ;"PIT" frame  pointer
+        ; Setup Pit sprite
+_L45    LDA $D015                       ;Sprite display Enable
+        ORA #$10                        ;#%00010000
+        STA $D015                       ;Sprite display Enable
+        LDA $D017                       ;Sprites Expand 2x Vertical (Y)
+        ORA #$10                        ;#%00010000
+        STA $D017                       ;Sprites Expand 2x Vertical (Y)
+        LDA $D01C                       ;Sprites Multi-Color Mode Select
+        ORA #$10                        ;#%00010000
+        STA $D01C                       ;Sprites Multi-Color Mode Select
+        LDA $D01D                       ;Sprites Expand 2x Horizontal (X)
+        ORA #$10                        ;#%00010000
+        STA $D01D                       ;Sprites Expand 2x Horizontal (X)
+        LDA #$02                        ;Color Red
+        STA $D02B                       ;Sprite 4 Color
+        LDA #$F3                        ;"PIT" frame  pointer
         STA SPR_FRAME_PTR_04
-        LDA #$81     ;#%10000001
-        STA $D008    ;Sprite 4 X Pos
-        LDA #$3A     ;#%00111010
-        STA $D009    ;Sprite 4 Y Pos
+        LDA #129
+        STA $D008                       ;Sprite 4 X Pos
+        LDA #58
+        STA $D009
 _L46    JMP jF2FB
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -2917,6 +2921,7 @@ _L16    STA SCREEN_RAM+40*14+32,Y
 
 _L17    JMP IRQ_HANDLER_MAIN
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
         ; Screen location of where to print the passed cars
 PASSED_CARS_POS_LO
         .BYTE <(SCREEN_RAM+40*16+33)
@@ -3378,10 +3383,10 @@ jF793   RTS
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Data
         * = $F800
-        .BINARY "charset-f800-f97f.bin"
-        .BINARY "sprites-f980-f9ff.bin"
-        .BINARY "charset-fa00-fcbf.bin"
-        .BINARY "sprites-fcc0-ffbf.bin"
+        .BINARY "charset-f800-f97f.bin"         ;Chars 00-47
+        .BINARY "sprites-f980-f9ff.bin"         ;Frames 230-231
+        .BINARY "charset-fa00-fcbf.bin"         ;Chars 64-151
+        .BINARY "sprites-fcc0-ffbf.bin"         ;Frames 243-254
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Garbage
