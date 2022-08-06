@@ -111,19 +111,16 @@ a59 = $59
 a5A = $5A
 a5B = $5B
 a5C = $5C
-a61 = $61
-a62 = $62
+ZP_SID_FREQ_LO = $61
+ZP_SID_FREQ_HI = $62
 a63 = $63
 ZP_SOUND_EFFECT_TO_PLAY = $64
-ZP_SPLIT_ROAD_SPRITE_DISPLAYED = $65
-a66 = $66
-a67 = $67
-a68 = $68
-a69 = $69
-a6A = $6A
-a6C = $6C
-a6D = $6D
-a6E = $6E
+ZP_PLAY_SPLIT_ROAD_SOUND = $65
+ZP_PLAY_PASS_CAR_SOUND = $66
+ZP_PLAY_EXTENDED_TIME_SOUND = $67
+ZP_TMP_68 = $68
+ZP_TMP_69 = $69
+ZP_PRINT_SPEED_DELAY = $6A
 ZP_PASSED_CARS_TOTAL = $6F
 ZP_ADD_1000_PTS = $70
 a71 = $71
@@ -133,7 +130,7 @@ a74 = $74
 a75 = $75
 a76 = $76
 a77 = $77
-a78 = $78
+ZP_DISPLAY_PIT_DELAY = $78
 ;
 ; **** FIELDS ****
 ;
@@ -150,7 +147,6 @@ SPR_FRAME_PTR_07 = $07FF
 ;
 ; **** POINTERS ****
 ;
-p0002 = $0002
 SCORE_OFFSET = SCREEN_RAM + 40 * 2 + 32
 TIME_OFFSET = SCREEN_RAM + 40 * 5 + 35
 HI_SCORE_OFFSET = SCREEN_RAM + 40 * 8 + 32
@@ -205,7 +201,7 @@ IRQ_HANDLER
         PHA
         TYA
         PHA
-        JMP (p0002)
+        JMP (ZP_IRQ_LO)
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Interrupt is triggered by Timer A
@@ -407,13 +403,13 @@ INIT_GAME
         STX ZP_COLLISION_DETECTED
         STX a59
         STX ZP_SOUND_EFFECT_TO_PLAY
-        STX ZP_SPLIT_ROAD_SPRITE_DISPLAYED
-        STX a66
-        STX a67
+        STX ZP_PLAY_SPLIT_ROAD_SOUND
+        STX ZP_PLAY_PASS_CAR_SOUND
+        STX ZP_PLAY_EXTENDED_TIME_SOUND
         STX f6B
-        STX a6C
-        STX a6D
-        STX a6E
+        STX f6B+1
+        STX f6B+2
+        STX f6B+3
         STX ZP_PASSED_CARS_TOTAL
         STX ZP_ADD_1000_PTS
         STX a71
@@ -1902,7 +1898,7 @@ DO_COLLISION
         STY a77
         DEY
         STY ZP_SOUND_EFFECT_TO_PLAY
-        STY ZP_SPLIT_ROAD_SPRITE_DISPLAYED
+        STY ZP_PLAY_SPLIT_ROAD_SOUND
         STY $D017                       ;Sprites Expand 2x Vertical (Y)
         STY $D01D                       ;Sprites Expand 2x Horizontal (X)
         STY ZP_HEADLIGHT_DURATION
@@ -2175,17 +2171,17 @@ _L04    LDA ZP_SPEED_LO
 
 _L05    LDY ZP_SPEED_HI                 ;Values from 0 to 3 (0xx, 1xx, 2xx, 3xx)
         LDA ACCELERATION_TBL_LO,Y
-        STA a68
+        STA ZP_TMP_68
         LDA ACCELERATION_TBL_HI,Y
-        STA a69
+        STA ZP_TMP_69
 
         LDA a29
         CLC
-        ADC a68
+        ADC ZP_TMP_68
         STA a29
 
         LDA ZP_SPEED_LO
-        ADC a69
+        ADC ZP_TMP_69
         STA ZP_SPEED_LO
         LDA ZP_SPEED_HI
         ADC #$00
@@ -2225,8 +2221,9 @@ _L09    LDA ZP_SPEED_HI
         STA ZP_SPEED_HI
 _L10    CLD
         JSR PRINT_SCORE_AND_TIME
-        INC a6A
-        LDA a6A
+
+        INC ZP_PRINT_SPEED_DELAY        ;Speed is displayed with a 7 frame delay
+        LDA ZP_PRINT_SPEED_DELAY
         AND #$07
         BNE _L11
         JSR PRINT_SPEED
@@ -2334,7 +2331,7 @@ _L15    LDY a47
         ORA #$40                        ;#%01000000
         STA $D015                       ;Sprite display Enable
         LDA #$01
-        STA ZP_SPLIT_ROAD_SPRITE_DISPLAYED
+        STA ZP_PLAY_SPLIT_ROAD_SOUND
         BNE _L17
 
         ; Disable "Split road" sprite
@@ -2342,7 +2339,7 @@ _L16    LDA $D015                       ;Sprite display Enable
         AND #$BF                        ;#%10111111
         STA $D015                       ;Sprite display Enable
         LDA #$00
-        STA ZP_SPLIT_ROAD_SPRITE_DISPLAYED
+        STA ZP_PLAY_SPLIT_ROAD_SOUND
 
 _L17    STY a47
 
@@ -2618,10 +2615,12 @@ _L44    STY a4B
 
         LDA a59
         BEQ _L46
-        INC a78
-        LDA a78
+        INC ZP_DISPLAY_PIT_DELAY
+        LDA ZP_DISPLAY_PIT_DELAY
         AND #$04
         BNE _L45
+
+        ; Disable Pit sprite
         LDA $D015                       ;Sprite display Enable
         AND #$EF                        ;#%11101111
         STA $D015                       ;Sprite display Enable
@@ -2822,6 +2821,7 @@ _L04    LDA PASSED_CARS_POS_LO,Y
         LDA PASSED_CARS_POS_HI,Y
         STA ZP_SCREEN_PTR_HI
         STY ZP_TMP_49
+
         LDX #$03
 _L05    CPY ZP_PASSED_CARS_TOTAL
         BCC _L06
@@ -2881,10 +2881,11 @@ _L10    LDA a71
         AND #$04
         BEQ _L11
         LDA #$01
-        STA a66
+        STA ZP_PLAY_PASS_CAR_SOUND
         BNE _L13
+
 _L11    LDA #$00
-        STA a66
+        STA ZP_PLAY_PASS_CAR_SOUND
         LDA a71
         BNE _L13
 
@@ -2904,7 +2905,7 @@ _L13    LDA a55
         BEQ _L15
 
         LDA #$01
-        STA a67
+        STA ZP_PLAY_EXTENDED_TIME_SOUND
 
         ; Print "EXTENDED TIME" message
         LDY #$07
@@ -2918,7 +2919,7 @@ _L14    LDA EXTENDED_MSG,Y
 
         ; Erase "EXTENDED TIME" message
 _L15    LDA #$00
-        STA a67
+        STA ZP_PLAY_EXTENDED_TIME_SOUND
         LDY #$07
         LDA #$20
 _L16    STA SCREEN_RAM+40*14+32,Y
@@ -3014,8 +3015,8 @@ _L01    INC a13
         STA ZP_COLLISION_DETECTED
         STA a59
         STA ZP_SOUND_EFFECT_TO_PLAY
-        STA ZP_SPLIT_ROAD_SPRITE_DISPLAYED
-        STA a66
+        STA ZP_PLAY_SPLIT_ROAD_SOUND
+        STA ZP_PLAY_PASS_CAR_SOUND
         STA ZP_UNUSED_30
         STA ZP_UNUSED_31
         STA ZP_UNUSED_32
@@ -3176,20 +3177,20 @@ bF5ED   LDA a13
         LDA #$00     ;#%00000000
         STA $D40B    ;Voice 2: Control Register
         STA $D412    ;Voice 3: Control Register
-        STA a61
+        STA ZP_SID_FREQ_LO
         STA $D400    ;Voice 1: Frequency Control - Low-Byte
         LDA #$0D     ;#%00001101
-        STA a62
+        STA ZP_SID_FREQ_HI
         STA $D401    ;Voice 1: Frequency Control - High-Byte
         INC a13
-bF616   LDA a61
+bF616   LDA ZP_SID_FREQ_LO
         SEC
         SBC #$1E     ;#%00011110
-        STA a61
+        STA ZP_SID_FREQ_LO
         STA $D400    ;Voice 1: Frequency Control - Low-Byte
-        LDA a62
+        LDA ZP_SID_FREQ_HI
         SBC #$00     ;#%00000000
-        STA a62
+        STA ZP_SID_FREQ_HI
         STA $D401    ;Voice 1: Frequency Control - High-Byte
         CMP #$0A     ;#%00001010
         BNE jF667
@@ -3222,13 +3223,13 @@ bF64E   ASL a2E
         LDA #$41     ;#%01000001
         STA $D404    ;Voice 1: Control Register
 
-jF667   LDA a67
+jF667   LDA ZP_PLAY_EXTENDED_TIME_SOUND
         BNE bF6CD
-        LDA ZP_SPLIT_ROAD_SPRITE_DISPLAYED
+        LDA ZP_PLAY_SPLIT_ROAD_SOUND
         BEQ bF672
         JMP jF6F3
 
-bF672   LDA a66
+bF672   LDA ZP_PLAY_PASS_CAR_SOUND
         BNE bF6E0
         LDA ZP_SOUND_EFFECT_TO_PLAY
         BNE bF682
