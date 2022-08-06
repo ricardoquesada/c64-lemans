@@ -221,16 +221,16 @@ _L01    LDA #$01
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 VIC_VALUES
-        .BYTE $10       ;$D011 - Text, 24-rows
-        .BYTE $00       ;$D012 - Raster
-        .BYTE $00       ;$D013 - Latch X
-        .BYTE $00       ;$D014 - Latch Y
-        .BYTE $00       ;$D015 - All sprites disabled
-        .BYTE $18       ;$D016 - 40 Cols, Multicolor mode
-        .BYTE $00       ;$D017 - Y-expanded sprites: None
-        .BYTE $1E       ;$D018 - Charset : 0x3800 / Screen RAM: 0x0400
-        .BYTE $00       ;$D019 - VIC Interrupts (ACK)
-        .BYTE $00       ;$D01A - Request VIC Interrupts: None
+        .BYTE $10                       ;$D011 - Text, 24-rows
+        .BYTE $00                       ;$D012 - Raster
+        .BYTE $00                       ;$D013 - Latch X
+        .BYTE $00                       ;$D014 - Latch Y
+        .BYTE $00                       ;$D015 - All sprites disabled
+        .BYTE $18                       ;$D016 - 40 Cols, Multicolor mode
+        .BYTE $00                       ;$D017 - Y-expanded sprites: None
+        .BYTE $1E                       ;$D018 - Charset : 0x3800 / Screen RAM: 0x0400
+        .BYTE $00                       ;$D019 - VIC Interrupts (ACK)
+        .BYTE $00                       ;$D01A - Request VIC Interrupts: None
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Starting address
@@ -241,41 +241,56 @@ START
         STA ZP_HI_SCORE_02
         STA ZP_HI_SCORE_03
 
-        LDX #$FA                ;Stack size
+        LDX #$FA                        ;Stack size
         TXS
 
         ; Init VIC
         CLD
-        LDX #$09     ;#%00001001
+        LDX #$09
 _L00    LDA VIC_VALUES,X
-        STA $D011,X             ;VIC Control Register 1
+        STA $D011,X                     ;VIC Control Register 1
         DEX
         BPL _L00
 
         ; Init CIA
-        LDA #$7F                ;Clear interrupt flags
-        STA $DC0D               ;CIA1: CIA Interrupt Control Register
-        LDA #$08                ;Set Timer A and B for One-shot
-        STA $DC0E               ;CIA1: CIA Control Register A
-        STA $DC0F               ;CIA1: CIA Control Register B
-        LDX #$00                ;Set as Input
-        STX $DC03               ;CIA1: Data Direction Register B
-        DEX                     ;Set as Output
-        STX $DC02               ;CIA1: Data Direction Register A
+        LDA #$7F                        ;Clear interrupt flags
+        STA $DC0D                       ;CIA1: CIA Interrupt Control Register
+        LDA #$08                        ;Set Timer A and B for One-shot
+        STA $DC0E                       ;CIA1: CIA Control Register A
+        STA $DC0F                       ;CIA1: CIA Control Register B
+        LDX #$00                        ;Set as Input
+        STX $DC03                       ;CIA1: Data Direction Register B
+        DEX                             ;Set as Output
+        STX $DC02                       ;CIA1: Data Direction Register A
 
-        LDA #$E5                ;$8000-$BFFF=RAM, $D000-$DFFF=I/O, $E000-$FFFF=RAM
+        LDA #$E5                        ;$8000-$BFFF=RAM, $D000-$DFFF=I/O, $E000-$FFFF=RAM
         STA $01
-        LDA #$2F                ;Default value
+        LDA #$2F                        ;Default value
         STA $00
 
-        LDA #$1A                ;Set Timer A (LSB)
-        STA $DC04               ;CIA1: Timer A: Low-Byte
-        LDA #$41                ;Set Timer A (MSB)
-        STA $DC05               ;CIA1: Timer A: High-Byte
-        LDA #$81                ;Enable Timer A
-        STA $DC0D               ;CIA1: CIA Interrupt Control Register
-        LDA #$11                ;Start Timer A
-        STA $DC0E               ;CIA1: CIA Control Register A
+        ; Total cycles in C64:
+        ;  PAL      = 19656 (312 * 63)
+        ;  PAL-N    = 20280 (312 * 65)
+        ;  NTSC     = 17095 (263 * 65)
+        ;  NTSC Old = 16832 (263 * 64)
+        ; And the "cycles" used in this game is 16666, and doesn't match any
+        ; of the "standard" cycles for a full vertical retrace.
+        ; But it is pretty similar to 16832. Since the game was released in 1982,
+        ; right at the early stage of the C64, my guess is that this game was
+        ; developed on a NTSC-old C64 machine.
+        ; In any case, by using a Timer and not Raster interrupt, it gurantees
+        ; that the time is the same for all C64 machines.
+
+        ; Timer frequency: 16666, pretty close to full-retrace in Old NTSC C64 machine
+        LDA #<(16666)                   ;Set Timer A (LSB)
+        STA $DC04                       ;CIA1: Timer A: Low-Byte
+        LDA #>(16666)                   ;Set Timer A (MSB)
+        STA $DC05                       ;CIA1: Timer A: High-Byte
+
+        LDA #$81                        ;Enable Timer A
+        STA $DC0D                       ;CIA1: CIA Interrupt Control Register
+        LDA #$11                        ;Start Timer A, Continuous mode
+        STA $DC0E                       ;CIA1: CIA Control Register A
 
         LDA #<IRQ_HANDLER_MAIN
         STA ZP_IRQ_LO
