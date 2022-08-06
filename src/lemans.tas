@@ -72,8 +72,8 @@ ZP_FRAME_PTR_IDX = $43
 ZP_CAR_ANIM_DELAY = $44
 ZP_FLAME_ANIM_DELAY = $45
 ZP_FLAME_FRAME_IDX = $46
-a47 = $47
-a48 = $48
+ZP_SPLIT_ROAD_SPRITE_DELAY = $47
+ZP_SPLIT_ROAD_SPRITE_TOGGLE = $48
 ZP_TMP_49 = $49
 ZP_TMP_4A = $4A
 a4B = $4B
@@ -2303,17 +2303,20 @@ _L14    LDA ZP_ROAD_STATE
         STA $D00D                       ;Sprite 6 Y Pos
         LDA #129
         STA $D00C                       ;Sprite 6 X Pos
+
         LDA #$00
-        STA a47
-        STA a48
-_L15    LDY a47
+        STA ZP_SPLIT_ROAD_SPRITE_DELAY
+        STA ZP_SPLIT_ROAD_SPRITE_TOGGLE
+
+_L15    LDY ZP_SPLIT_ROAD_SPRITE_DELAY
         INY
         CPY #$08
         BCC _L17
+
         LDY #$00
-        LDA a48
+        LDA ZP_SPLIT_ROAD_SPRITE_TOGGLE
         EOR #$01
-        STA a48
+        STA ZP_SPLIT_ROAD_SPRITE_TOGGLE
         BEQ _L16
 
         ; Enable "Split road" sprite
@@ -2331,7 +2334,7 @@ _L16    LDA $D015                       ;Sprite display Enable
         LDA #$00
         STA ZP_PLAY_SPLIT_ROAD_SOUND
 
-_L17    STY a47
+_L17    STY ZP_SPLIT_ROAD_SPRITE_DELAY
 
         ; Remaining of Road States
 _L18    LDA ZP_SOUND_ENABLED
