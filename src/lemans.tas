@@ -34,7 +34,7 @@ ZP_TIMER0_TRIGGERED = $15
 ZP_TIME = $16
 ZP_TICK_COUNTER = $17           ;Current number of ticks.
 ZP_TICKS_PER_SECOND = $18       ;How many ticks are in a second
-ZP_TIMER1_TRIGGERD = $19
+ZP_TIMER1_TRIGGERED = $19
 ZP_ROAD_STATE = $1A
 ZP_ROAD_STATE_DELAY = $1B
 ZP_ROAD_TURN_TBL_IDX = $1C
@@ -61,11 +61,11 @@ f30 = $30
 f34 = $34
 ZP_PADDLE_1_VALUE_INV = $38
 ZP_PADDLE_1_VALUE = $39
-a3A = $3A
-a3B = $3B
-a3C = $3C
-a3D = $3D
-a3E = $3E
+ZP_CAR_MOVEMENT_DELAY_LO = $3A
+ZP_CAR_MOVEMENT_DELAY_HI = $3B
+CAR_Y_OFFSET = $3C
+ZP_TMP_3D = $3D
+ZP_TMP_3E = $3E
 ZP_PIXELS_TO_MOVE_CAR = $41
 ZP_BRAKE_FORCE = $42
 ZP_FRAME_PTR_IDX = $43
@@ -208,7 +208,7 @@ _L00    INC ZP_TIMER0_CNT
         STY ZP_TIMER0_TRIGGERED
 
 _L01    LDA #$01
-        STA ZP_TIMER1_TRIGGERD
+        STA ZP_TIMER1_TRIGGERED
 
         LDA $DC0D               ;CIA1: CIA Interrupt Control Register
 
@@ -592,7 +592,7 @@ _L12    LDA #$00
         LDY #$01
         JSR DELAY_00
 
-        ; Initi sprite's positions and frames
+        ; Init sprite's positions and frames
         LDA #$0E                        ;Color Light Blue
         STA $D02E                       ;Sprite 7 Color
         LDA #$F4                        ;Sprite pointer: Stopped car
@@ -783,12 +783,12 @@ _L01    LDA ZP_TIMER0_TRIGGERED
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Delay based on ticks. Register Y is number of ticks to wait
-; Uses ZP_TIMER1_TRIGGERD
+; Uses ZP_TIMER1_TRIGGERED
 DELAY_01
 _L00
         LDA #$00
-        STA ZP_TIMER1_TRIGGERD
-_L01    LDA ZP_TIMER1_TRIGGERD
+        STA ZP_TIMER1_TRIGGERED
+_L01    LDA ZP_TIMER1_TRIGGERED
         BEQ _L01
         DEY
         BNE _L00
@@ -1672,7 +1672,7 @@ _L01    STY ZP_TMP_REG_00
 _L02    JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
         JSR INCREMENT_SCORE
-        JSR sEDDF
+        JSR ANIMATE_HERO_CAR
 
         ; Check collision with shoulder
         LDA $D00F               ;A = Sprite 7 Y Pos
@@ -1926,7 +1926,7 @@ _L00    STY ZP_TMP_REG_01
 _L01    JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
         JSR INCREMENT_SCORE
-        JSR sEDDF
+        JSR ANIMATE_HERO_CAR
         LDY ZP_TMP_REG_01
         DEY
         BPL _L00
@@ -1942,7 +1942,7 @@ _L03    CPY #$32        ;#%00110010
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
         JSR INCREMENT_SCORE
-        JSR sEDDF
+        JSR ANIMATE_HERO_CAR
 
         LDA ZP_IS_GAME_OVER
         BEQ _L02
@@ -1958,7 +1958,7 @@ _L05    LDA ZP_SPEED_LO
 _L06    JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
         JSR INCREMENT_SCORE
-        JSR sEDDF
+        JSR ANIMATE_HERO_CAR
 
         LDA ZP_IS_GAME_OVER
         BEQ _L05
@@ -2002,20 +2002,23 @@ _L09    LDA #$FA     ;#%11111010
         JMP MAIN_LOOP
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; Called after SCROLL_DOWN
-sEDDF
-        LDA a3A
-        STA a3D
-        LDA a3B
-        STA a3E
+; Animates the Hero car, and also applies "laternal" delay
+ANIMATE_HERO_CAR
+        LDA ZP_CAR_MOVEMENT_DELAY_LO
+        STA ZP_TMP_3D
+        LDA ZP_CAR_MOVEMENT_DELAY_HI
+        STA ZP_TMP_3E
 
-_L00    LDA a3D
+        ; Delay used to control how fast the car moves horizontally.
+        ; Not only during the race, but also used for the crash animation
+        ; when the car moves from right to left.
+_L00    LDA ZP_TMP_3D
         SEC
         SBC #$01
-        STA a3D
-        LDA a3E
+        STA ZP_TMP_3D
+        LDA ZP_TMP_3E
         SBC #$00
-        STA a3E
+        STA ZP_TMP_3E
         BCS _L00
 
         LDY ZP_CAR_ANIM_DELAY
@@ -2218,25 +2221,36 @@ _L10    CLD
         AND #$07
         BNE _L11
         JSR PRINT_SPEED
+
+        ; Converts speed from the range of [0,320] to [0,32]
+        ; Basically divides by 10
+        ; And uses this new value to position the Hero Car Y position
+        ; And to calculate the horizontal movement delay
 _L11    LDA ZP_SPEED_LO
         LSR A
         LSR A
         LSR A
-        LSR A
-        LDX ZP_SPEED_HI
+        LSR A                           ;A = SPEED_LO / 16
+                                        ; Basically take the MSB 4 bits (BCD)
+        LDX ZP_SPEED_HI                 ;X = SPEED_HI (values goes from 0 to 3)
         CLC
-        ADC fF2E3,X
-        STA a3C
+        ADC CAR_SPEED_CONVERTION_TBL,X  ;A += TABLE[X]
+
+        ; Update Hero Y Position based on SPEED / 10
+        STA CAR_Y_OFFSET
+
+        ; Update Hero Horizontal Delay based on TABLE[SPEED/10]
         TAY
-        LDA fF2A3,Y
-        STA a3A
-        LDA fF2C3,Y
-        STA a3B
+        LDA CAR_MOVEMENT_DELAY_LO_TBL,Y
+        STA ZP_CAR_MOVEMENT_DELAY_LO
+        LDA CAR_MOVEMENT_DELAY_HI_TBL,Y
+        STA ZP_CAR_MOVEMENT_DELAY_HI
+
         LDA ZP_SOUND_ENABLED
         BEQ _L12
         LDA #195
         SEC
-        SBC a3C
+        SBC CAR_Y_OFFSET
         STA $D00F                       ;Sprite 7 Y Pos
 
 _L12    LDA ZP_ROAD_STATE
@@ -2725,17 +2739,21 @@ _L06    LSR a2D
         ; Colors of the enemy car
 ENEMY_CAR_COLOR_TBL
         .BYTE $02,$03,$05,$07,$08,$09,$0A,$0D
-fF2A3   .BYTE $00,$00,$00,$00,$00,$00,$80,$00
+CAR_MOVEMENT_DELAY_LO_TBL
+        .BYTE $00,$00,$00,$00,$00,$00,$80,$00
         .BYTE $80,$00,$80,$00,$80,$30,$00,$A0
         .BYTE $60,$20,$00,$D0,$98,$70,$35,$10
         .BYTE $00,$C0,$40,$18,$08,$04,$02,$00
-fF2C3   .BYTE $10,$0C,$0A,$09,$08,$07,$06,$06
+CAR_MOVEMENT_DELAY_HI_TBL
+        .BYTE $10,$0C,$0A,$09,$08,$07,$06,$06
         .BYTE $05,$05,$04,$04,$03,$03,$03,$02
         .BYTE $02,$02,$02,$01,$01,$01,$01,$01
         .BYTE $01,$00,$00,$00,$00,$00,$00,$00
-fF2E3   .BYTE $00,$0A,$14,$1E,$FE,$FD,$FB,$F7
-        .BYTE $01,$02,$04,$08
-fF2EF   .BYTE $51,$6B,$B3,$CD
+CAR_SPEED_CONVERTION_TBL
+        .BYTE $00,$0A,$14,$1E
+        .BYTE $FE,$FD,$FB,$F7           ;Unk
+        .BYTE $01,$02,$04,$08           ;Unk
+fF2EF   .BYTE $51,$6B,$B3,$CD           ;Unk
         ; Related to Speed
 ACCELERATION_TBL_LO
         .BYTE $00,$00,$40,$08
@@ -3030,7 +3048,7 @@ _L01    INC a13
 _L02    STY ZP_TMP_REG_01
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
-        JSR sEDDF
+        JSR ANIMATE_HERO_CAR
         LDY ZP_TMP_REG_01
         DEY
         BNE _L02
@@ -3044,7 +3062,7 @@ _L03    LDA RACE_OVER_BOTTOM_ROW_BANNER,Y
         BPL _L03
 
         JSR SCROLL_DOWN
-        JSR sEDDF
+        JSR ANIMATE_HERO_CAR
 
         LDY #31                         ;32 columns
 _L04    LDA RACE_OVER_TOP_ROW_BANNER,Y
@@ -3053,12 +3071,12 @@ _L04    LDA RACE_OVER_TOP_ROW_BANNER,Y
         BPL _L04
 
         JSR SCROLL_DOWN
-        JSR sEDDF
+        JSR ANIMATE_HERO_CAR
         LDY #10
 _L05    STY ZP_TMP_REG_01
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
-        JSR sEDDF
+        JSR ANIMATE_HERO_CAR
         LDY ZP_TMP_REG_01
         DEY
         BPL _L05
@@ -3332,10 +3350,10 @@ _L18    LDA a13
         BCC _L19
         JMP _L28
 
-_L19    LDA a3C
+_L19    LDA CAR_Y_OFFSET
         CMP #$10     ;#%00010000
         BCS _L20
-        LDA a3C
+        LDA CAR_Y_OFFSET
         SEC
         SBC #$10     ;#%00010000
         STA a74
@@ -3344,7 +3362,7 @@ _L19    LDA a3C
         BNE _L21
 _L20    LDA #$10     ;#%00010000
         SEC
-        SBC a3C
+        SBC CAR_Y_OFFSET
         STA a74
         LDA #$00     ;#%00000000
         STA a75
