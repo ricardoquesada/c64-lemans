@@ -29,19 +29,19 @@ ZP_HI_SCORE_03 = $10
 ZP_SOUND_ENABLED = $11
 ZP_IS_GAME_OVER = $12
 a13 = $13
-TIMER0_CNT = $14
-TIMER0_TRIGGERED = $15
+ZP_TIMER0_CNT = $14
+ZP_TIMER0_TRIGGERED = $15
 ZP_TIME = $16
 ZP_TICK_COUNTER = $17           ;Current number of ticks.
 ZP_TICKS_PER_SECOND = $18       ;How many ticks are in a second
-TIMER1_TRIGGERED = $19
+ZP_TIMER1_TRIGGERD = $19
 ZP_ROAD_STATE = $1A
-a1B = $1B
-a1C = $1C
+ZP_ROAD_STATE_DELAY = $1B
+ZP_ROAD_TURN_TBL_IDX = $1C
 a1D = $1D
-SHOULDER_LEFT_IDX = $1E
-SHOULDER_RIGHT_IDX = $1F
-a20 = $20
+ZP_SHOULDER_LEFT_IDX = $1E
+ZP_SHOULDER_RIGHT_IDX = $1F
+ZP_SHOULDER_PATTER_CHOOSER = $20
 ZP_DIGIT_TO_PRINT = $21         ;Digit to print. Values from 0 to 9
 ZP_BCD_TO_PRINT = $22           ;Encoded in BCD
 ZP_TMP_REG_00 = $23
@@ -196,19 +196,19 @@ IRQ_HANDLER_MAIN
 
         JSR PLAY_AUDIO
 
-_L00    INC TIMER0_CNT
-        INC TIMER0_CNT
-        LDA TIMER0_CNT
+_L00    INC ZP_TIMER0_CNT
+        INC ZP_TIMER0_CNT
+        LDA ZP_TIMER0_CNT
         CMP #60
         BCC _L01
 
         LDY #$00
-        STY TIMER0_CNT
+        STY ZP_TIMER0_CNT
         INY
-        STY TIMER0_TRIGGERED
+        STY ZP_TIMER0_TRIGGERED
 
 _L01    LDA #$01
-        STA TIMER1_TRIGGERED
+        STA ZP_TIMER1_TRIGGERD
 
         LDA $DC0D               ;CIA1: CIA Interrupt Control Register
 
@@ -289,8 +289,8 @@ _L00    LDA VIC_VALUES,X
         STA ZP_SCORE_01
         STA ZP_SCORE_02
         STA ZP_SCORE_03
-        STA a1B
-        STA a1C
+        STA ZP_ROAD_STATE_DELAY
+        STA ZP_ROAD_TURN_TBL_IDX
         STA ZP_TMP_REG_00
         STA ZP_TMP_REG_01
         STA ZP_SPEED_LO
@@ -306,9 +306,9 @@ _L01    STA $D000,Y             ;Sprite Pos
         DEY
         BPL _L01
 
-        STA SHOULDER_LEFT_IDX
+        STA ZP_SHOULDER_LEFT_IDX
         LDA #$64
-        STA SHOULDER_RIGHT_IDX
+        STA ZP_SHOULDER_RIGHT_IDX
         LDA #$07
         STA ZP_ROAD_STATE
         JSR INIT_SCREEN
@@ -367,14 +367,14 @@ INIT_GAME
         STX ZP_SCORE_01
         STX ZP_SCORE_02
         STX ZP_SCORE_03
-        STX a1B
-        STX a1C
+        STX ZP_ROAD_STATE_DELAY
+        STX ZP_ROAD_TURN_TBL_IDX
         STX ZP_TMP_REG_01
         STX a26
         STX ZP_SPEED_LO
         STX ZP_SPEED_HI
         STX ZP_HEADLIGHT_DURATION
-        STX a20
+        STX ZP_SHOULDER_PATTER_CHOOSER
         STX ZP_BRAKE_FORCE
         STX ZP_FRAME_PTR_IDX
         STX ZP_SOUND_ENABLED
@@ -412,7 +412,7 @@ INIT_GAME
         STX $D01B                       ;Sprite to Background Display Priority
         STX $D01D                       ;Sprites Expand 2x Horizontal (X)
         STX $D026                       ;Sprite Multi-Color Register 1
-        STX SHOULDER_LEFT_IDX
+        STX ZP_SHOULDER_LEFT_IDX
 
         INX
 
@@ -433,7 +433,7 @@ INIT_GAME
         LDA #$60                        ;Initial time: 60 seconds (BCD)
         STA ZP_TIME
         LDA #$64
-        STA SHOULDER_RIGHT_IDX
+        STA ZP_SHOULDER_RIGHT_IDX
         LDA #$70
         STA a2A
 
@@ -769,13 +769,13 @@ TITLE_ROWS_TBL
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Delay based on ticks. Register Y is number of ticks to wait
-; Uses TIMER0_TRIGGERED
+; Uses ZP_TIMER0_TRIGGERED
 DELAY_00
 _L00
         LDA #$00
-        STA TIMER0_CNT
-        STA TIMER0_TRIGGERED
-_L01    LDA TIMER0_TRIGGERED
+        STA ZP_TIMER0_CNT
+        STA ZP_TIMER0_TRIGGERED
+_L01    LDA ZP_TIMER0_TRIGGERED
         BEQ _L01
         DEY
         BNE _L00
@@ -783,12 +783,12 @@ _L01    LDA TIMER0_TRIGGERED
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Delay based on ticks. Register Y is number of ticks to wait
-; Uses TIMER1_TRIGGERED
+; Uses ZP_TIMER1_TRIGGERD
 DELAY_01
 _L00
         LDA #$00
-        STA TIMER1_TRIGGERED
-_L01    LDA TIMER1_TRIGGERED
+        STA ZP_TIMER1_TRIGGERD
+_L01    LDA ZP_TIMER1_TRIGGERD
         BEQ _L01
         DEY
         BNE _L00
@@ -1266,10 +1266,10 @@ _L02    STA COLOR_RAM,X
         DEX
         BPL _L02
 
-        INC a20
-        LDA a20
-        AND #$03     ;#%00000011
-        STA a20
+        INC ZP_SHOULDER_PATTER_CHOOSER
+        LDA ZP_SHOULDER_PATTER_CHOOSER
+        AND #$03
+        STA ZP_SHOULDER_PATTER_CHOOSER
 
         LDA ZP_ROAD_STATE
         CMP #$05
@@ -1278,28 +1278,29 @@ _L02    STA COLOR_RAM,X
 
         ; Road State 00-04
 _STATES_00_04
-        LDA SHOULDER_LEFT_IDX
+        LDA ZP_SHOULDER_LEFT_IDX
         CMP #$10
         BCS _L04
-        INC SHOULDER_LEFT_IDX
+        INC ZP_SHOULDER_LEFT_IDX
 
-_L04    LDA SHOULDER_RIGHT_IDX
+_L04    LDA ZP_SHOULDER_RIGHT_IDX
         CMP #$54
         BCS _L05
-        INC SHOULDER_RIGHT_IDX
+        INC ZP_SHOULDER_RIGHT_IDX
         JMP DRAW_SHOULDERS
 
-_L05    INC a1B
-        LDA a1B
-        CMP #$08     ;#%00001000
+        ; Only check road state every 8 "ticks"
+_L05    INC ZP_ROAD_STATE_DELAY
+        LDA ZP_ROAD_STATE_DELAY
+        CMP #$08
         BCC _L09
-        LDA #$00     ;#%00000000
-        STA a1B
+        LDA #$00
+        STA ZP_ROAD_STATE_DELAY
 
         LDA ZP_ROAD_STATE
-        CMP #$03     ;#%00000011
+        CMP #$03
         BCS _STATES_03_04
-        CMP #$02     ;#%00000010
+        CMP #$02
         BNE _STATES_00_01
 
         ; Road State 02: Night
@@ -1310,42 +1311,42 @@ _L05    INC a1B
 _STATES_00_01
         JSR sE734
         LDA a08
-        AND #$03     ;#%00000011
+        AND #$03
         BEQ _L09
-        CMP #$03     ;#%00000011
+        CMP #$03
         BEQ _L09
-        CMP #$01     ;#%00000001
+        CMP #$01
         BNE _L10
 
-        ;SHOULDER_LEFT_IDX--
-        LDA SHOULDER_LEFT_IDX
+        ;ZP_SHOULDER_LEFT_IDX--
+        LDA ZP_SHOULDER_LEFT_IDX
         SEC
         SBC #$01
         CMP #$10
         BCS _L07
         LDA #$10
-_L07    STA SHOULDER_LEFT_IDX
+_L07    STA ZP_SHOULDER_LEFT_IDX
 
-        ;SHOULDER_RIGHT_IDX++
-        LDA SHOULDER_RIGHT_IDX
+        ;ZP_SHOULDER_RIGHT_IDX++
+        LDA ZP_SHOULDER_RIGHT_IDX
         CLC
         ADC #$01
         CMP #$64
         BCC _L08
         LDA #$64
-_L08    STA SHOULDER_RIGHT_IDX
+_L08    STA ZP_SHOULDER_RIGHT_IDX
 
 _L09    JMP DRAW_SHOULDERS
 
-_L10    LDA SHOULDER_LEFT_IDX
+_L10    LDA ZP_SHOULDER_LEFT_IDX
         CLC
         ADC #$01
         CMP #$20
         BCC _L11
         LDA #$20
-_L11    STA SHOULDER_LEFT_IDX
+_L11    STA ZP_SHOULDER_LEFT_IDX
 
-        LDA SHOULDER_RIGHT_IDX
+        LDA ZP_SHOULDER_RIGHT_IDX
         SEC
         SBC #$01
         CMP #$54
@@ -1358,40 +1359,40 @@ _STATES_03_04
         BNE _STATE_04
 
         ; Road State 03
-        LDA #$00     ;#%00000000
-        STA a1C
-        LDA SHOULDER_LEFT_IDX
-        CMP #$11     ;#%00010001
+        LDA #$00
+        STA ZP_ROAD_TURN_TBL_IDX
+        LDA ZP_SHOULDER_LEFT_IDX
+        CMP #17
         BCC _L13
-        DEC SHOULDER_LEFT_IDX
-_L13    CMP #$10     ;#%00010000
+        DEC ZP_SHOULDER_LEFT_IDX
+_L13    CMP #16
         BCS _L14
-        INC SHOULDER_LEFT_IDX
-_L14    LDA SHOULDER_RIGHT_IDX
-        CMP #$54     ;#%01010100
+        INC ZP_SHOULDER_LEFT_IDX
+_L14    LDA ZP_SHOULDER_RIGHT_IDX
+        CMP #84
         BCC _L15
-        DEC SHOULDER_RIGHT_IDX
-_L15    CMP #$53     ;#%01010011
+        DEC ZP_SHOULDER_RIGHT_IDX
+_L15    CMP #83
         BCS _L09
-        INC SHOULDER_RIGHT_IDX
+        INC ZP_SHOULDER_RIGHT_IDX
         JMP DRAW_SHOULDERS
 
         ; Road State 04
 _STATE_04
-        LDA SHOULDER_LEFT_IDX
+        LDA ZP_SHOULDER_LEFT_IDX
         CMP #$11     ;#%00010001
         BCC _L17
-        DEC SHOULDER_LEFT_IDX
+        DEC ZP_SHOULDER_LEFT_IDX
 _L17    CMP #$10     ;#%00010000
         BCS _L18
-        INC SHOULDER_LEFT_IDX
-_L18    LDA SHOULDER_RIGHT_IDX
+        INC ZP_SHOULDER_LEFT_IDX
+_L18    LDA ZP_SHOULDER_RIGHT_IDX
         CMP #$65     ;#%01100101
         BCC _L19
-        DEC SHOULDER_RIGHT_IDX
+        DEC ZP_SHOULDER_RIGHT_IDX
 _L19    CMP #$64     ;#%01100100
         BCS DRAW_SHOULDERS
-        INC SHOULDER_RIGHT_IDX
+        INC ZP_SHOULDER_RIGHT_IDX
         JMP DRAW_SHOULDERS
 
         ; Road States: 05-08
@@ -1401,19 +1402,19 @@ _STATES_05_08
         BNE _STATES_06_08
 
         ; Road State 05: Turns
-        INC a1C
-        LDA a1C
-        AND #$3F     ;#%00111111
-        STA a1C
+        INC ZP_ROAD_TURN_TBL_IDX
+        LDA ZP_ROAD_TURN_TBL_IDX
+        AND #$3F
+        STA ZP_ROAD_TURN_TBL_IDX
         TAY
         LDA TURN_OFFSET_TBL,Y
         CLC
         ADC #16
-        STA SHOULDER_LEFT_IDX
+        STA ZP_SHOULDER_LEFT_IDX
         LDA TURN_OFFSET_TBL,Y
         CLC
         ADC #83
-        STA SHOULDER_RIGHT_IDX
+        STA ZP_SHOULDER_RIGHT_IDX
         JMP DRAW_SHOULDERS
 
 _STATES_06_08
@@ -1426,9 +1427,9 @@ _STATES_07_08
         BNE _STATE_08
 
         ; Road State 07
-        LDA SHOULDER_LEFT_IDX
+        LDA ZP_SHOULDER_LEFT_IDX
         BEQ DRAW_SHOULDERS
-        DEC SHOULDER_LEFT_IDX
+        DEC ZP_SHOULDER_LEFT_IDX
         JMP DRAW_SHOULDERS
 
         ; Road State 08
@@ -1438,7 +1439,7 @@ _STATE_08
         DEC ZP_LEFT_SHOULDER_ENABLED
         JMP DRAW_SHOULDERS
 
-_L20    LDA SHOULDER_LEFT_IDX
+_L20    LDA ZP_SHOULDER_LEFT_IDX
         CMP #$0F     ;#%00001111
         BCC _L21
 
@@ -1446,31 +1447,31 @@ _L20    LDA SHOULDER_LEFT_IDX
         STA ZP_ROAD_STATE
         BNE DRAW_SHOULDERS
 
-_L21    INC SHOULDER_LEFT_IDX
+_L21    INC ZP_SHOULDER_LEFT_IDX
 
         ; Fallthrough
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 DRAW_SHOULDERS
-        LDA SHOULDER_LEFT_IDX           ;A = SHOULDER_LEFT_IDX
+        LDA ZP_SHOULDER_LEFT_IDX           ;A = ZP_SHOULDER_LEFT_IDX
         ASL A                           ;A *= 2
         CLC
         ADC #24                         ;A += 24
         STA ZP_ROAD_X_LEFT_ROW_TBL
 
-        LDA SHOULDER_RIGHT_IDX          ;A = SHOULDER_RIGHT_IDX
+        LDA ZP_SHOULDER_RIGHT_IDX          ;A = ZP_SHOULDER_RIGHT_IDX
         ASL A                           ;A *= 2
         CLC
         ADC #24                         ;A += 24
         STA ZP_ROAD_X_RIGHT_ROW_TBL
 
-        LDA SHOULDER_RIGHT_IDX          ;A = SHOULDER_RIGHT_IDX
+        LDA ZP_SHOULDER_RIGHT_IDX          ;A = ZP_SHOULDER_RIGHT_IDX
         LSR A
         LSR A                           ;A /= 4
         STA a1D
         INC a1D
 
-        LDA SHOULDER_LEFT_IDX           ;A = SHOULDER_LEFT_IDX
+        LDA ZP_SHOULDER_LEFT_IDX           ;A = ZP_SHOULDER_LEFT_IDX
         LSR A
         LSR A                           ;A /= 4
         TAY
@@ -1494,20 +1495,20 @@ _L01    STA COLOR_RAM+1,Y
 
         ; Left Shoulder
         ; Setup Screen ptr
-        LDA SHOULDER_LEFT_IDX
-        LSR A                           ;SHOULDER_LEFT_IDX /= 4
+        LDA ZP_SHOULDER_LEFT_IDX
+        LSR A                           ;ZP_SHOULDER_LEFT_IDX /= 4
         LSR A                           ;Since we draw 4 char shoulders
         STA ZP_TMP_PTR_LO               ;in this loop (?)
         LDA #$04
         STA ZP_TMP_PTR_HI
 
         ; Draw shoulder (4 chars)
-        LDA SHOULDER_LEFT_IDX           ;Use the 2-LSB to index the pattern to print
+        LDA ZP_SHOULDER_LEFT_IDX           ;Use the 2-LSB to index the pattern to print
         AND #$03
         TAY
         LDX SHOULDER_PATTERN_IDX_TBL,Y
         LDY #$00
-_L02    LDA a20
+_L02    LDA ZP_SHOULDER_PATTER_CHOOSER
         BNE _L03
         LDA SHOULDER_PATERN_A0,X
         BNE _L04
@@ -1520,20 +1521,20 @@ _L04    STA (ZP_TMP_PTR_LO),Y
 
         ; Right Shoulder
         ; Setup Screen ptr
-        LDA SHOULDER_RIGHT_IDX
-        LSR A                           ;SHOULDER_RIGHT_IDX /= 4
+        LDA ZP_SHOULDER_RIGHT_IDX
+        LSR A                           ;ZP_SHOULDER_RIGHT_IDX /= 4
         LSR A                           ;Since we draw 4 char shoulders
         STA ZP_TMP_PTR_LO               ;in this loop
         LDA #$04
         STA ZP_TMP_PTR_HI
 
         ; Draw shoulder (4 chars)
-        LDA SHOULDER_RIGHT_IDX
+        LDA ZP_SHOULDER_RIGHT_IDX
         AND #$03
         TAY
         LDX SHOULDER_PATTERN_IDX_TBL,Y
         LDY #$00
-_L05    LDA a20
+_L05    LDA ZP_SHOULDER_PATTER_CHOOSER
         BNE _L06
         LDA SHOULDER_PATTERN_A3,X
         BNE _L07
@@ -1557,7 +1558,7 @@ _L00    STA COLOR_RAM+7,Y
         BPL _L00
 
         LDY #$03     ;#%00000011
-_L01    LDA a20
+_L01    LDA ZP_SHOULDER_PATTER_CHOOSER
         BNE _L02
 
         LDA SHOULDER_PATERN_A0,Y
@@ -3097,14 +3098,14 @@ _L08    STA SCREEN_RAM+40*23+32,Y
 _L09    STX ZP_TMP_REG_00
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
-        LDA SHOULDER_RIGHT_IDX
+        LDA ZP_SHOULDER_RIGHT_IDX
         CMP #100
         BEQ _L11
         BCC _L10
-        DEC SHOULDER_RIGHT_IDX
+        DEC ZP_SHOULDER_RIGHT_IDX
         JMP _L11
 
-_L10    INC SHOULDER_RIGHT_IDX
+_L10    INC ZP_SHOULDER_RIGHT_IDX
 _L11    LDY #$01
         JSR DELAY_01
         LDX ZP_TMP_REG_00
