@@ -28,7 +28,7 @@ ZP_HI_SCORE_02 = $0F
 ZP_HI_SCORE_03 = $10
 ZP_SOUND_ENABLED = $11
 ZP_IS_GAME_OVER = $12
-a13 = $13
+ZP_GAME_OVER_STATE = $13
 ZP_TIMER0_CNT = $14
 ZP_TIMER0_TRIGGERED = $15
 ZP_TIME = $16
@@ -194,7 +194,7 @@ IRQ_HANDLER_MAIN
         LDA ZP_SOUND_ENABLED
         BEQ _L00
 
-        JSR PLAY_AUDIO
+        JSR PLAY_SOUND_EFFECT
 
 _L00    INC ZP_TIMER0_CNT
         INC ZP_TIMER0_CNT
@@ -394,7 +394,7 @@ INIT_GAME
         STX ZP_FRAME_PTR_IDX
         STX ZP_SOUND_ENABLED
         STX ZP_IS_GAME_OVER
-        STX a13
+        STX ZP_GAME_OVER_STATE
         STX ZP_ENEMY_CAR_ANIM_DELAY
         STX ZP_ENEMY_CAR_FRAME_IDX
         STX ZP_TICK_COUNTER
@@ -2108,19 +2108,22 @@ _L05    RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 IRQ_HANDLER_GAME_LOOP
-        LDA a13
+        LDA ZP_GAME_OVER_STATE
         BEQ _L00
+
+        ; In "GAME OVER" state skip the input controls
+        ; The car should not be moved by the user.
         SED
         JMP _L05
 
-_L00    LDA #$40                ;#%01000000
-        STA $DC00               ;CIA1: Data Port Register A
+_L00    LDA #$40                        ;#%01000000
+        STA $DC00                       ;CIA1: Data Port Register A
 
 .IF USE_JOYSTICK == 0
-        LDA $D419               ;Analog/Digital Converter: Game Paddle 1
+        LDA $D419                       ;Analog/Digital Converter: Game Paddle 1
         STA ZP_PADDLE_1_VALUE
 
-        CMP #$BC                ;#%10111100
+        CMP #188
         BCC _L01
 
         LDA #$BC
@@ -2847,7 +2850,7 @@ _L01    LDA $D00E                       ;Sprite 7 X Pos
 _L02    DEY                             ;Compare it with sprites 0-3
         BPL _L00
 
-        LDA a13
+        LDA ZP_GAME_OVER_STATE
         BEQ _L03
         JMP _L13
 
@@ -3038,7 +3041,7 @@ _L00    LDA fF564,Y
         LDX a56
         RTS
 
-_L01    INC a13
+_L01    INC ZP_GAME_OVER_STATE
         LDA #$07
         STA ZP_ROAD_STATE
 
@@ -3104,7 +3107,7 @@ _L05    STY ZP_TMP_REG_01
         STA ZP_IRQ_HI
         CLI
 
-        INC a13
+        INC ZP_GAME_OVER_STATE
         LDA #163
 _L06    CMP #$08
         BCC _L07
@@ -3169,7 +3172,7 @@ RACE_OVER_BOTTOM_ROW_BANNER
         .BYTE $8F,$90,$79,$79,$79,$79,$79,$79
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-PLAY_AUDIO
+PLAY_SOUND_EFFECT
         LDA ZP_PLAY_CRASH_SOUND
         BEQ _L03
 
@@ -3207,13 +3210,15 @@ _L00    CMP #$02
 
 _L02    JMP _L08
 
-_L03    LDA a13
+_L03    LDA ZP_GAME_OVER_STATE
         CMP #$02
         BCC _L05
         CMP #$03
         BEQ _L04
         CMP #$04
         BEQ _L08
+
+        ; ZP_GAME_OVER_STATE == 2 (or > 4)
         LDA #$40                        ;#%01000000
         STA $D404                       ;Voice 1: Control Register
         LDA #$00
@@ -3224,7 +3229,9 @@ _L03    LDA a13
         LDA #$0D
         STA ZP_SID_FREQ_HI
         STA $D401                       ;Voice 1: Frequency Control - High-Byte
-        INC a13
+        INC ZP_GAME_OVER_STATE
+
+        ; ZP_GAME_OVER_STATE == 3
 _L04    LDA ZP_SID_FREQ_LO
         SEC
         SBC #$1E
@@ -3236,9 +3243,10 @@ _L04    LDA ZP_SID_FREQ_LO
         STA $D401                       ;Voice 1: Frequency Control - High-Byte
         CMP #$0A
         BNE _L08
-        INC a13
+        INC ZP_GAME_OVER_STATE
         JMP _L08
 
+        ; ZP_GAME_OVER_STATE == 0 or 1
 _L05    LDA ZP_SPEED_LO
         BNE _L06
         LDA ZP_SPEED_HI
@@ -3246,6 +3254,7 @@ _L05    LDA ZP_SPEED_LO
         LDA #$00
         STA $D404                       ;Voice 1: Control Register
         BEQ _L08
+
 _L06    LDA ZP_SPEED_LO
         STA a2C
         LDA ZP_SPEED_HI
@@ -3267,6 +3276,7 @@ _L07    ASL a2E
         LDA #$41                        ;#%01000001
         STA $D404                       ;Voice 1: Control Register
 
+        ; ZP_GAME_OVER_STATE == 4
 _L08    LDA ZP_PLAY_EXTENDED_TIME_SOUND
         BNE _PLAY_EXTENDED_TIME
         LDA ZP_PLAY_SPLIT_ROAD_SOUND
@@ -3361,11 +3371,12 @@ _PLAY_SPLIT_ROAD
         ORA ZP_SID_VOICE_FILTER_MASK
         STA $D417                       ;Filter Resonance Control / Voice Input Control
 
-_L18    LDA a13
+_L18    LDA ZP_GAME_OVER_STATE
         CMP #$02
         BCC _L19
         JMP _L28
 
+        ; ZP_GAME_OVER_STATE == 0 or 1
 _L19    LDA CAR_Y_OFFSET
         CMP #$10     ;#%00010000
         BCS _L20
