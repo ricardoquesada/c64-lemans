@@ -107,7 +107,7 @@ ZP_PLAY_EXTENDED_TIME_SOUND = $67
 ZP_TMP_68 = $68
 ZP_TMP_69 = $69
 ZP_PRINT_SPEED_DELAY = $6A
-f6B = $6B
+ZP_ENEMY_CAR_PASSED_TBL = $6B
 ZP_PASSED_CARS_TOTAL = $6F
 ZP_ADD_1000_PTS = $70
 a71 = $71
@@ -411,10 +411,10 @@ INIT_GAME
         STX ZP_PLAY_SPLIT_ROAD_SOUND
         STX ZP_PLAY_PASS_CAR_SOUND
         STX ZP_PLAY_EXTENDED_TIME_SOUND
-        STX f6B
-        STX f6B+1
-        STX f6B+2
-        STX f6B+3
+        STX ZP_ENEMY_CAR_PASSED_TBL
+        STX ZP_ENEMY_CAR_PASSED_TBL+1
+        STX ZP_ENEMY_CAR_PASSED_TBL+2
+        STX ZP_ENEMY_CAR_PASSED_TBL+3
         STX ZP_PASSED_CARS_TOTAL
         STX ZP_ADD_1000_PTS
         STX a71
@@ -2488,7 +2488,7 @@ _L25    STX a5A                         ;X has Sprite Index
 
         ; EnemyCar.Y < 29
 _L26    LDA #$00
-        STA f6B,X
+        STA ZP_ENEMY_CAR_PASSED_TBL,X
         CPX a5A
         BNE _L28
         LDA f30,X
@@ -2671,15 +2671,17 @@ _L38    LDY ZP_TMP_49
         BCS _L39
 
         LDA #$01
-        STA f6B,X
+        STA ZP_ENEMY_CAR_PASSED_TBL,X
 _L39    LDA $D001,Y                     ;Sprite 0 Y Pos
         CMP $D00F                       ;Sprite 7 Y Pos
         BCC _L40
 
-        LDA f6B,X
+        ; The enemy car can only be passed once.
+        ; Once we pass it, tag it as passed.
+        LDA ZP_ENEMY_CAR_PASSED_TBL,X
         BEQ _L40
         LDA #$00
-        STA f6B,X
+        STA ZP_ENEMY_CAR_PASSED_TBL,X
 
         INC ZP_PASSED_CARS_TOTAL
         LDA ZP_PASSED_CARS_TOTAL
@@ -2689,6 +2691,7 @@ _L39    LDA $D001,Y                     ;Sprite 0 Y Pos
         STY ZP_PASSED_CARS_TOTAL
         INY
         STY ZP_ADD_1000_PTS             ;Trigger Bonus Points (???)
+
 _L40    DEX
         BMI _L41
         JMP _L23
