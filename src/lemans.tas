@@ -86,8 +86,8 @@ ZP_ENEMY_CAR_FRAME_IDX = $4C
 ZP_ENEMY_CAR_VERTICAL_DIR = $4D
 ZP_ENEMY_CAR_HORIZONTAL_MOV_TBL = $4E
 ZP_LEFT_SHOULDER_ENABLED = $52
-a53 = $53
-a54 = $54
+ZP_LIVES = $53
+ZP_LIVES_USED = $54
 a55 = $55
 a56 = $56
 a57 = $57
@@ -403,8 +403,8 @@ INIT_GAME
         STX ZP_ENEMY_CAR_ANIM_DELAY
         STX ZP_ENEMY_CAR_FRAME_IDX
         STX ZP_TICK_COUNTER
-        STX a53
-        STX a54
+        STX ZP_LIVES
+        STX ZP_LIVES_USED
         STX ZP_COLLISION_DETECTED
         STX ZP_PLAY_CRASH_SOUND
         STX ZP_SOUND_EFFECT_TO_PLAY
@@ -2103,10 +2103,10 @@ INCREMENT_SCORE
         LDA ZP_SCORE_01
         BNE _L00
         LDA ZP_SCORE_02
-        AND #$1F
-        BNE _L00
+        AND #$1F                        ;20.000 points?
+        BNE _L00                        ; No
 
-        INC a53
+        INC ZP_LIVES                         ; Yes, so add extra life (extended time)
         LDA #$5F
         STA a55
 
@@ -2844,8 +2844,10 @@ CAR_MOVEMENT_DELAY_HI_TBL
         .BYTE $01,$00,$00,$00,$00,$00,$00,$00
 CAR_SPEED_CONVERTION_TBL
         .BYTE $00,$0A,$14,$1E
+
         .BYTE $FE,$FD,$FB,$F7           ;Unk (Unused?)
         .BYTE $01,$02,$04,$08           ;Unk (Unused?)
+
         ; Valid position when in Split Screen
 ENEMY_CAR_INITIAL_X_TBL
         .BYTE 81,107,179,205
@@ -2972,10 +2974,11 @@ _L07    LDY TWO_BY_TWO_OFFSET_TBL,X
 
         CLD
         LDA ZP_SCORE_02
-        AND #$1F                        ;#%00011111
-        BNE _L08
+        AND #$1F                        ;20.000 ?
+        BNE _L08                        ; No, so no extended time
 
-        INC a53
+        ; Reached 20.000 points, so extend time
+        INC ZP_LIVES
         LDA #$5F                        ;#%01011111
         STA a55
 
@@ -3095,26 +3098,33 @@ TIME2_MSG
 GAME_OVER
         STY a56
         STX a57
-        LDA a53
+        LDA ZP_LIVES
         BEQ _L01
 
-        DEC a53
-        LDY a54
+        DEC ZP_LIVES                    ;Life--
+
+        ; Make time goes faster for each life used
+        LDY ZP_LIVES_USED
         CPY #$05
         BCC _L00
         LDY #$04
-_L00    LDA fF564,Y
+_L00    LDA TICKS_PER_SECOND_TBL,Y
         STA ZP_TICKS_PER_SECOND
+
         INY
-        STY a54
+        STY ZP_LIVES_USED
+
         LDA #$60                        ;Initial time: 60 seconds (BCD)
         STA ZP_TIME
+
         LDA #$00
         STA ZP_IS_GAME_OVER
         STA ZP_TICK_COUNTER
         LDY a57
         LDX a56
         RTS
+
+        ; Do Game Over
 
 _L01    INC ZP_GAME_OVER_STATE
         LDA #$07
@@ -3234,7 +3244,9 @@ _L00    STA $D000,X                     ;Sprite 0 X Pos
         BPL _L00
         JMP SET_IRQ_TO_WAIT_BUTTON
 
-fF564   .BYTE $40,$3A,$34,$2F,$22
+        ; Time gets faster
+TICKS_PER_SECOND_TBL
+        .BYTE 64,58,52,47,34
 RACE_OVER_TOP_ROW_BANNER
         .BYTE $79,$79,$79,$79,$79,$79,$85,$8E
         .BYTE $7A,$7E,$7A,$7B,$85,$86,$79,$79
