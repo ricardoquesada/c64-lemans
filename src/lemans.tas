@@ -6,7 +6,8 @@
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 
 ; Compile-time variables
-USE_JOYSTICK .VAR 0             ;Set it to 1 to use Joystick instead of Paddle
+USE_JOYSTICK .VAR 0                     ;Set it to 1 to use Joystick
+                                        ; instead of Paddle
 
 ;
 ; **** ZP ABSOLUTE ADRESSES ****
@@ -22,7 +23,7 @@ ZP_RANDOM_NUMBER_SEED = $09
 ZP_SCORE_01 = $0A
 ZP_SCORE_02 = $0B
 ZP_SCORE_03 = $0C
-ZP_ZERO_IS_ZERO = $0D           ;If 1, print "0" as "0", otherwise as " "
+ZP_ZERO_IS_ZERO = $0D                   ;If 1, print "0" as "0", otherwise as " "
 ZP_HI_SCORE_01 = $0E
 ZP_HI_SCORE_02 = $0F
 ZP_HI_SCORE_03 = $10
@@ -32,8 +33,8 @@ ZP_GAME_OVER_STATE = $13
 ZP_TIMER0_CNT = $14
 ZP_TIMER0_TRIGGERED = $15
 ZP_TIME = $16
-ZP_TICK_COUNTER = $17           ;Current number of ticks.
-ZP_TICKS_PER_SECOND = $18       ;How many ticks are in a second
+ZP_TICK_COUNTER = $17                   ;Current number of ticks.
+ZP_TICKS_PER_SECOND = $18               ;How many ticks are in a second
 ZP_TIMER1_TRIGGERED = $19
 ZP_ROAD_STATE = $1A
 ZP_ROAD_STATE_DELAY = $1B
@@ -42,10 +43,14 @@ a1D = $1D
 ZP_SHOULDER_LEFT_IDX = $1E
 ZP_SHOULDER_RIGHT_IDX = $1F
 ZP_SHOULDER_PATTER_CHOOSER = $20
-ZP_DIGIT_TO_PRINT = $21         ;Digit to print. Values from 0 to 9
-ZP_BCD_TO_PRINT = $22           ;Encoded in BCD
-ZP_TMP_REG_00 = $23
-ZP_TMP_REG_01 = $24
+ZP_DIGIT_TO_PRINT = $21                 ;Digit to print. Values from 0 to 9
+ZP_BCD_TO_PRINT = $22                   ;Encoded in BCD
+ZP_LEVEL_IDX = $23                      ;When ZP_LEVEL_TICK reaches 250,
+                                        ; it gets increased by one.
+                                        ; Although sometimes used as tmp var
+ZP_LEVEL_TICK = $24                     ;Ticks once per IRQ. Used to keep track
+                                        ; the ROAD_STATE "life"
+                                        ; Although sometimes used as tmp var
 ZP_HEADLIGHT_DURATION = $25
 a26 = $26
 ZP_SPEED_LO = $27
@@ -167,7 +172,7 @@ HI_SCORE_OFFSET = SCREEN_RAM + 40 * 8 + 32
 ; $01 = White, Ice
 ; $02 = Black, Night
 ; $03 = Green
-; $04 = Green, Show  Split Screen sprite
+; $04 = Green, Show Split Screen sprite
 ; $05 = Brown, turns
 ; $06 = Split screen
 ; $07 = Purple, shoulder on left (initial state)
@@ -306,8 +311,8 @@ _L00    LDA VIC_VALUES,X
         STA ZP_SCORE_03
         STA ZP_ROAD_STATE_DELAY
         STA ZP_ROAD_TURN_TBL_IDX
-        STA ZP_TMP_REG_00
-        STA ZP_TMP_REG_01
+        STA ZP_LEVEL_IDX
+        STA ZP_LEVEL_TICK
         STA ZP_SPEED_LO
         STA ZP_SPEED_HI
         STA ZP_RANDOM_NUMBER
@@ -384,7 +389,7 @@ INIT_GAME
         STX ZP_SCORE_03
         STX ZP_ROAD_STATE_DELAY
         STX ZP_ROAD_TURN_TBL_IDX
-        STX ZP_TMP_REG_01
+        STX ZP_LEVEL_TICK
         STX a26
         STX ZP_SPEED_LO
         STX ZP_SPEED_HI
@@ -495,12 +500,12 @@ _L00    STA $D400,Y                     ;Voice 1: Frequency Control - Low-Byte
 
         ; Scroll down 15 rows with a small delay betwen each
         LDX #15
-_L01    STX ZP_TMP_REG_00
+_L01    STX ZP_LEVEL_IDX       ;Overloaded ZP_LEVEL_IDX
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
         LDY #$01
         JSR DELAY_01
-        LDX ZP_TMP_REG_00
+        LDX ZP_LEVEL_IDX       ;Overloaded ZP_LEVEL_IDX
         DEX
         BPL _L01
 
@@ -513,7 +518,7 @@ _L01    STX ZP_TMP_REG_00
         ; Do the initial scroll down, where the car
         ; goes up, and the START banner appears with the traffic lights
         LDX #250                        ;The loop goes from 250 to 187
-_L02    STX ZP_TMP_REG_00
+_L02    STX ZP_LEVEL_IDX       ;Overloaded ZP_LEVEL_IDX
         CPX #202
         BEQ _PRINT_START_TOP
         CPX #201
@@ -575,7 +580,7 @@ _L09    LDA START_TOP_ROW_BANNER,Y
         ; And move the Hero car 8 pixel up
 _L10    JSR DRAW_ROAD_TOP_ROW
 _L11    JSR SCROLL_DOWN
-        LDX ZP_TMP_REG_00
+        LDX ZP_LEVEL_IDX
         TXA
         CLC
         ADC #$08
@@ -627,7 +632,7 @@ _L12    LDA #$00
         STA $D006                       ;Sprite 3 X Pos
 
         LDX #$03
-_L13    STX ZP_TMP_REG_00
+_L13    STX ZP_LEVEL_IDX
 
         LDY #$02
         JSR DELAY_00
@@ -660,14 +665,14 @@ _L15    LDY TWO_BY_TWO_OFFSET_TBL,X
         LDY #$0A
         JSR DELAY_01
 
-        LDX ZP_TMP_REG_00
+        LDX ZP_LEVEL_IDX
         LDA TRAFFICLIGHT_SID_CONTROL_TBL,X
         STA $D40B                       ;Voice 2: Control Register
         DEX
         BPL _L13
 
         LDA #$00
-        STA ZP_TMP_REG_00
+        STA ZP_LEVEL_IDX
         LDA #60                         ;For how long the left shoulder will be drawn
         STA ZP_LEFT_SHOULDER_ENABLED
         LDA #$08
@@ -711,10 +716,10 @@ PRINT_TITLE_SCREEN
         STA ZP_ROAD_STATE
 
         LDX #$00
-_L00    STX ZP_TMP_REG_00
+_L00    STX ZP_LEVEL_IDX
         JSR DRAW_ROAD_TOP_ROW
 
-        LDX ZP_TMP_REG_00               ;Index of row to print
+        LDX ZP_LEVEL_IDX               ;Index of row to print
         LDY TITLE_ROWS_TBL,X            ;Choose which row to print
         LDX #$00
 _L01    LDA TITLE_MSG,Y
@@ -730,21 +735,21 @@ _L01    LDA TITLE_MSG,Y
         LDY #$02
         JSR DELAY_01
 
-        LDX ZP_TMP_REG_00
+        LDX ZP_LEVEL_IDX
         INX
         CPX #16                         ;16 rows in total (?)
         BCC _L00
 
         ; After print the Title Message Draw 4 rows of street
         LDX #$03
-_L02    STX ZP_TMP_REG_00
+_L02    STX ZP_LEVEL_IDX
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
 
         LDY #$02
         JSR DELAY_01
 
-        LDX ZP_TMP_REG_00
+        LDX ZP_LEVEL_IDX
         DEX
         BPL _L02
 
@@ -1670,20 +1675,26 @@ _L00    LDA ZP_ROAD_STATE
         CMP #$08
         BEQ _L02
 
-        INC ZP_TMP_REG_01
-        LDA ZP_TMP_REG_01
+        ; ZP_LEVEL_TICK keeps the "life" of the Level.
+        ; Each Level (road state) might use this variable to know
+        ; much "time" it has left.
+        ; When it reaches 250, it switches to a new Level
+        INC ZP_LEVEL_TICK
+        LDA ZP_LEVEL_TICK
         CMP #250
         BCC _L02
 
         LDA #$00
-        STA ZP_TMP_REG_01
-        LDY ZP_TMP_REG_00
+        STA ZP_LEVEL_TICK
+        LDY ZP_LEVEL_IDX
         INY
         CPY #40
         BCC _L01
 
+        ; Levels 0-31 are used only once, once it reaches level 39,
+        ; the game loops between Levels 32-39
         LDY #32
-_L01    STY ZP_TMP_REG_00
+_L01    STY ZP_LEVEL_IDX
         LDA ROAD_STATE_TBL,Y
         STA ZP_ROAD_STATE
 _L02    JSR DRAW_ROAD_TOP_ROW
@@ -1885,6 +1896,9 @@ START_BOTTOM_ROW_BANNER
         .BYTE $79,$79,$79,$79,$79,$79,$79,$79
 
 ROAD_STATE_TBL
+        ; Before $06, there is always a $04 since:
+        ;  $06 = split road
+        ;  $04 = green with split road warning message
         .BYTE $00,$01,$02,$03,$05,$04,$06,$03
         .BYTE $05,$00,$02,$00,$01,$00,$04,$06
         .BYTE $00,$02,$00,$03,$05,$00,$01,$00
@@ -1934,7 +1948,7 @@ DO_COLLISION
         STA ZP_ROAD_STATE
 
         LDY #35                         ;Draw 35 rows
-_L00    STY ZP_TMP_REG_01
+_L00    STY ZP_LEVEL_TICK
 
         LDA ZP_IS_GAME_OVER
         BEQ _L01
@@ -1944,7 +1958,7 @@ _L01    JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
         JSR INCREMENT_SCORE
         JSR ANIMATE_HERO_CAR
-        LDY ZP_TMP_REG_01
+        LDY ZP_LEVEL_TICK
         DEY
         BPL _L00
 
@@ -2011,22 +2025,24 @@ _L07    LDA $D015                       ;Sprite display Enable
         LDA #60
         STA ZP_LEFT_SHOULDER_ENABLED
 
-        ; Set Road State == Shoulder
+        ; Set Road State == Shoulder (Purple)
         LDA #$08
         STA ZP_ROAD_STATE
 
-        LDY ZP_TMP_REG_00
+        LDY ZP_LEVEL_IDX
         LDA ROAD_STATE_TBL,Y
-        BEQ _L08
+        BEQ _L08                        ;Branch on =0 (Green)
         CMP #$03
-        BEQ _L08
+        BEQ _L08                        ;Branch on =3 (Green)
         CMP #$04
-        BEQ _L08
+        BEQ _L08                        ;Branch on =4 (Green + Split Screen warning)
         BNE _L09
-_L08    DEC ZP_TMP_REG_00
 
-_L09    LDA #250
-        STA ZP_TMP_REG_01
+        ; On "Green" Road States, start from the previous level
+_L08    DEC ZP_LEVEL_IDX
+
+_L09    LDA #250                        ;The current level should end now
+        STA ZP_LEVEL_TICK
 
         JMP MAIN_LOOP
 
@@ -2302,6 +2318,7 @@ _L12    LDA ZP_ROAD_STATE
         INY
         CPY #10
         BCC _L13
+
         LDY #$00
 
         ; Switch between Flames 00 and Flames 01 sprite pointers
@@ -2317,23 +2334,28 @@ _L12    LDA ZP_ROAD_STATE
         AND #$01
         EOR #$01
         CLC
-        ADC #$F8                        ;Flames sprite frmae
+        ADC #$F8                        ;Flames sprite frame
         STA SPR_FRAME_PTR_05
 
 _L13    STY ZP_FLAME_ANIM_DELAY
 
 _L14    LDA ZP_ROAD_STATE
-        CMP #$04
-        BNE _L18
+        CMP #$04                        ;Green with Split Road Warning?
+        BNE _L18                        ; No, then skip
 
         ; Road State 04: Show Split Screen sprite
-        LDA ZP_TMP_REG_01
+        LDA ZP_LEVEL_TICK
         CMP #160
-        BCC _L18
+        BCC _L18                        ;Branch if < 160
         CMP #240
-        BCS _L16
+        BCS _L16                        ;Branch if > 240
         CMP #160
-        BNE _L15
+        BNE _L15                        ;Branch if > 160 & < 240
+                                        ;Else (= 160)
+
+        ; Sets up the Split Screen Sign at 160
+        ; Between 160 and 240 it keeps toogling it
+        ; And at 240 it turns it off.
 
         ; Show Split Screen sprite
         LDA #$40                        ;#%01000000
@@ -2478,36 +2500,55 @@ _L27    JMP _L32
 _L28    LDA a5A
         CMP #$04
         BNE _L27
+
         LDA f30,X
         BEQ _L27
+
         JSR UPDATE_RANDOM_NUMBER
         LDA ZP_RANDOM_NUMBER
         AND #$1F
         BNE _L27
+
+        ;
+        ; New Enemy Car (?)
+        ;
+
         STX a5A
         JSR UPDATE_RANDOM_NUMBER
         LDA ZP_RANDOM_NUMBER
         AND #$07
         TAY
+
+        ; Set the color
         LDA ENEMY_CAR_COLOR_TBL,Y
         STA $D027,X                     ;Sprite 0 Color
+
         LDA ZP_ROAD_STATE_ROW_TBL
-        CMP #$06
-        BEQ _L29
+        CMP #$06                        ;Split Screen coming?
+        BEQ _L29                        ; Yes
+
         LDA ZP_ROAD_STATE_ROW_TBL+24
-        CMP #$06
-        BEQ _L29
+        CMP #$06                        ;Still in Split Screen?
+        BEQ _L29                        ; Yes
+
+        ; Get a random number between 63 and 110
         JSR UPDATE_RANDOM_NUMBER
         LDA ZP_RANDOM_NUMBER
         AND #$3F
         CLC
         ADC #110
-        LDY ZP_TMP_49
+
+        ; Set sprite X position
+        LDY ZP_TMP_49                   ;Use the random number as X position
         STA $D000,Y                     ;Sprite 0 X Pos
+
+        ; Set sprite direction (left or right) ?
         JSR UPDATE_RANDOM_NUMBER
         LDA ZP_RANDOM_NUMBER
         AND #$01
         STA f5D,X
+
+        ; Set sprite direction (left or right) ?
         JSR UPDATE_RANDOM_NUMBER
         LDA ZP_RANDOM_NUMBER
         AND #$02
@@ -2516,15 +2557,20 @@ _L28    LDA a5A
         STY ZP_ENEMY_CAR_HORIZONTAL_MOV_TBL,X
         JMP _L30
 
+        ; In Split screen, used hardcoded position x
+        ; to prevent the enemy car to start in an invalid
+        ; position
 _L29    JSR UPDATE_RANDOM_NUMBER
         LDA ZP_RANDOM_NUMBER
         AND #$03
         TAY
-        LDA fF2EF,Y
+        LDA ENEMY_CAR_INITIAL_X_TBL,Y
         LDY ZP_TMP_49
         STA $D000,Y                     ;Sprite 0 X Pos
+
         LDA #$01
         STA f5D,X
+
 _L30    LDY ZP_TMP_49
         LDA ZP_ENEMY_CAR_VERTICAL_DIR
         BNE _L31
@@ -2556,7 +2602,7 @@ _L33    LDA ZP_ROAD_STATE
         CMP #$04
         BNE _L34
 
-        LDA ZP_TMP_REG_01
+        LDA ZP_LEVEL_TICK
         CMP #200
         BCC _L34
 
@@ -2785,10 +2831,11 @@ CAR_MOVEMENT_DELAY_HI_TBL
         .BYTE $01,$00,$00,$00,$00,$00,$00,$00
 CAR_SPEED_CONVERTION_TBL
         .BYTE $00,$0A,$14,$1E
-        .BYTE $FE,$FD,$FB,$F7           ;Unk
-        .BYTE $01,$02,$04,$08           ;Unk
-fF2EF   .BYTE $51,$6B,$B3,$CD           ;Unk
-        ; Related to Speed
+        .BYTE $FE,$FD,$FB,$F7           ;Unk (Unused?)
+        .BYTE $01,$02,$04,$08           ;Unk (Unused?)
+        ; Valid position when in Split Screen
+ENEMY_CAR_INITIAL_X_TBL
+        .BYTE 81,107,179,205
 ACCELERATION_TBL_LO
         .BYTE $00,$00,$40,$08
 ACCELERATION_TBL_HI
@@ -3079,11 +3126,11 @@ _L01    INC ZP_GAME_OVER_STATE
         STA $D417                       ;Filter Resonance Control / Voice Input Control
 
         LDY #75                         ;75 rows to scroll down
-_L02    STY ZP_TMP_REG_01
+_L02    STY ZP_LEVEL_TICK               ;Overload ZP_LEVEL_TICK, since we are in Game Over
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
         JSR ANIMATE_HERO_CAR
-        LDY ZP_TMP_REG_01
+        LDY ZP_LEVEL_TICK
         DEY
         BNE _L02
 
@@ -3107,11 +3154,11 @@ _L04    LDA RACE_OVER_TOP_ROW_BANNER,Y
         JSR SCROLL_DOWN
         JSR ANIMATE_HERO_CAR
         LDY #10
-_L05    STY ZP_TMP_REG_01
+_L05    STY ZP_LEVEL_TICK               ;Overload ZP_LEVEL_TICK since we are in Game Over
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
         JSR ANIMATE_HERO_CAR
-        LDY ZP_TMP_REG_01
+        LDY ZP_LEVEL_TICK
         DEY
         BPL _L05
 
@@ -3147,8 +3194,8 @@ _L08    STA SCREEN_RAM+40*23+32,Y
 
         ; Scroll down 26 rows, and...
         LDX #26
-_L09    STX ZP_TMP_REG_00
-        JSR DRAW_ROAD_TOP_ROW
+_L09    STX ZP_LEVEL_IDX                ;Overload ZP_LEVEL_IDX
+        JSR DRAW_ROAD_TOP_ROW           ; since we are in Game Over
         JSR SCROLL_DOWN
         LDA ZP_SHOULDER_RIGHT_IDX
         CMP #100
@@ -3160,8 +3207,8 @@ _L09    STX ZP_TMP_REG_00
 _L10    INC ZP_SHOULDER_RIGHT_IDX
 _L11    LDY #$01
         JSR DELAY_01
-        LDX ZP_TMP_REG_00
-        DEX
+        LDX ZP_LEVEL_IDX                ;Overloaded ZP_LEVEL_IDX
+        DEX                             ; See above
         BPL _L09
 
         ; Disable and Reset sprites X pos
