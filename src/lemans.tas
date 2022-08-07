@@ -1469,25 +1469,25 @@ _L21    INC ZP_SHOULDER_LEFT_IDX
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 DRAW_SHOULDERS
-        LDA ZP_SHOULDER_LEFT_IDX           ;A = ZP_SHOULDER_LEFT_IDX
+        LDA ZP_SHOULDER_LEFT_IDX        ;A = ZP_SHOULDER_LEFT_IDX
         ASL A                           ;A *= 2
         CLC
         ADC #24                         ;A += 24
         STA ZP_ROAD_X_LEFT_ROW_TBL
 
-        LDA ZP_SHOULDER_RIGHT_IDX          ;A = ZP_SHOULDER_RIGHT_IDX
+        LDA ZP_SHOULDER_RIGHT_IDX       ;A = ZP_SHOULDER_RIGHT_IDX
         ASL A                           ;A *= 2
         CLC
         ADC #24                         ;A += 24
         STA ZP_ROAD_X_RIGHT_ROW_TBL
 
-        LDA ZP_SHOULDER_RIGHT_IDX          ;A = ZP_SHOULDER_RIGHT_IDX
+        LDA ZP_SHOULDER_RIGHT_IDX       ;A = ZP_SHOULDER_RIGHT_IDX
         LSR A
         LSR A                           ;A /= 4
         STA a1D
         INC a1D
 
-        LDA ZP_SHOULDER_LEFT_IDX           ;A = ZP_SHOULDER_LEFT_IDX
+        LDA ZP_SHOULDER_LEFT_IDX        ;A = ZP_SHOULDER_LEFT_IDX
         LSR A
         LSR A                           ;A /= 4
         TAY
@@ -1519,7 +1519,7 @@ _L01    STA COLOR_RAM+1,Y
         STA ZP_TMP_PTR_HI
 
         ; Draw shoulder (4 chars)
-        LDA ZP_SHOULDER_LEFT_IDX           ;Use the 2-LSB to index the pattern to print
+        LDA ZP_SHOULDER_LEFT_IDX        ;Use the 2-LSB to index the pattern to print
         AND #$03
         TAY
         LDX SHOULDER_PATTERN_IDX_TBL,Y
@@ -1606,6 +1606,7 @@ _L03    DEY
         STA ZP_ROAD_STATE_ROW_TBL
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ROAD_COLOR_TBL
         .BYTE $0D,$09,$08,$0D,$0D,$0A,$0B,$0C
         .BYTE $0C
@@ -1661,24 +1662,24 @@ MAIN_LOOP
         BNE _L00
 
         ; Speed is 0
-        LDA #$F4     ;Sprite pointer: Stopped car
+        LDA #$F4                        ;Sprite pointer: Stopped car
         STA SPR_FRAME_PTR_07
         JMP _L11
 
 _L00    LDA ZP_ROAD_STATE
-        CMP #$08     ;#%00001000
+        CMP #$08
         BEQ _L02
 
         INC ZP_TMP_REG_01
         LDA ZP_TMP_REG_01
-        CMP #$FA     ;#%11111010
+        CMP #250
         BCC _L02
 
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA ZP_TMP_REG_01
         LDY ZP_TMP_REG_00
         INY
-        CPY #$28     ;#%00101000
+        CPY #40
         BCC _L01
 
         LDY #32
@@ -1691,31 +1692,31 @@ _L02    JSR DRAW_ROAD_TOP_ROW
         JSR ANIMATE_HERO_CAR
 
         ; Check collision with shoulder
-        LDA $D00F               ;A = Sprite 7 Y Pos
+        LDA $D00F                       ;A = Sprite 7 Y Pos
         LSR A
         LSR A
-        LSR A                   ;A /= 8
+        LSR A                           ;A /= 8
         SEC
-        SBC #$05                ;A -= 5
+        SBC #$05                        ;A -= 5
         TAY
         LDA ZP_ROAD_X_LEFT_ROW_TBL,Y
-        CMP $D00E               ;Sprite 7 X Pos
+        CMP $D00E                       ;Sprite 7 X Pos
         BCS _L04
 
         CLC
         ADC #24
-        CMP $D00E               ;Sprite 7 X Pos
+        CMP $D00E                       ;Sprite 7 X Pos
         BCS _L03
 
         LDA ZP_ROAD_X_RIGHT_ROW_TBL,Y
         CLC
         ADC #$02
-        CMP $D00E               ;Sprite 7 X Pos
+        CMP $D00E                       ;Sprite 7 X Pos
         BCC _L04
 
         SEC
         SBC #22
-        CMP $D00E               ;Sprite 7 X Pos
+        CMP $D00E                       ;Sprite 7 X Pos
         BCC _L03
 
         LDA #$05
@@ -1776,15 +1777,15 @@ _L07    LDY ZP_PIXELS_TO_MOVE_CAR
 .IF USE_JOYSTICK == 0
         ;Update car X position based on Paddle reading
 _L08    LDA ZP_PADDLE_1_VALUE_INV
-        CMP $D00E    ;Sprite 7 X Pos
+        CMP $D00E                       ;Sprite 7 X Pos
         BCS _L09
 
         ; Move Hero to the left
-        DEC $D00E    ;Sprite 7 X Pos
+        DEC $D00E                       ;Sprite 7 X Pos
         JMP _L10
 
         ; Move Hero to the right
-_L09    INC $D00E    ;Sprite 7 X Pos
+_L09    INC $D00E                       ;Sprite 7 X Pos
 .ELSE
         ;Update car X position based on Joystick #1
 _L08    LDA ZP_PADDLE_1_VALUE_INV
@@ -1947,14 +1948,14 @@ _L01    JSR DRAW_ROAD_TOP_ROW
         DEY
         BPL _L00
 
-_L02    LDX #$03        ;#%00000011
-        LDY $D00E       ;Sprite 7 X Pos
-_L03    CPY #$32        ;#%00110010
+_L02    LDX #$03
+        LDY $D00E                       ;Sprite 7 X Pos
+_L03    CPY #50
         BCC _L04
         DEY
         DEX
         BPL _L03
-        STY $D00E    ;Sprite 7 X Pos
+        STY $D00E                       ;Sprite 7 X Pos
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
         JSR INCREMENT_SCORE
@@ -1971,6 +1972,7 @@ _L05    LDA ZP_SPEED_LO
         BNE _L06
         LDA ZP_SPEED_HI
         BEQ _L07
+
 _L06    JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
         JSR INCREMENT_SCORE
@@ -1981,6 +1983,9 @@ _L06    JSR DRAW_ROAD_TOP_ROW
         JSR GAME_OVER
         JMP _L05
 
+        ; Speed is 0, means that the flames
+        ; animation should be stopped, and the flames sprites
+        ; should be disabled.
 _L07    LDA $D015                       ;Sprite display Enable
         AND #$8F                        ;#%10001111
         STA $D015                       ;Sprite display Enable
@@ -1992,6 +1997,7 @@ _L07    LDA $D015                       ;Sprite display Enable
         LDA #$F0                        ;#%11110000
         STA $D417                       ;Filter Resonance Control / Voice Input Control
 
+        ; Reset some game variables
         LDA #$00
         STA ZP_FRAME_PTR_IDX
         STA ZP_CAR_ANIM_DELAY
@@ -2000,21 +2006,28 @@ _L07    LDA $D015                       ;Sprite display Enable
         STA ZP_COLLISION_DETECTED
         STA ZP_PASSED_CARS_TOTAL
         STA ZP_SID_VOICE_FILTER_MASK
+
+        ; Enable shoulder for 60 rows
         LDA #60
         STA ZP_LEFT_SHOULDER_ENABLED
+
+        ; Set Road State == Shoulder
         LDA #$08
         STA ZP_ROAD_STATE
+
         LDY ZP_TMP_REG_00
         LDA ROAD_STATE_TBL,Y
         BEQ _L08
-        CMP #$03     ;#%00000011
+        CMP #$03
         BEQ _L08
-        CMP #$04     ;#%00000100
+        CMP #$04
         BEQ _L08
         BNE _L09
 _L08    DEC ZP_TMP_REG_00
-_L09    LDA #$FA     ;#%11111010
+
+_L09    LDA #250
         STA ZP_TMP_REG_01
+
         JMP MAIN_LOOP
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -2315,11 +2328,11 @@ _L14    LDA ZP_ROAD_STATE
 
         ; Road State 04: Show Split Screen sprite
         LDA ZP_TMP_REG_01
-        CMP #$A0
+        CMP #160
         BCC _L18
-        CMP #$F0
+        CMP #240
         BCS _L16
-        CMP #$A0
+        CMP #160
         BNE _L15
 
         ; Show Split Screen sprite
@@ -2542,9 +2555,11 @@ _L32    LDY ZP_TMP_49
 _L33    LDA ZP_ROAD_STATE
         CMP #$04
         BNE _L34
+
         LDA ZP_TMP_REG_01
         CMP #200
         BCC _L34
+
         LDA $D000,Y                     ;Sprite 0 X Pos
         CMP #107
         BCC _L36
