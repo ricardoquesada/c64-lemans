@@ -2110,10 +2110,7 @@ INCREMENT_SCORE
         LDA #$5F
         STA a55
 
-        ; Unused / Incomplete code
-        ; Possible incomplete code about rewarding something
-        ; when certain points were reached
-
+        ; The more points you have, the more difficult is the game
 _L00    LDY #$01
         LDA ZP_SCORE_02
         CMP #$40
@@ -2129,10 +2126,10 @@ _L00    LDY #$01
         BEQ _L04
         BNE _L05
 
-_L01    STY f30+3                       ;Score is 40xx ? (unused)
-_L02    STY f30+2                       ;Score is 20xx ? (unused)
-_L03    STY f30+1                       ;Score is 05xx ? (unused)
-_L04    STY f30+0                       ;Score is 02xx ? (unused)
+_L01    STY f30+3                       ;Score is 40xx ?
+_L02    STY f30+2                       ;Score is 20xx ?
+_L03    STY f30+1                       ;Score is 05xx ?
+_L04    STY f30+0                       ;Score is 02xx ?
 _L05    RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -2491,8 +2488,10 @@ _L26    LDA #$00
         STA ZP_ENEMY_CAR_PASSED_TBL,X
         CPX a5A
         BNE _L28
+
         LDA f30,X
         BNE _L30
+
         LDA #$04
         STA a5A
 _L27    JMP _L32
@@ -2504,13 +2503,15 @@ _L28    LDA a5A
         LDA f30,X
         BEQ _L27
 
+        ; Create new enemy car?
+        ; Chances are 1 in 32
         JSR UPDATE_RANDOM_NUMBER
         LDA ZP_RANDOM_NUMBER
         AND #$1F
         BNE _L27
 
         ;
-        ; New Enemy Car (?)
+        ; New Enemy Car
         ;
 
         STX a5A
