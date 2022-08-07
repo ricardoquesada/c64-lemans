@@ -96,7 +96,7 @@ ZP_PLAY_CRASH_SOUND = $59
 a5A = $5A
 a5B = $5B
 a5C = $5C
-f5D = $5D
+ZP_ENEMY_CAR_X_IS_FIXED_TBL = $5D
 ZP_SID_FREQ_LO = $61
 ZP_SID_FREQ_HI = $62
 ZP_SOUND_EFFECT_01_DELAY = $63
@@ -2542,11 +2542,11 @@ _L28    LDA a5A
         LDY ZP_TMP_49                   ;Use the random number as X position
         STA $D000,Y                     ;Sprite 0 X Pos
 
-        ; Set sprite direction (left or right) ?
+        ; Does the sprite move horizontally, or stared fixed?
         JSR UPDATE_RANDOM_NUMBER
         LDA ZP_RANDOM_NUMBER
         AND #$01
-        STA f5D,X
+        STA ZP_ENEMY_CAR_X_IS_FIXED_TBL,X
 
         ; Set sprite direction (left or right) ?
         JSR UPDATE_RANDOM_NUMBER
@@ -2568,8 +2568,9 @@ _L29    JSR UPDATE_RANDOM_NUMBER
         LDY ZP_TMP_49
         STA $D000,Y                     ;Sprite 0 X Pos
 
+        ; Sprite must stay fixed. Don't move
         LDA #$01
-        STA f5D,X
+        STA ZP_ENEMY_CAR_X_IS_FIXED_TBL,X
 
 _L30    LDY ZP_TMP_49
         LDA ZP_ENEMY_CAR_VERTICAL_DIR
@@ -2617,18 +2618,23 @@ _L33    LDA ZP_ROAD_STATE
         STA $D000,Y                     ;Sprite 0 X Pos
         JMP _L36
 
-_L34    LDA f5D,X
-        BNE _L36
+_L34    LDA ZP_ENEMY_CAR_X_IS_FIXED_TBL,X
+        BNE _L36                        ;Enemy car must not move horizontally
+
         LDA ZP_ROAD_STATE
-        CMP #$06
-        BEQ _L36
+        CMP #$06                        ;Split screen?
+        BEQ _L36                        ; yes, don't move the sprite horizontally
+
         LDA ZP_ROAD_STATE_ROW_TBL+24
-        CMP #$06
-        BEQ _L36
+        CMP #$06                        ;Split scren in current row?
+        BEQ _L36                        ; yes, ditto above
+
+        ; Move the enemy car horizontally
         LDA $D000,Y                     ;Sprite 0 X Pos
         CLC
         ADC ZP_ENEMY_CAR_HORIZONTAL_MOV_TBL,X
         STA $D000,Y                     ;Sprite 0 X Pos
+
         CMP #103
         BCS _L35
         LDA #$01
@@ -2638,6 +2644,7 @@ _L35    CMP #183
         BCC _L36
         LDA #$FF
         STA ZP_ENEMY_CAR_HORIZONTAL_MOV_TBL,X
+
 _L36    LDY ZP_TMP_49
         LDA $D001,Y                     ;Sprite 0 Y Pos
         LSR A
@@ -2647,11 +2654,13 @@ _L36    LDY ZP_TMP_49
         SBC #$05
         TAY
         LDA ZP_ROAD_STATE_ROW_TBL,Y
-        CMP #$02
-        BNE _L37
-        LDA #$FA                        ;Enemy Night car frame
-        STA SPR_FRAME_PTR_00,X
+        CMP #$02                        ;Night for the current row for the sprite?
+        BNE _L37                        ; No
+
+        LDA #$FA                        ; Yes, nigth, so update car frame
+        STA SPR_FRAME_PTR_00,X          ; with the "Night car" sprite frame
         BNE _L38
+
 _L37    LDA #$F6                        ;Enemy Car 00
         STA SPR_FRAME_PTR_00,X
 _L38    LDY ZP_TMP_49
