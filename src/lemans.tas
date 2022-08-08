@@ -351,15 +351,21 @@ SET_IRQ_TO_WAIT_BUTTON
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 IRQ_HANDLER_WAIT_BUTTON
+.IF USE_JOYSTICK == 0
         ; Read button from Paddle
         LDA #$FF                        ;#%11111111
         STA $DC00                       ;CIA1: Data Port Register A
         LDA $DC01                       ;CIA1: Data Port Register B
         AND #$04
         BEQ _L00
+.ENDIF
 
         ; Read button from Joystick
-        LDA #$FE                        ;#%11111110
+.IF USE_JOYSTICK == 1
+        LDA #%00111110                  ;Don't enable paddle to read the joystick button
+.ELSE
+        LDA #%11111110
+.ENDIF
         STA $DC00                       ;CIA1: Data Port Register A
         LDA $DC01                       ;CIA1: Data Port Register B
         AND #$10                        ;#%00010000
@@ -1733,8 +1739,10 @@ _L02    JSR DRAW_ROAD_TOP_ROW
         LDA #$05
         STA ZP_PIXELS_TO_MOVE_CAR
 
-        ; Car is not colliding with shoulder
-        ; NOTE(riq): Disable Rumble here
+.if USE_JOYSTICK == 1
+        LDA #%00111110                  ;Disable rumble
+        STA $DC00
+.endif
         LDA #$00
         STA ZP_BRAKE_FORCE
         STA ZP_SOUND_EFFECT_TO_PLAY
@@ -1742,8 +1750,12 @@ _L02    JSR DRAW_ROAD_TOP_ROW
 
         ; Car is colliding with shoulder,
         ; but this is not a crash yet, just warning.
-        ; NOTE(riq): Enable Rumble here
-_L03    LDA #$01
+_L03
+.if USE_JOYSTICK == 1
+        LDA #%10111110                  ;Enable rumble
+        STA $DC00
+.endif
+        LDA #$01
         STA ZP_PIXELS_TO_MOVE_CAR       ;Limit car horizontal movement
         STA ZP_BRAKE_FORCE              ;Apply brake, so car cannot speed up
         STA ZP_SOUND_EFFECT_TO_PLAY     ;Play noise
@@ -2106,7 +2118,7 @@ INCREMENT_SCORE
         AND #$1F                        ;20.000 points?
         BNE _L00                        ; No
 
-        INC ZP_LIVES                         ; Yes, so add extra life (extended time)
+        INC ZP_LIVES                    ; Yes, so add extra life (extended time)
         LDA #$5F
         STA a55
 
