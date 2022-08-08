@@ -1382,10 +1382,10 @@ _L11    STA ZP_SHOULDER_LEFT_IDX
         BNE _L08
 
 _STATES_03_04
-        CMP #$03
+        CMP #$03                        ;"Green" state
         BNE _STATE_04
 
-        ; Road State 03
+        ; Road State 03 (Green)
         LDA #$00
         STA ZP_ROAD_TURN_TBL_IDX
         LDA ZP_SHOULDER_LEFT_IDX
@@ -1407,17 +1407,17 @@ _L15    CMP #83
         ; Road State 04
 _STATE_04
         LDA ZP_SHOULDER_LEFT_IDX
-        CMP #$11     ;#%00010001
+        CMP #17
         BCC _L17
         DEC ZP_SHOULDER_LEFT_IDX
-_L17    CMP #$10     ;#%00010000
+_L17    CMP #16
         BCS _L18
         INC ZP_SHOULDER_LEFT_IDX
 _L18    LDA ZP_SHOULDER_RIGHT_IDX
-        CMP #$65     ;#%01100101
+        CMP #101
         BCC _L19
         DEC ZP_SHOULDER_RIGHT_IDX
-_L19    CMP #$64     ;#%01100100
+_L19    CMP #100
         BCS DRAW_SHOULDERS
         INC ZP_SHOULDER_RIGHT_IDX
         JMP DRAW_SHOULDERS
@@ -1425,20 +1425,22 @@ _L19    CMP #$64     ;#%01100100
         ; Road States: 05-08
 _STATES_05_08
         LDA ZP_ROAD_STATE
-        CMP #$05     ;#%00000101
+        CMP #$05                        ;Turns state
         BNE _STATES_06_08
 
         ; Road State 05: Turns
         INC ZP_ROAD_TURN_TBL_IDX
         LDA ZP_ROAD_TURN_TBL_IDX
-        AND #$3F
-        STA ZP_ROAD_TURN_TBL_IDX
+        AND #$3F                        ;ROAD_TURN_TBL size is 64.
+        STA ZP_ROAD_TURN_TBL_IDX        ; so, don't let it overflow
+
         TAY
-        LDA TURN_OFFSET_TBL,Y
+        LDA ROAD_TURN_TBL,Y
         CLC
         ADC #16
         STA ZP_SHOULDER_LEFT_IDX
-        LDA TURN_OFFSET_TBL,Y
+
+        LDA ROAD_TURN_TBL,Y
         CLC
         ADC #83
         STA ZP_SHOULDER_RIGHT_IDX
@@ -1653,8 +1655,9 @@ SHOULDER_PATTERN_IDX_TBL
         .BYTE $00,$04,$08,$0C
 
         ; Used to draw the "turns".
-        ; Offset to the byte to draw (?)
-TURN_OFFSET_TBL
+        ; Offset to the byte to draw
+        ; Size: 64 bytes
+ROAD_TURN_TBL
         .BYTE $00,$00,$01,$01,$01,$02,$02,$02
         .BYTE $03,$03,$04,$04,$05,$06,$07,$08
         .BYTE $09,$0A,$0B,$0C,$0D,$0D,$0E,$0E
