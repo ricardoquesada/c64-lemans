@@ -110,7 +110,7 @@ ZP_PRINT_SPEED_DELAY = $6A
 ZP_ENEMY_CAR_PASSED_TBL = $6B
 ZP_PASSED_CARS_TOTAL = $6F
 ZP_ADD_1000_PTS = $70
-a71 = $71
+ZP_DISPLAY_1000_PTS_DURATION = $71
 a72 = $72
 a73 = $73
 a74 = $74
@@ -118,9 +118,9 @@ a75 = $75
 ZP_SID_CUTOFF_FREQ_HI = $76
 ZP_SID_VOICE_FILTER_MASK = $77
 ZP_DISPLAY_PIT_DELAY = $78
-ZP_ROAD_X_LEFT_ROW_TBL = $79
-ZP_ROAD_X_RIGHT_ROW_TBL = $92
-ZP_ROAD_STATE_ROW_TBL = $AB
+ZP_ROAD_X_LEFT_ROW_TBL = $79            ;25 elements
+ZP_ROAD_X_RIGHT_ROW_TBL = $92           ;25 elements
+ZP_ROAD_STATE_ROW_TBL = $AB             ;25 elements
 ;
 ; **** FIELDS ****
 ;
@@ -423,7 +423,7 @@ INIT_GAME
         STX ZP_ENEMY_CAR_PASSED_TBL+3
         STX ZP_PASSED_CARS_TOTAL
         STX ZP_ADD_1000_PTS
-        STX a71
+        STX ZP_DISPLAY_1000_PTS_DURATION
         STX a55
         STX ZP_SID_VOICE_FILTER_MASK
         STX f34
@@ -2971,8 +2971,8 @@ _L07    LDY TWO_BY_TWO_OFFSET_TBL,X
         ; Score += 100
         ; The player sees +1000, but the rightmost zero
         ; doesn't get updated.
-        LDA #40
-        STA a71
+        LDA #40                         ;How long the message will be displayed
+        STA ZP_DISPLAY_1000_PTS_DURATION
         LDA #$00
         STA ZP_ADD_1000_PTS
 
@@ -3004,10 +3004,10 @@ _L09    LDA BONUS_MSG,Y
         DEY
         BPL _L09
 
-_L10    LDA a71
+_L10    LDA ZP_DISPLAY_1000_PTS_DURATION
         BEQ _L13
-        DEC a71
-        LDA a71
+        DEC ZP_DISPLAY_1000_PTS_DURATION
+        LDA ZP_DISPLAY_1000_PTS_DURATION
         AND #$04
         BEQ _L11
         LDA #$01
@@ -3016,7 +3016,7 @@ _L10    LDA a71
 
 _L11    LDA #$00
         STA ZP_PLAY_PASS_CAR_SOUND
-        LDA a71
+        LDA ZP_DISPLAY_1000_PTS_DURATION
         BNE _L13
 
         ; Erase "BONUS 1000 PTS" message
