@@ -1740,7 +1740,7 @@ _L02    JSR DRAW_ROAD_TOP_ROW
         STA ZP_PIXELS_TO_MOVE_CAR
 
 .if USE_JOYSTICK == 1
-        LDA #%00111110                  ;Disable rumble
+        LDA #%00111110                  ;Disable rumble in both joysticks
         STA $DC00
 .endif
         LDA #$00
@@ -1752,7 +1752,7 @@ _L02    JSR DRAW_ROAD_TOP_ROW
         ; but this is not a crash yet, just warning.
 _L03
 .if USE_JOYSTICK == 1
-        LDA #%10111110                  ;Enable rumble
+        LDA #%01111110                  ;Enable rumble in J1
         STA $DC00
 .endif
         LDA #$01
@@ -2154,10 +2154,11 @@ IRQ_HANDLER_GAME_LOOP
         SED
         JMP _L05
 
-_L00    LDA #$40                        ;#%01000000
+_L00
+.IF USE_JOYSTICK == 0
+        LDA #%01000000                  ;Enable Pot A
         STA $DC00                       ;CIA1: Data Port Register A
 
-.IF USE_JOYSTICK == 0
         LDA $D419                       ;Analog/Digital Converter: Game Paddle 1
         STA ZP_PADDLE_1_VALUE
 
