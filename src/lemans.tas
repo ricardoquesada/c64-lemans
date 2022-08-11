@@ -42,7 +42,7 @@ ZP_ROAD_TURN_TBL_IDX = $1C
 a1D = $1D
 ZP_SHOULDER_LEFT_IDX = $1E
 ZP_SHOULDER_RIGHT_IDX = $1F
-ZP_SHOULDER_PATTER_CHOOSER = $20
+ZP_SHOULDER_PATTERN_CHOOSER = $20       ;Valid values: 0,1,2,3
 ZP_DIGIT_TO_PRINT = $21                 ;Digit to print. Values from 0 to 9
 ZP_BCD_TO_PRINT = $22                   ;Encoded in BCD
 ZP_LEVEL_IDX = $23                      ;When ZP_LEVEL_TICK reaches 250,
@@ -400,7 +400,7 @@ INIT_GAME
         STX ZP_SPEED_LO
         STX ZP_SPEED_HI
         STX ZP_HEADLIGHT_DURATION
-        STX ZP_SHOULDER_PATTER_CHOOSER
+        STX ZP_SHOULDER_PATTERN_CHOOSER
         STX ZP_BRAKE_FORCE
         STX ZP_FRAME_PTR_IDX
         STX ZP_SOUND_ENABLED
@@ -1293,10 +1293,10 @@ _L02    STA COLOR_RAM,X
         DEX
         BPL _L02
 
-        INC ZP_SHOULDER_PATTER_CHOOSER
-        LDA ZP_SHOULDER_PATTER_CHOOSER
+        INC ZP_SHOULDER_PATTERN_CHOOSER
+        LDA ZP_SHOULDER_PATTERN_CHOOSER
         AND #$03
-        STA ZP_SHOULDER_PATTER_CHOOSER
+        STA ZP_SHOULDER_PATTERN_CHOOSER
 
         LDA ZP_ROAD_STATE
         CMP #$05
@@ -1306,12 +1306,12 @@ _L02    STA COLOR_RAM,X
         ; Road State 00-04
 _STATES_00_04
         LDA ZP_SHOULDER_LEFT_IDX
-        CMP #$10
+        CMP #16
         BCS _L04
         INC ZP_SHOULDER_LEFT_IDX
 
 _L04    LDA ZP_SHOULDER_RIGHT_IDX
-        CMP #$54
+        CMP #84
         BCS _L05
         INC ZP_SHOULDER_RIGHT_IDX
         JMP DRAW_SHOULDERS
@@ -1358,9 +1358,9 @@ _L07    STA ZP_SHOULDER_LEFT_IDX
         LDA ZP_SHOULDER_RIGHT_IDX
         CLC
         ADC #$01
-        CMP #$64
+        CMP #100
         BCC _L08
-        LDA #$64
+        LDA #100
 _L08    STA ZP_SHOULDER_RIGHT_IDX
 
 _L09    JMP DRAW_SHOULDERS
@@ -1368,17 +1368,17 @@ _L09    JMP DRAW_SHOULDERS
 _L10    LDA ZP_SHOULDER_LEFT_IDX
         CLC
         ADC #$01
-        CMP #$20
+        CMP #32
         BCC _L11
-        LDA #$20
+        LDA #32
 _L11    STA ZP_SHOULDER_LEFT_IDX
 
         LDA ZP_SHOULDER_RIGHT_IDX
         SEC
         SBC #$01
-        CMP #$54
+        CMP #84
         BCS _L08
-        LDA #$54
+        LDA #84
         BNE _L08
 
 _STATES_03_04
@@ -1469,10 +1469,10 @@ _STATE_08
         JMP DRAW_SHOULDERS
 
 _L20    LDA ZP_SHOULDER_LEFT_IDX
-        CMP #$0F     ;#%00001111
+        CMP #$0F
         BCC _L21
 
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA ZP_ROAD_STATE
         BNE DRAW_SHOULDERS
 
@@ -1535,12 +1535,14 @@ _L01    STA COLOR_RAM+1,Y
         LDA ZP_SHOULDER_LEFT_IDX        ;Use the 2-LSB to index the pattern to print
         AND #$03
         TAY
-        LDX SHOULDER_PATTERN_IDX_TBL,Y
+        LDX SHOULDER_PATTERN_IDX_TBL,Y  ;X=Valid offsets are 0,4,8,12... offsets for the pattern
         LDY #$00
-_L02    LDA ZP_SHOULDER_PATTER_CHOOSER
+_L02    LDA ZP_SHOULDER_PATTERN_CHOOSER
         BNE _L03
-        LDA SHOULDER_PATERN_A0,X
+
+        LDA SHOULDER_PATTERN_A0,X       ;PATTERN_CHOOSER=0
         BNE _L04
+
 _L03    LDA SHOULDER_PATTERN_B0,X
 _L04    STA (ZP_TMP_PTR_LO),Y
         INX
@@ -1563,7 +1565,7 @@ _L04    STA (ZP_TMP_PTR_LO),Y
         TAY
         LDX SHOULDER_PATTERN_IDX_TBL,Y
         LDY #$00
-_L05    LDA ZP_SHOULDER_PATTER_CHOOSER
+_L05    LDA ZP_SHOULDER_PATTERN_CHOOSER
         BNE _L06
         LDA SHOULDER_PATTERN_A3,X
         BNE _L07
@@ -1579,18 +1581,19 @@ _L07    STA (ZP_TMP_PTR_LO),Y
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Road State 06: Split screen
 DRAW_SPLIT_SCREEN
-        LDY #$05     ;#%00000101
-        LDA #$0E     ;#%00001110
+        LDY #$05
+        LDA #$0E                        ;Color Light Blue
 _L00    STA COLOR_RAM+7,Y
         STA COLOR_RAM+19,Y
         DEY
         BPL _L00
 
-        LDY #$03     ;#%00000011
-_L01    LDA ZP_SHOULDER_PATTER_CHOOSER
+        LDY #$03
+_L01    LDA ZP_SHOULDER_PATTERN_CHOOSER
         BNE _L02
 
-        LDA SHOULDER_PATERN_A0,Y
+        ; PATTERN_CHOOSER = 0
+        LDA SHOULDER_PATTERN_A0,Y
         STA SCREEN_RAM+4,Y
         LDA SHOULDER_PATTERN_A1,Y
         STA SCREEN_RAM+16,Y
@@ -1600,6 +1603,8 @@ _L01    LDA ZP_SHOULDER_PATTER_CHOOSER
         STA SCREEN_RAM+25,Y
         BNE _L03
 
+
+        ; PATTERN_CHOOSER != 0
 _L02    LDA SHOULDER_PATTERN_B0,Y
         STA SCREEN_RAM+4,Y
         LDA SHOULDER_PATTERN_B1,Y
@@ -1627,30 +1632,54 @@ ROAD_COLOR2_TBL
         .BYTE $0E,$09,$08,$0E,$0E,$0E,$0E,$0E
         .BYTE $0E
 
+        ; Each of these patterns consist of 4 rows. Each row has 4 chars.
+        ;
+        ; Pattern A = {
+        ;    ROW0,
+        ;    ROW1,
+        ;    ROW2,
+        ;    ROW3,
+        ;  }
+        ; And each ROW has:
+        ; row = [C0, C1, C2, C3] where:
+        ;  C0 = left-most part of the shoulder
+        ;  C1 = middle-left
+        ;  C2 = middle-right
+        ;  C3 = right-most part of the shoulder.
+        ; [C0,...C3] are screen codes (the chars to print).
+        ;
+        ; The rows are:
+        ;  ROW0 represents a shoulder that is indented to the left.
+        ;  ROW..N is a indented a bit to the rigth compared to ROW N-1.
 SHOULDER_PATTERN_A3
-        .BYTE $40,$45,$46,$44,$41,$45,$47,$48
+        .BYTE $40,$45,$46,$44
+        .BYTE $41,$45,$47,$48
         .BYTE $42,$45,$45,$49
 SHOULDER_PATTERN_A2
         .BYTE $43,$45,$45,$4A
 
 SHOULDER_PATTERN_B3
-        .BYTE $40,$45,$4B,$44,$41,$45,$47,$44
+        .BYTE $40,$45,$4B,$44
+        .BYTE $41,$45,$47,$44
         .BYTE $42,$45,$45,$4C
 SHOULDER_PATTERN_B2
         .BYTE $43,$45,$45,$4D
 
-SHOULDER_PATERN_A0
+SHOULDER_PATTERN_A0
         .BYTE $57,$52,$52,$51
 SHOULDER_PATTERN_A1
-        .BYTE $56,$52,$52,$50,$55,$54,$52,$4F
+        .BYTE $56,$52,$52,$50
+        .BYTE $55,$54,$52,$4F
         .BYTE $44,$53,$52,$4E
 
 SHOULDER_PATTERN_B0
         .BYTE $5A,$52,$52,$51
 SHOULDER_PATTERN_B1
-        .BYTE $59,$52,$52,$50,$44,$54,$52,$4F
+        .BYTE $59,$52,$52,$50
+        .BYTE $44,$54,$52,$4F
         .BYTE $44,$58,$52,$4E
 
+        ; Offset used for SHOULDER_PATTERN_A* and SHOULDER_PATTERN_B*
 SHOULDER_PATTERN_IDX_TBL
         .BYTE $00,$04,$08,$0C
 
