@@ -52,14 +52,14 @@ ZP_LEVEL_TICK = $24                     ;Ticks once per IRQ. Used to keep track
                                         ; the ROAD_STATE "life"
                                         ; Although sometimes used as tmp var
 ZP_HEADLIGHT_DURATION = $25
-a26 = $26
+ZP_UNUSED_26 = $26
 ZP_SPEED_LO = $27
 ZP_SPEED_HI = $28
 a29 = $29
 a2A = $2A
-a2B = $2B
+a2B = $2B                               ;It is always 1
 a2C = $2C
-a2D = $2D
+ZP_ENEMY_CAR_DELTA_Y = $2D
 a2E = $2E
 a2F = $2F
 f30 = $30
@@ -68,7 +68,7 @@ ZP_PADDLE_1_VALUE_INV = $38
 ZP_PADDLE_1_VALUE = $39
 ZP_CAR_MOVEMENT_DELAY_LO = $3A
 ZP_CAR_MOVEMENT_DELAY_HI = $3B
-CAR_Y_OFFSET = $3C
+ZP_CAR_Y_OFFSET = $3C
 ZP_TMP_3D = $3D
 ZP_TMP_3E = $3E
 ZP_PIXELS_TO_MOVE_CAR = $41
@@ -84,13 +84,13 @@ ZP_TMP_4A = $4A
 ZP_ENEMY_CAR_ANIM_DELAY = $4B
 ZP_ENEMY_CAR_FRAME_IDX = $4C
 ZP_ENEMY_CAR_VERTICAL_DIR = $4D
-ZP_ENEMY_CAR_HORIZONTAL_MOV_TBL = $4E
+ZP_ENEMY_CAR_DELTA_X_TBL = $4E          ;$4E, $4F, $50, $51
 ZP_LEFT_SHOULDER_ENABLED = $52
 ZP_LIVES = $53
 ZP_LIVES_USED = $54
 ZP_TIMES_TO_DISPLAY_EXTENDED_TIME = $55
-a56 = $56
-a57 = $57
+ZP_TMP_REG_Y = $56
+ZP_TMP_REG_X = $57
 ZP_COLLISION_DETECTED = $58
 ZP_PLAY_CRASH_SOUND = $59
 a5A = $5A
@@ -396,7 +396,7 @@ INIT_GAME
         STX ZP_ROAD_STATE_DELAY
         STX ZP_ROAD_TURN_TBL_IDX
         STX ZP_LEVEL_TICK
-        STX a26
+        STX ZP_UNUSED_26
         STX ZP_SPEED_LO
         STX ZP_SPEED_HI
         STX ZP_HEADLIGHT_DURATION
@@ -443,8 +443,8 @@ INIT_GAME
         INX
 
         STX a2B
-        STX ZP_ENEMY_CAR_HORIZONTAL_MOV_TBL
-        STX ZP_ENEMY_CAR_HORIZONTAL_MOV_TBL+1
+        STX ZP_ENEMY_CAR_DELTA_X_TBL
+        STX ZP_ENEMY_CAR_DELTA_X_TBL+1
 
         LDA #$04
         STA a5A
@@ -458,7 +458,7 @@ INIT_GAME
         STA ZP_TICKS_PER_SECOND
         LDA #$60                        ;Initial time: 60 seconds (BCD)
         STA ZP_TIME
-        LDA #$64
+        LDA #100
         STA ZP_SHOULDER_RIGHT_IDX
         LDA #$70
         STA a2A
@@ -469,8 +469,8 @@ INIT_GAME
         LDA #$FF                        ;#%11111111
         STA $D01C                       ;Sprites Multi-Color Mode Select
 
-        STA ZP_ENEMY_CAR_HORIZONTAL_MOV_TBL+2
-        STA ZP_ENEMY_CAR_HORIZONTAL_MOV_TBL+3
+        STA ZP_ENEMY_CAR_DELTA_X_TBL+2
+        STA ZP_ENEMY_CAR_DELTA_X_TBL+3
 
         ; Init SID
         LDA #$00
@@ -2324,7 +2324,7 @@ _L11    LDA ZP_SPEED_LO
         ADC CAR_SPEED_CONVERTION_TBL,X  ;A += TABLE[X]
 
         ; Update Hero Y Position based on SPEED / 10
-        STA CAR_Y_OFFSET
+        STA ZP_CAR_Y_OFFSET
 
         ; Update Hero Horizontal Delay based on TABLE[SPEED/10]
         TAY
@@ -2337,7 +2337,7 @@ _L11    LDA ZP_SPEED_LO
         BEQ _L12
         LDA #195
         SEC
-        SBC CAR_Y_OFFSET
+        SBC ZP_CAR_Y_OFFSET
         STA $D00F                       ;Sprite 7 Y Pos
 
 _L12    LDA ZP_ROAD_STATE
@@ -2488,7 +2488,7 @@ _L20    STY ZP_TICK_COUNTER
         STA a2C
         LDA a2B
         SBC ZP_SPEED_HI
-        STA a2D
+        STA ZP_ENEMY_CAR_DELTA_Y
         JSR sF227
         JMP _L22
 
@@ -2500,7 +2500,7 @@ _L21    LDA #$00                        ;Moving down
         STA a2C
         LDA ZP_SPEED_HI
         SBC a2B
-        STA a2D
+        STA ZP_ENEMY_CAR_DELTA_Y
         JSR sF227
 
 _L22    LDX #$03                        ;Compare with sprites 0-3
@@ -2597,7 +2597,7 @@ _L28    LDA a5A
         AND #$02
         TAY
         DEY
-        STY ZP_ENEMY_CAR_HORIZONTAL_MOV_TBL,X
+        STY ZP_ENEMY_CAR_DELTA_X_TBL,X
         JMP _L30
 
         ; In Split screen, used hardcoded position x
@@ -2624,8 +2624,9 @@ _L30    LDY ZP_TMP_49
         CLC
         ADC a2C
         STA f34,X
+
         LDA $D001,Y                     ;Sprite 0 Y Pos
-        ADC a2D
+        ADC ZP_ENEMY_CAR_DELTA_Y
         STA $D001,Y                     ;Sprite 0 Y Pos
         JMP _L33
 
@@ -2634,8 +2635,9 @@ _L31    LDA f34,X
         SEC
         SBC a2C
         STA f34,X
+
         LDA $D001,Y                     ;Sprite 0 Y Pos
-        SBC a2D
+        SBC ZP_ENEMY_CAR_DELTA_Y
         STA $D001,Y                     ;Sprite 0 Y Pos
         JMP _L33
 
@@ -2657,7 +2659,7 @@ _L33    LDA ZP_ROAD_STATE
         BCS _L36
         LDA $D000,Y                     ;Sprite 0 X Pos
         CLC
-        ADC ZP_ENEMY_CAR_HORIZONTAL_MOV_TBL,X
+        ADC ZP_ENEMY_CAR_DELTA_X_TBL,X
         STA $D000,Y                     ;Sprite 0 X Pos
         JMP _L36
 
@@ -2675,18 +2677,18 @@ _L34    LDA ZP_ENEMY_CAR_X_IS_FIXED_TBL,X
         ; Move the enemy car horizontally
         LDA $D000,Y                     ;Sprite 0 X Pos
         CLC
-        ADC ZP_ENEMY_CAR_HORIZONTAL_MOV_TBL,X
+        ADC ZP_ENEMY_CAR_DELTA_X_TBL,X
         STA $D000,Y                     ;Sprite 0 X Pos
 
         CMP #103
         BCS _L35
         LDA #$01
-        STA ZP_ENEMY_CAR_HORIZONTAL_MOV_TBL,X
+        STA ZP_ENEMY_CAR_DELTA_X_TBL,X
         BNE _L36
 _L35    CMP #183
         BCC _L36
         LDA #$FF
-        STA ZP_ENEMY_CAR_HORIZONTAL_MOV_TBL,X
+        STA ZP_ENEMY_CAR_DELTA_X_TBL,X
 
 _L36    LDY ZP_TMP_49
         LDA $D001,Y                     ;Sprite 0 Y Pos
@@ -2803,7 +2805,7 @@ sF227   CLD
         LDA #$00
         STA a2E
         STA a2F
-        LDY a2D
+        LDY ZP_ENEMY_CAR_DELTA_Y
         BEQ _L01
 
 _L00    LDA a2E
@@ -2848,14 +2850,14 @@ _L04    LDA a2E
 _L05    LDA a2F
         STA a2C
         LDA a2E
-        STA a2D
+        STA ZP_ENEMY_CAR_DELTA_Y
 
         LDY #$05
-_L06    LSR a2D
+_L06    LSR ZP_ENEMY_CAR_DELTA_Y
         ROR a2C
         DEY
         BPL _L06
-        LDA a2D
+        LDA ZP_ENEMY_CAR_DELTA_Y
         LSR A
         STA a5C
         LDA a2C
@@ -2865,9 +2867,9 @@ _L06    LSR a2D
         CLC
         ADC a5B
         STA a2C
-        LDA a2D
+        LDA ZP_ENEMY_CAR_DELTA_Y
         ADC a5C
-        STA a2D
+        STA ZP_ENEMY_CAR_DELTA_Y
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -3138,8 +3140,8 @@ TIME2_MSG
 ; Called when time is 0.
 ; Game over animnation gets triggered from here
 GAME_OVER
-        STY a56
-        STX a57
+        STY ZP_TMP_REG_Y                ;Temporary save X and Y
+        STX ZP_TMP_REG_X
         LDA ZP_LIVES
         BEQ _L01
 
@@ -3154,16 +3156,18 @@ _L00    LDA TICKS_PER_SECOND_TBL,Y
         STA ZP_TICKS_PER_SECOND
 
         INY
-        STY ZP_LIVES_USED
+        STY ZP_LIVES_USED               ;LIVES_USED++
 
         LDA #$60                        ;Initial time: 60 seconds (BCD)
         STA ZP_TIME
 
         LDA #$00
-        STA ZP_IS_GAME_OVER
-        STA ZP_TICK_COUNTER
-        LDY a57
-        LDX a56
+        STA ZP_IS_GAME_OVER             ;Not game over yet
+        STA ZP_TICK_COUNTER             ;Reset tick counter
+
+        LDY ZP_TMP_REG_X                ;Swap X & Y (or BUG?)
+        LDX ZP_TMP_REG_Y                ; It seems they are not used. Legacy
+                                        ; code most probably
         RTS
 
         ; Do Game Over
@@ -3387,7 +3391,7 @@ _L05    LDA ZP_SPEED_LO
 _L06    LDA ZP_SPEED_LO
         STA a2C
         LDA ZP_SPEED_HI
-        STA a2D
+        STA ZP_ENEMY_CAR_DELTA_Y
         JSR sF227
 
         LDY #$02
@@ -3506,10 +3510,10 @@ _L18    LDA ZP_GAME_OVER_STATE
         JMP _L28
 
         ; ZP_GAME_OVER_STATE == 0 or 1
-_L19    LDA CAR_Y_OFFSET
+_L19    LDA ZP_CAR_Y_OFFSET
         CMP #$10     ;#%00010000
         BCS _L20
-        LDA CAR_Y_OFFSET
+        LDA ZP_CAR_Y_OFFSET
         SEC
         SBC #$10     ;#%00010000
         STA a74
@@ -3518,7 +3522,7 @@ _L19    LDA CAR_Y_OFFSET
         BNE _L21
 _L20    LDA #$10     ;#%00010000
         SEC
-        SBC CAR_Y_OFFSET
+        SBC ZP_CAR_Y_OFFSET
         STA a74
         LDA #$00     ;#%00000000
         STA a75
