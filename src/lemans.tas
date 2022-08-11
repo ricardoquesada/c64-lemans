@@ -88,7 +88,7 @@ ZP_ENEMY_CAR_HORIZONTAL_MOV_TBL = $4E
 ZP_LEFT_SHOULDER_ENABLED = $52
 ZP_LIVES = $53
 ZP_LIVES_USED = $54
-a55 = $55
+ZP_TIMES_TO_DISPLAY_EXTENDED_TIME = $55
 a56 = $56
 a57 = $57
 ZP_COLLISION_DETECTED = $58
@@ -424,7 +424,7 @@ INIT_GAME
         STX ZP_PASSED_CARS_TOTAL
         STX ZP_ADD_1000_PTS
         STX ZP_DISPLAY_1000_PTS_DURATION
-        STX a55
+        STX ZP_TIMES_TO_DISPLAY_EXTENDED_TIME
         STX ZP_SID_VOICE_FILTER_MASK
         STX f34
         STX f34+1
@@ -1540,7 +1540,7 @@ _L01    STA COLOR_RAM+1,Y
 _L02    LDA ZP_SHOULDER_PATTERN_CHOOSER
         BNE _L03
 
-        LDA SHOULDER_PATTERN_LEFT_A,X       ;PATTERN_CHOOSER=0
+        LDA SHOULDER_PATTERN_LEFT_A,X   ;PATTERN_CHOOSER=0
         BNE _L04
 
 _L03    LDA SHOULDER_PATTERN_LEFT_B,X
@@ -1594,25 +1594,25 @@ _L01    LDA ZP_SHOULDER_PATTERN_CHOOSER
 
         ; PATTERN_CHOOSER == 0
         LDA SHOULDER_PATTERN_LEFT_A,Y
-        STA SCREEN_RAM+4,Y
+        STA SCREEN_RAM+4,Y              ;Left road, left shoulder
         LDA SHOULDER_PATTERN_LEFT_A+4,Y
-        STA SCREEN_RAM+16,Y
+        STA SCREEN_RAM+16,Y             ;Right road, left shoulder
         LDA SHOULDER_PATTERN_RIGHT_A+12,Y
-        STA SCREEN_RAM+12,Y
+        STA SCREEN_RAM+12,Y             ;Left road, right shoulder
         LDA SHOULDER_PATTERN_RIGHT_A,Y
-        STA SCREEN_RAM+25,Y
+        STA SCREEN_RAM+25,Y             ;Right road, right shoulder
         BNE _L03
 
 
         ; PATTERN_CHOOSER != 0
 _L02    LDA SHOULDER_PATTERN_LEFT_B,Y
-        STA SCREEN_RAM+4,Y
+        STA SCREEN_RAM+4,Y              ;Left road, Left shoulder
         LDA SHOULDER_PATTERN_LEFT_B+4,Y
-        STA SCREEN_RAM+16,Y
+        STA SCREEN_RAM+16,Y             ;Right road, Left shoulder
         LDA SHOULDER_PATTERN_RIGHT_B+12,Y
-        STA SCREEN_RAM+12,Y
+        STA SCREEN_RAM+12,Y             ;Left road, right shoulder
         LDA SHOULDER_PATTERN_RIGHT_B,Y
-        STA SCREEN_RAM+25,Y
+        STA SCREEN_RAM+25,Y             ;Right road, right shoulder
 
 _L03    DEY
         BPL _L01
@@ -1621,7 +1621,7 @@ _L03    DEY
         STA ZP_ROAD_X_LEFT_ROW_TBL
         LDA #224
         STA ZP_ROAD_X_RIGHT_ROW_TBL
-        LDA #$06
+        LDA #$06                        ;Split screen for row
         STA ZP_ROAD_STATE_ROW_TBL
         RTS
 
@@ -2149,7 +2149,7 @@ INCREMENT_SCORE
 
         INC ZP_LIVES                    ; Yes, so add extra life (extended time)
         LDA #$5F
-        STA a55
+        STA ZP_TIMES_TO_DISPLAY_EXTENDED_TIME
 
         ; The more points you have, the more difficult is the game
 _L00    LDY #$01
@@ -3021,8 +3021,8 @@ _L07    LDY TWO_BY_TWO_OFFSET_TBL,X
 
         ; Reached 20.000 points, so extend time
         INC ZP_LIVES
-        LDA #$5F                        ;#%01011111
-        STA a55
+        LDA #$5F
+        STA ZP_TIMES_TO_DISPLAY_EXTENDED_TIME
 
         ; Print "BONUS 1000 PTS" message
 _L08    LDY #$07
@@ -3056,10 +3056,10 @@ _L12    STA SCREEN_RAM+40*23+32,Y
         DEY
         BPL _L12
 
-_L13    LDA a55
+_L13    LDA ZP_TIMES_TO_DISPLAY_EXTENDED_TIME
         BEQ _L17
-        DEC a55
-        LDA a55
+        DEC ZP_TIMES_TO_DISPLAY_EXTENDED_TIME
+        LDA ZP_TIMES_TO_DISPLAY_EXTENDED_TIME
         AND #$10
         BEQ _L15
 
