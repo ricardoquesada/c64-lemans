@@ -1,8 +1,8 @@
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; LeMans for Commodore 64                                                      ;
-; Disassembly                                                                  ;
-;
-; by riq / L.I.A
+; Disassembled + fully commented                                               ;
+;                                                                              ;
+; by riq / L.I.A                                                               ;
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 
 ; Compile-time variables
