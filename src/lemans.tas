@@ -369,7 +369,7 @@ IRQ_HANDLER_WAIT_BUTTON
         STA $DC00                       ;CIA1: Data Port Register A
         LDA $DC01                       ;CIA1: Data Port Register B
         AND #$10                        ;#%00010000
-        BNE _L01
+        BNE _L01                        ;Button pressed? (Active low)
 
 _L00    LDA #<IRQ_HANDLER_MAIN
         STA ZP_IRQ_LO
@@ -3199,8 +3199,12 @@ _L00    LDA TICKS_PER_SECOND_TBL,Y
         RTS
 
         ; Do Game Over
-
-_L01    INC ZP_GAME_OVER_STATE
+_L01
+.if USE_JOYSTICK == 1
+        LDA #%00111110                  ;Disable rumble in both joysticks
+        STA $DC00
+.endif
+        INC ZP_GAME_OVER_STATE
         LDA #$07
         STA ZP_ROAD_STATE
 
