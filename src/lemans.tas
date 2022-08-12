@@ -39,7 +39,7 @@ ZP_TIMER1_TRIGGERED = $19
 ZP_ROAD_STATE = $1A
 ZP_ROAD_STATE_DELAY = $1B
 ZP_ROAD_TURN_TBL_IDX = $1C
-a1D = $1D
+a1D = $1D                               ;Related to color index when printing shoulders
 ZP_SHOULDER_LEFT_IDX = $1E
 ZP_SHOULDER_RIGHT_IDX = $1F
 ZP_SHOULDER_PATTERN_CHOOSER = $20       ;Valid values: 0,1,2,3
@@ -55,15 +55,15 @@ ZP_HEADLIGHT_DURATION = $25
 ZP_UNUSED_26 = $26
 ZP_SPEED_LO = $27
 ZP_SPEED_HI = $28
-a29 = $29
-a2A = $2A
-ZP_CONSTANT_EQ_1 = $2B                  ;It is always 1
-ZP_CAR_ACCEL_LO = $2C
-ZP_CAR_ACCEL_HI = $2D                   ;Also used for Enemy Car Delta Y
+ZP_UNUSED_29 = $29
+ZP_CONSTANT_368_LO = $2A                ;It is alwasy 112 (1 * 256 + 112 = 368)
+ZP_CONSTANT_368_HI = $2B                ;It is always 1 (1 * 256 + 112 = 368)
+ZP_CAR_RESISTANCE_LO = $2C
+ZP_CAR_RESISTANCE_HI = $2D              ;Also used for Enemy Car Delta Y
 a2E = $2E
 a2F = $2F
-f30 = $30
-f34 = $34
+ZP_ENABLE_ENEMY_CAR0 = $30
+f34 = $34                               ;Not used, but related to the enemy speed/direction
 ZP_PADDLE_1_VALUE_INV = $38
 ZP_PADDLE_1_VALUE = $39
 ZP_CAR_MOVEMENT_DELAY_LO = $3A
@@ -430,10 +430,10 @@ INIT_GAME
         STX f34+1
         STX f34+2
         STX f34+3
-        STX f30
-        STX f30+1
-        STX f30+2
-        STX f30+3
+        STX ZP_ENABLE_ENEMY_CAR0
+        STX ZP_ENABLE_ENEMY_CAR0+1
+        STX ZP_ENABLE_ENEMY_CAR0+2
+        STX ZP_ENABLE_ENEMY_CAR0+3
         STX $D017                       ;Sprites Expand 2x Vertical (Y)
         STX $D01B                       ;Sprite to Background Display Priority
         STX $D01D                       ;Sprites Expand 2x Horizontal (X)
@@ -442,7 +442,7 @@ INIT_GAME
 
         INX
 
-        STX ZP_CONSTANT_EQ_1
+        STX ZP_CONSTANT_368_HI
         STX ZP_ENEMY_CAR_DELTA_X_TBL
         STX ZP_ENEMY_CAR_DELTA_X_TBL+1
 
@@ -460,8 +460,8 @@ INIT_GAME
         STA ZP_TIME
         LDA #100
         STA ZP_SHOULDER_RIGHT_IDX
-        LDA #$70
-        STA a2A
+        LDA #112
+        STA ZP_CONSTANT_368_LO
 
         ; Only set Visible enemy cars and hero car sprites
         LDA #$8F                        ;#%10001111
@@ -2167,10 +2167,12 @@ _L00    LDY #$01
         BEQ _L04
         BNE _L05
 
-_L01    STY f30+3                       ;Score is 40xx ?
-_L02    STY f30+2                       ;Score is 20xx ?
-_L03    STY f30+1                       ;Score is 05xx ?
-_L04    STY f30+0                       ;Score is 02xx ?
+        ; Enable the enemy cars as more points are added
+        ; Enemy cars should appear at points: 2000,5000,20000,40000
+_L01    STY ZP_ENABLE_ENEMY_CAR0+3                       ;Score is 40xx ?
+_L02    STY ZP_ENABLE_ENEMY_CAR0+2                       ;Score is 20xx ?
+_L03    STY ZP_ENABLE_ENEMY_CAR0+1                       ;Score is 05xx ?
+_L04    STY ZP_ENABLE_ENEMY_CAR0+0                       ;Score is 02xx ?
 _L05    RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -2256,10 +2258,10 @@ _L05    LDY ZP_SPEED_HI                 ;Values from 0 to 3 (0xx, 1xx, 2xx, 3xx)
         LDA ACCELERATION_TBL_HI,Y
         STA ZP_TMP_69
 
-        LDA a29
+        LDA ZP_UNUSED_29                ;Not used anywhere in the game
         CLC
         ADC ZP_TMP_68
-        STA a29
+        STA ZP_UNUSED_29
 
         LDA ZP_SPEED_LO
         ADC ZP_TMP_69
@@ -2475,32 +2477,40 @@ _L20    STY ZP_TICK_COUNTER
         SED
         LDA ZP_SPEED_LO
         SEC
-        SBC a2A
+        SBC ZP_CONSTANT_368_LO          ;Unused
         LDA ZP_SPEED_HI
-        SBC ZP_CONSTANT_EQ_1
+        SBC ZP_CONSTANT_368_HI
         BCS _L21
 
         LDA #$01                        ;Moving up
         STA ZP_ENEMY_CAR_VERTICAL_DIR
-        LDA a2A
+
+        ; Resistance = 368 - speed
+        LDA ZP_CONSTANT_368_LO
         SEC
         SBC ZP_SPEED_LO
-        STA ZP_CAR_ACCEL_LO
-        LDA ZP_CONSTANT_EQ_1
+        STA ZP_CAR_RESISTANCE_LO
+
+        LDA ZP_CONSTANT_368_HI
         SBC ZP_SPEED_HI
-        STA ZP_CAR_ACCEL_HI
+        STA ZP_CAR_RESISTANCE_HI
+
         JSR CALCULATE_SOMETHING_WITH_SPEED
         JMP _L22
 
 _L21    LDA #$00                        ;Moving down
         STA ZP_ENEMY_CAR_VERTICAL_DIR
+
+        ; Resistance = Speed - 368
         LDA ZP_SPEED_LO
         SEC
-        SBC a2A
-        STA ZP_CAR_ACCEL_LO
+        SBC ZP_CONSTANT_368_LO
+        STA ZP_CAR_RESISTANCE_LO
+
         LDA ZP_SPEED_HI
-        SBC ZP_CONSTANT_EQ_1
-        STA ZP_CAR_ACCEL_HI
+        SBC ZP_CONSTANT_368_HI
+        STA ZP_CAR_RESISTANCE_HI
+
         JSR CALCULATE_SOMETHING_WITH_SPEED
 
 _L22    LDX #$03                        ;Compare with sprites 0-3
@@ -2531,7 +2541,7 @@ _L26    LDA #$00
         CPX a5A
         BNE _L28
 
-        LDA f30,X
+        LDA ZP_ENABLE_ENEMY_CAR0,X
         BNE _L30
 
         LDA #$04
@@ -2542,7 +2552,7 @@ _L28    LDA a5A
         CMP #$04
         BNE _L27
 
-        LDA f30,X
+        LDA ZP_ENABLE_ENEMY_CAR0,X
         BEQ _L27
 
         ; Create new enemy car?
@@ -2622,22 +2632,22 @@ _L30    LDY ZP_TMP_49
         ; Move enemy car from top to bottom (moving down)
         LDA f34,X
         CLC
-        ADC ZP_CAR_ACCEL_LO
+        ADC ZP_CAR_RESISTANCE_LO
         STA f34,X
 
         LDA $D001,Y                     ;Sprite 0 Y Pos
-        ADC ZP_CAR_ACCEL_HI
+        ADC ZP_CAR_RESISTANCE_HI
         STA $D001,Y                     ;Sprite 0 Y Pos
         JMP _L33
 
         ; Move enemy car from bottom to top (moving up)
 _L31    LDA f34,X
         SEC
-        SBC ZP_CAR_ACCEL_LO
+        SBC ZP_CAR_RESISTANCE_LO
         STA f34,X
 
         LDA $D001,Y                     ;Sprite 0 Y Pos
-        SBC ZP_CAR_ACCEL_HI
+        SBC ZP_CAR_RESISTANCE_HI
         STA $D001,Y                     ;Sprite 0 Y Pos
         JMP _L33
 
@@ -2807,7 +2817,8 @@ CALCULATE_SOMETHING_WITH_SPEED
         STA a2E
         STA a2F
 
-        LDY ZP_CAR_ACCEL_HI
+        ; Before calling this function, ZP_CAR_RESISTANCE == ZP_SPEED +/- 1
+        LDY ZP_CAR_RESISTANCE_HI
         BEQ _L01
 
 _L00    LDA a2E                         ;a2E += 100
@@ -2822,7 +2833,7 @@ _L00    LDA a2E                         ;a2E += 100
         DEY
         BNE _L00
 
-_L01    LDA ZP_CAR_ACCEL_LO             ;Test 4-bit MSB
+_L01    LDA ZP_CAR_RESISTANCE_LO        ;Test 4-bit MSB
         LSR A
         LSR A
         LSR A
@@ -2830,7 +2841,7 @@ _L01    LDA ZP_CAR_ACCEL_LO             ;Test 4-bit MSB
         TAY
         BEQ _L03
 
-_L02    LDA a2E                         ;a2E += 10 (times MSB ZP_CAR_ACCEL_LO)
+_L02    LDA a2E                         ;a2E += 10 (times MSB ZP_CAR_RESISTANCE_LO)
         CLC
         ADC #10
         STA a2E
@@ -2840,12 +2851,12 @@ _L02    LDA a2E                         ;a2E += 10 (times MSB ZP_CAR_ACCEL_LO)
         DEY
         BNE _L02
 
-_L03    LDA ZP_CAR_ACCEL_LO             ;Test 4-bit LSB
+_L03    LDA ZP_CAR_RESISTANCE_LO        ;Test 4-bit LSB
         AND #$0F
         TAY
         BEQ _L05
 
-_L04    LDA a2E                         ;a2E += 1 (times LSB ZP_CAR_ACCEL_LO)
+_L04    LDA a2E                         ;a2E += 1 (times LSB ZP_CAR_RESISTANCE_LO)
         CLC
         ADC #$01
         STA a2E
@@ -2856,37 +2867,37 @@ _L04    LDA a2E                         ;a2E += 1 (times LSB ZP_CAR_ACCEL_LO)
         BNE _L04
 
 
-_L05    LDA a2F                         ;ZP_CAR_ACCEL_LO = a2F
-        STA ZP_CAR_ACCEL_LO
-        LDA a2E                         ;ZP_CAR_ACCEL_HI = a2E
-        STA ZP_CAR_ACCEL_HI
+_L05    LDA a2F                         ;ZP_CAR_RESISTANCE_LO = a2F
+        STA ZP_CAR_RESISTANCE_LO
+        LDA a2E                         ;ZP_CAR_RESISTANCE_HI = a2E
+        STA ZP_CAR_RESISTANCE_HI
 
         ; acceleration /= 32
 
         LDY #$05
-_L06    LSR ZP_CAR_ACCEL_HI
-        ROR ZP_CAR_ACCEL_LO
+_L06    LSR ZP_CAR_RESISTANCE_HI
+        ROR ZP_CAR_RESISTANCE_LO
         DEY
         BPL _L06
 
         ; Update acceleration
         ; acceleration += (acceleration/2)
 
-        LDA ZP_CAR_ACCEL_HI
+        LDA ZP_CAR_RESISTANCE_HI
         LSR A
         STA ZP_TMP_5C
-        LDA ZP_CAR_ACCEL_LO
+        LDA ZP_CAR_RESISTANCE_LO
         ROR A
         STA ZP_TMP_5B
 
-        LDA ZP_CAR_ACCEL_LO
+        LDA ZP_CAR_RESISTANCE_LO
         CLC
         ADC ZP_TMP_5B
-        STA ZP_CAR_ACCEL_LO
+        STA ZP_CAR_RESISTANCE_LO
 
-        LDA ZP_CAR_ACCEL_HI
+        LDA ZP_CAR_RESISTANCE_HI
         ADC ZP_TMP_5C
-        STA ZP_CAR_ACCEL_HI
+        STA ZP_CAR_RESISTANCE_HI
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -3204,10 +3215,10 @@ _L01    INC ZP_GAME_OVER_STATE
         STA ZP_SOUND_EFFECT_TO_PLAY
         STA ZP_PLAY_SPLIT_ROAD_SOUND
         STA ZP_PLAY_PASS_CAR_SOUND
-        STA f30
-        STA f30+1
-        STA f30+2
-        STA f30+3
+        STA ZP_ENABLE_ENEMY_CAR0
+        STA ZP_ENABLE_ENEMY_CAR0+1
+        STA ZP_ENABLE_ENEMY_CAR0+2
+        STA ZP_ENABLE_ENEMY_CAR0+3
         LDA #$F0                        ;#%11110000
         STA $D417                       ;Filter Resonance Control / Voice Input Control
 
@@ -3406,12 +3417,12 @@ _L05    LDA ZP_SPEED_LO
         BEQ _L08
 
 _L06    LDA ZP_SPEED_LO
-        STA ZP_CAR_ACCEL_LO
+        STA ZP_CAR_RESISTANCE_LO
         LDA ZP_SPEED_HI
-        STA ZP_CAR_ACCEL_HI
+        STA ZP_CAR_RESISTANCE_HI
         JSR CALCULATE_SOMETHING_WITH_SPEED
 
-        ; Divice by 8
+        ; Divide by 8
         LDY #$02
 _L07    ASL a2E
         ROL a2F
