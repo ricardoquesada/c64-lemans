@@ -6,8 +6,10 @@
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 
 ; Compile-time variables
-USE_JOYSTICK .VAR 0                     ;Set it to 1 to use Joystick
+USE_JOYSTICK    .VAR 1                  ;Set it to 1 to use Joystick
                                         ; instead of Paddle
+USE_PRG         .VAR 1                  ;Generate a .prg instead of a .crt
+                                        ; Original is cartridge
 
 ;
 ; **** ZP ABSOLUTE ADRESSES ****
@@ -182,7 +184,15 @@ HI_SCORE_OFFSET = SCREEN_RAM + 40 * 8 + 32
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; It is an 8Kb Ultimax cartridge.
 ; Starting address:
+.IF USE_PRG == 0
         * = $E000
+.ELSE
+        * = $0801
+        .WORD (+), 2019                 ;pointer, line number
+        .NULL $9E, FORMAT("%d", START)  ;will be sys START
++       .WORD 0                         ;basic line end
+.ENDIF
+
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 IRQ_HANDLER
@@ -241,6 +251,19 @@ VIC_VALUES
 ; Starting address
 START
         SEI
+.IF USE_PRG == 1
+        ; Needed to set them manually since the cartridge sets them
+        ; by overriding their address
+        LDX #<NMI_HANDLER               ;Setup NMI Handler
+        LDY #>NMI_HANDLER
+        STX $FFFC
+        STY $FFFD
+
+        LDX #<IRQ_HANDLER               ;Setup IRQ Handler
+        LDY #>IRQ_HANDLER
+        STX $FFFE
+        STY $FFFF
+.ENDIF
         LDA #$00
         STA ZP_HI_SCORE_01
         STA ZP_HI_SCORE_02
@@ -3621,7 +3644,8 @@ _L27    LDA #$0A
 _L28    RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; Garbage
+; Garbage: Remove from .prg
+.IF USE_PRG == 0
         .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$FF
         .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$FF
         .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$FF
@@ -3636,17 +3660,24 @@ _L28    RTS
         .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$FF
         .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$FF
         .BYTE $00,$FF,$00,$FF
+.ENDIF
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; Data
+; Data:
+.IF USE_PRG == 1
+        * = $3800                       ;To avoid updating all frame pointers
+                                        ; let's place it at $3800 in .prg
+.ELSE
         * = $F800
+.ENDIF
         .BINARY "charset-f800-f97f.bin"         ;Chars 00-47
         .BINARY "sprites-f980-f9ff.bin"         ;Frames 230-231
         .BINARY "charset-fa00-fcbf.bin"         ;Chars 64-151
         .BINARY "sprites-fcc0-ffbf.bin"         ;Frames 243-254
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; Garbage
+; Garbage: Remove from .prg
+.IF USE_PRG == 0
         * = $FFC0
         .BYTE $00,$FF,$00
         .BYTE $00,$00,$FF
@@ -3667,12 +3698,16 @@ _L28    RTS
         .BYTE $00,$FF,$00
         .BYTE $FF,$00,$FF
         .BYTE $00,$FF,$00,$FF
+.ENDIF
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Setup NMI, IRQ, START vectors
+; Remove from .prg since they are manually set
+.IF USE_PRG == 0
         ; NMI ($FFFA-$FFFB)
         .ADDR NMI_HANDLER
         ; COLD RESET ($FFFC-$FFFD)
         .ADDR START
         ; IRQ ($FFFE-$FFFF)
         .ADDR IRQ_HANDLER
+.ENDIF

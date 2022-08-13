@@ -21,6 +21,15 @@ crt: lemans.prg
 run: crt
 	$(X64) -verbose -moncommands bin/labels.txt bin/lemans.crt
 
+lemans.exo: lemans.prg
+	exomizer sfx sys -x1 -Di_line_number=2019 bin/lemans.prg -o bin/lemans.exo.prg
+
+runprg: lemans.prg
+	$(X64) -verbose -moncommands bin/labels.txt bin/lemans.prg
+
+runexo: lemans.exo
+	$(X64) -verbose -moncommands bin/labels.txt bin/lemans.exo.prg
+
 debug: crt
 	$(DEBUGGER) -crt bin/lemans.crt
 
