@@ -14,7 +14,7 @@ lemans.prg: src/lemans.asm src/charset-f800-f97f.bin src/sprites-f980-f9ff.bin s
 	md5sum bin/lemans.prg orig/lemans.prg
 
 lemans_lia.prg: src/lemans.asm src/charset-f800-f97f.bin src/sprites-f980-f9ff.bin src/charset-fa00-fcbf.bin src/sprites-fcc0-ffbf.bin
-	64tass -Wall -Werror --cbm-prg -D USE_JOYSTICK:=1 -D USE_PRG:=1 -D USE_FIX_MISSPELL:=1 -o bin/lemans_lia.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/lemans.asm
+	64tass -Wall -Werror --cbm-prg -D USE_LEMANS_LIA:=1 -o bin/lemans_lia.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/lemans.asm
 
 crt: lemans.prg
 	dd if=bin/lemans.prg of=bin/lemans.bin skip=2 bs=1

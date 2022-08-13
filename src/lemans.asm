@@ -6,6 +6,13 @@
 ; by riq / L.I.A                                                               ;
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 
+USE_LEMANS_LIA :?= 0
+.IF USE_LEMANS_LIA==1
+USE_JOYSTICK := 1
+USE_PRG := 1
+USE_FIX_MISSPELL := 1
+.ENDIF
+
 ; Compile-time variables
 ; To compile the unmodified original game, all values must be 0
 USE_JOYSTICK            :?= 0           ;Set it to 1 to use Joystick  instead of Paddle
