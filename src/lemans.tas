@@ -1,15 +1,19 @@
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; LeMans for Commodore 64                                                      ;
 ; Disassembled + fully commented                                               ;
+; Added some improvements. See compile-time variables below                    ;
 ;                                                                              ;
 ; by riq / L.I.A                                                               ;
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 
 ; Compile-time variables
-USE_JOYSTICK    .VAR 1                  ;Set it to 1 to use Joystick
-                                        ; instead of Paddle
-USE_PRG         .VAR 1                  ;Generate a .prg instead of a .crt
+; To compile the same original game, all values must be 0
+USE_JOYSTICK            .VAR 0          ;Set it to 1 to use Joystick  instead of Paddle
+                                        ; By enabling Joystick support, it also enables
+                                        ; Gamepad Rumble support
+USE_PRG                 .VAR 0          ;Generate a .prg instead of a .crt
                                         ; Original is cartridge
+USE_FIX_MISSPELL        .VAR 0          ;Fix "BOUNS" -> "BONUS"
 
 ;
 ; **** ZP ABSOLUTE ADRESSES ****
@@ -807,7 +811,11 @@ TITLE_MSG
         .TEXT "      AND       "
         .TEXT " HAL LABORATORY "
         .TEXT "  PUSH ",$1D,$06,$22,$1D," OR  " ; 'F1'
+.IF USE_JOYSTICK==0
         .TEXT "BUTTON ON PADDLE"
+.ELSE
+        .TEXT " BUTTON ON JOY",$22," "
+.ENDIF
         .TEXT "    TO START    "
         .TEXT "                "
 
@@ -3180,7 +3188,11 @@ PASSED_CARS_CHAR_TBL
 
         .ENC "screen"
 BONUS_MSG
+.IF USE_FIX_MISSPELL == 0
         .TEXT " BOUNS  "                ;Notice the misspell.
+.ELSE
+        .TEXT " BONUS  "
+.ENDIF
 THOUSAND_PTS_MSG
         .BYTE $22,$21,$21,$21           ;1000
         .TEXT " PTS"

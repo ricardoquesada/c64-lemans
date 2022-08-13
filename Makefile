@@ -30,6 +30,11 @@ runprg: lemans.prg
 runexo: lemans.exo
 	$(X64) -verbose -moncommands bin/labels.txt bin/lemans.exo.prg
 
+d64: lemans.exo
+	$(C1541) -format "lemans ,rq" d64 $(D64_IMAGE)
+	$(C1541) $(D64_IMAGE) -write bin/lemans.exo.prg "lemans"
+	$(C1541) $(D64_IMAGE) -list
+
 debug: crt
 	$(DEBUGGER) -crt bin/lemans.crt
 
