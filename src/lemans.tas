@@ -93,7 +93,7 @@ ZP_TMP_REG_Y = $56
 ZP_TMP_REG_X = $57
 ZP_COLLISION_DETECTED = $58
 ZP_PLAY_CRASH_SOUND = $59
-a5A = $5A
+a5A = $5A                               ;Temporal sprite counter
 ZP_TMP_5B = $5B
 ZP_TMP_5C = $5C
 ZP_ENEMY_CAR_X_IS_FIXED_TBL = $5D
@@ -111,16 +111,16 @@ ZP_ENEMY_CAR_PASSED_TBL = $6B
 ZP_PASSED_CARS_TOTAL = $6F
 ZP_ADD_1000_PTS = $70
 ZP_DISPLAY_1000_PTS_DURATION = $71
-a72 = $72
-a73 = $73
-a74 = $74
-a75 = $75
+a72 = $72                               ;Used in play sound effect routine
+a73 = $73                               ;ditto above
+a74 = $74                               ;ditto above
+a75 = $75                               ;ditto above
 ZP_SID_CUTOFF_FREQ_HI = $76
 ZP_SID_VOICE_FILTER_MASK = $77
 ZP_DISPLAY_PIT_DELAY = $78
-ZP_ROAD_X_LEFT_ROW_TBL = $79            ;25 elements
-ZP_ROAD_X_RIGHT_ROW_TBL = $92           ;25 elements
-ZP_ROAD_STATE_ROW_TBL = $AB             ;25 elements
+ZP_ROAD_X_LEFT_ROW_TBL = $79            ;25 elements (height of screen)
+ZP_ROAD_X_RIGHT_ROW_TBL = $92           ;25 elements (height of screen)
+ZP_ROAD_STATE_ROW_TBL = $AB             ;25 elements (height of screen)
 ;
 ; **** FIELDS ****
 ;
@@ -1247,30 +1247,30 @@ _L01    TAY
         STA ZP_ZERO_IS_ZERO
 
         ; Update Speed Dashboard
-_L02    LDA fE85D,Y
+_L02    LDA DIGITS_DASHBOARD_TL_TBL,Y
         STA SCREEN_RAM+40*11+32,X
-        LDA fE868,Y
+        LDA DIGITS_DASHBOARD_TR_TBL,Y
         STA SCREEN_RAM+40*11+33,X
-        LDA fE873,Y
+        LDA DIGITS_DASHBOARD_BL_TBL,Y
         STA SCREEN_RAM+40*12+32,X
-        LDA fE87E,Y
+        LDA DIGITS_DASHBOARD_BR_TBL,Y
         STA SCREEN_RAM+40*12+33,X
         INX
         INX
 _L03    RTS
 
-        ; Speed Dashboard top-left
-fE85D   .BYTE $5B,$6D,$61,$61,$67,$6B,$6B,$5B
-        .BYTE $6B,$6B,$6D
-        ; Speed Dashboard top-right
-fE868   .BYTE $5C,$5F,$62,$62,$68,$6C,$6C,$5C
-        .BYTE $62,$62,$6E
-        ; Speed Dashboard bottom-left
-fE873   .BYTE $5D,$6F,$63,$65,$69,$65,$63,$6F
-        .BYTE $63,$65,$6F
-        ; Speed Dashboard bottom-right
-fE87E   .BYTE $5E,$60,$64,$66,$6A,$66,$66,$60
-        .BYTE $66,$66,$70
+        ; Digits used in speed dashboard: top-left
+DIGITS_DASHBOARD_TL_TBL
+        .BYTE $5B,$6D,$61,$61,$67,$6B,$6B,$5B,$6B,$6B,$6D
+        ; Digits used in speed dashboard: top-right
+DIGITS_DASHBOARD_TR_TBL
+        .BYTE $5C,$5F,$62,$62,$68,$6C,$6C,$5C,$62,$62,$6E
+        ; Digits used in speed dashboard: bottom-left
+DIGITS_DASHBOARD_BL_TBL
+        .BYTE $5D,$6F,$63,$65,$69,$65,$63,$6F,$63,$65,$6F
+        ; Digits used in speed dashboard: bottom-right
+DIGITS_DASHBOARD_BR_TBL
+        .BYTE $5E,$60,$64,$66,$6A,$66,$66,$60,$66,$66,$70
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Draw road (?)
@@ -3510,23 +3510,23 @@ _L14    CMP #$02
         ; Sound Effect: Extended Time
 _PLAY_EXTENDED_TIME
         LDA #$50
-        STA $D40F               ;Voice 3: Frequency Control - High-Byte
-        LDA #$21                ;#%00100001
-        STA $D412               ;Voice 3: Control Register
-        LDA #$F0                ;#%11110000
+        STA $D40F                       ;Voice 3: Frequency Control - High-Byte
+        LDA #$21                        ;#%00100001
+        STA $D412                       ;Voice 3: Control Register
+        LDA #$F0                        ;#%11110000
         ORA ZP_SID_VOICE_FILTER_MASK
-        STA $D417               ;Filter Resonance Control / Voice Input Control
+        STA $D417                       ;Filter Resonance Control / Voice Input Control
         BNE _L18
 
         ; Sound Effect: Pass Car
 _PLAY_PASS_CAR
         LDA #$82
-        STA $D40F               ;Voice 3: Frequency Control - High-Byte
-        LDA #$21                ;#%00100001
-        STA $D412               ;Voice 3: Control Register
-        LDA #$F0                ;#%11110000
+        STA $D40F                       ;Voice 3: Frequency Control - High-Byte
+        LDA #$21                        ;#%00100001
+        STA $D412                       ;Voice 3: Control Register
+        LDA #$F0                        ;#%11110000
         ORA ZP_SID_VOICE_FILTER_MASK
-        STA $D417               ;Filter Resonance Control / Voice Input Control
+        STA $D417                       ;Filter Resonance Control / Voice Input Control
         BNE _L18
 
         ; Sound Effect: "Split Road" ahead
@@ -3546,72 +3546,78 @@ _L18    LDA ZP_GAME_OVER_STATE
 
         ; ZP_GAME_OVER_STATE == 0 or 1
 _L19    LDA ZP_CAR_Y_OFFSET
-        CMP #$10     ;#%00010000
+        CMP #16
         BCS _L20
         LDA ZP_CAR_Y_OFFSET
         SEC
-        SBC #$10     ;#%00010000
+        SBC #16
         STA a74
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA a75
         BNE _L21
-_L20    LDA #$10     ;#%00010000
+_L20    LDA #16
         SEC
         SBC ZP_CAR_Y_OFFSET
         STA a74
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a75
-_L21    LDA #$FF     ;#%11111111
+_L21    LDA #$FF
         STA a72
-        LDX #$03     ;#%00000011
+
+        LDX #$03
 _L22    TXA
         ASL A
         TAY
-        LDA $D001,Y  ;Sprite 0 Y Pos
-        CMP $D00F    ;Sprite 7 Y Pos
+        LDA $D001,Y                     ;Sprite 0 Y Pos
+        CMP $D00F                       ;Sprite 7 Y Pos
         BCC _L23
-        LDA $D001,Y  ;Sprite 0 Y Pos
+
+        LDA $D001,Y                     ;Sprite 0 Y Pos
         SEC
-        SBC $D00F    ;Sprite 7 Y Pos
+        SBC $D00F                       ;Sprite 7 Y Pos
         CMP a72
         BCS _L24
+
         STA a72
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a73
         BEQ _L24
-_L23    LDA $D00F    ;Sprite 7 Y Pos
+
+_L23    LDA $D00F                       ;Sprite 7 Y Pos
         SEC
-        SBC $D001,Y  ;Sprite 0 Y Pos
+        SBC $D001,Y                     ;Sprite 0 Y Pos
         CMP a72
         BCS _L24
+
         STA a72
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA a73
 _L24    DEX
         BPL _L22
+
         LDA a72
-        CMP #$20     ;#%00100000
+        CMP #$20
         BCC _L25
-        LDA #$40     ;#%01000000
-        STA $D40B    ;Voice 2: Control Register
+        LDA #$40                        ;#%01000000
+        STA $D40B                       ;Voice 2: Control Register
         BNE _L28
-_L25    LDA #$41     ;#%01000001
-        STA $D40B    ;Voice 2: Control Register
+_L25    LDA #$41                        ;#%01000001
+        STA $D40B                       ;Voice 2: Control Register
         LDA a73
         EOR a75
         BEQ _L26
         LDA a72
         CLC
-        ADC #$20     ;#%00100000
-        STA $D407    ;Voice 2: Frequency Control - Low-Byte
+        ADC #$20                        ;#%00100000
+        STA $D407
         JMP _L27
 
-_L26    LDA #$20     ;#%00100000
+_L26    LDA #$20
         SEC
         SBC a72
-        STA $D407    ;Voice 2: Frequency Control - Low-Byte
-_L27    LDA #$0A     ;#%00001010
-        STA $D408    ;Voice 2: Frequency Control - High-Byte
+        STA $D407                       ;Voice 2: Frequency Control - Low-Byte
+_L27    LDA #$0A
+        STA $D408                       ;Voice 2: Frequency Control - High-Byte
 _L28    RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
