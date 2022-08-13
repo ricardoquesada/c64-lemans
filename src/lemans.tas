@@ -60,8 +60,8 @@ ZP_CONSTANT_368_LO = $2A                ;It is alwasy 112 (1 * 256 + 112 = 368)
 ZP_CONSTANT_368_HI = $2B                ;It is always 1 (1 * 256 + 112 = 368)
 ZP_CAR_RESISTANCE_LO = $2C
 ZP_CAR_RESISTANCE_HI = $2D              ;Also used for Enemy Car Delta Y
-a2E = $2E
-a2F = $2F
+ZP_MOTOR_SOUND_FREQ_LO = $2E            ;ZP_MOTOR_SOUND_FREQ ~= CAR_RESISTANCE * 20
+ZP_MOTOR_SOUND_FREQ_HI = $2F
 ZP_ENABLE_ENEMY_CAR0 = $30
 f34 = $34                               ;Not used, but related to the enemy speed/direction
 ZP_PADDLE_1_VALUE_INV = $38
@@ -2814,21 +2814,21 @@ _L46    JMP jF2FB
 CALCULATE_SOMETHING_WITH_SPEED
         CLD
         LDA #$00
-        STA a2E
-        STA a2F
+        STA ZP_MOTOR_SOUND_FREQ_LO
+        STA ZP_MOTOR_SOUND_FREQ_HI
 
         ; Before calling this function, ZP_CAR_RESISTANCE == ZP_SPEED +/- 1
         LDY ZP_CAR_RESISTANCE_HI
         BEQ _L01
 
-_L00    LDA a2E                         ;a2E += 100
+_L00    LDA ZP_MOTOR_SOUND_FREQ_LO      ;ZP_MOTOR_SOUND_FREQ_LO += 100
         CLC
         ADC #100
-        STA a2E
+        STA ZP_MOTOR_SOUND_FREQ_LO
 
-        LDA a2F
+        LDA ZP_MOTOR_SOUND_FREQ_HI
         ADC #$00
-        STA a2F
+        STA ZP_MOTOR_SOUND_FREQ_HI
 
         DEY
         BNE _L00
@@ -2841,13 +2841,13 @@ _L01    LDA ZP_CAR_RESISTANCE_LO        ;Test 4-bit MSB
         TAY
         BEQ _L03
 
-_L02    LDA a2E                         ;a2E += 10 (times MSB ZP_CAR_RESISTANCE_LO)
+_L02    LDA ZP_MOTOR_SOUND_FREQ_LO      ;ZP_MOTOR_SOUND_FREQ_LO += 10 (times MSB ZP_CAR_RESISTANCE_LO)
         CLC
         ADC #10
-        STA a2E
-        LDA a2F
+        STA ZP_MOTOR_SOUND_FREQ_LO
+        LDA ZP_MOTOR_SOUND_FREQ_HI
         ADC #$00
-        STA a2F
+        STA ZP_MOTOR_SOUND_FREQ_HI
         DEY
         BNE _L02
 
@@ -2856,48 +2856,50 @@ _L03    LDA ZP_CAR_RESISTANCE_LO        ;Test 4-bit LSB
         TAY
         BEQ _L05
 
-_L04    LDA a2E                         ;a2E += 1 (times LSB ZP_CAR_RESISTANCE_LO)
+_L04    LDA ZP_MOTOR_SOUND_FREQ_LO      ;ZP_MOTOR_SOUND_FREQ_LO += 1 (times LSB ZP_CAR_RESISTANCE_LO)
         CLC
         ADC #$01
-        STA a2E
-        LDA a2F
+        STA ZP_MOTOR_SOUND_FREQ_LO
+        LDA ZP_MOTOR_SOUND_FREQ_HI
         ADC #$00
-        STA a2F
+        STA ZP_MOTOR_SOUND_FREQ_HI
         DEY
         BNE _L04
 
 
-_L05    LDA a2F                         ;ZP_CAR_RESISTANCE_LO = a2F
+_L05    LDA ZP_MOTOR_SOUND_FREQ_HI      ;ZP_CAR_RESISTANCE_LO = ZP_MOTOR_SOUND_FREQ_HI
         STA ZP_CAR_RESISTANCE_LO
-        LDA a2E                         ;ZP_CAR_RESISTANCE_HI = a2E
+        LDA ZP_MOTOR_SOUND_FREQ_LO      ;ZP_CAR_RESISTANCE_HI = ZP_MOTOR_SOUND_FREQ_LO
         STA ZP_CAR_RESISTANCE_HI
 
-        ; acceleration /= 32
+        ;
+        ; ZP_CAR_RESISTANCE ~= ZP_MOTOR_SOUND_FREQ / 20
+        ;
 
+        ; First divide by 32
         LDY #$05
 _L06    LSR ZP_CAR_RESISTANCE_HI
         ROR ZP_CAR_RESISTANCE_LO
-        DEY
+        DEY                             ;resistance /= 32
         BPL _L06
 
-        ; Update acceleration
-        ; acceleration += (acceleration/2)
 
-        LDA ZP_CAR_RESISTANCE_HI
+        ; Then add half of it to itself
+        LDA ZP_CAR_RESISTANCE_HI        ;Divide by 2
         LSR A
         STA ZP_TMP_5C
         LDA ZP_CAR_RESISTANCE_LO
         ROR A
         STA ZP_TMP_5B
 
-        LDA ZP_CAR_RESISTANCE_LO
+        LDA ZP_CAR_RESISTANCE_LO        ;Add it to self
         CLC
         ADC ZP_TMP_5B
         STA ZP_CAR_RESISTANCE_LO
-
         LDA ZP_CAR_RESISTANCE_HI
         ADC ZP_TMP_5C
         STA ZP_CAR_RESISTANCE_HI
+
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -3428,14 +3430,14 @@ _L06    LDA ZP_SPEED_LO
 
         ; Divide by 8
         LDY #$02
-_L07    ASL a2E
-        ROL a2F
+_L07    ASL ZP_MOTOR_SOUND_FREQ_LO
+        ROL ZP_MOTOR_SOUND_FREQ_HI
         DEY
         BPL _L07
 
-        LDA a2E
+        LDA ZP_MOTOR_SOUND_FREQ_LO
         STA $D400                       ;Voice 1: Frequency Control - Low-Byte
-        LDA a2F
+        LDA ZP_MOTOR_SOUND_FREQ_HI
         CLC
         ADC #$03
         STA $D401                       ;Voice 1: Frequency Control - High-Byte
