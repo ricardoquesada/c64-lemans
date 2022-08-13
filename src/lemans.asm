@@ -7,13 +7,13 @@
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 
 ; Compile-time variables
-; To compile the same original game, all values must be 0
-USE_JOYSTICK            .VAR 0          ;Set it to 1 to use Joystick  instead of Paddle
+; To compile the unmodified original game, all values must be 0
+USE_JOYSTICK            .VAR 1          ;Set it to 1 to use Joystick  instead of Paddle
                                         ; By enabling Joystick support, it also enables
                                         ; Gamepad Rumble support
-USE_PRG                 .VAR 0          ;Generate a .prg instead of a .crt
+USE_PRG                 .VAR 1          ;Generate a .prg instead of a .crt
                                         ; Original is cartridge
-USE_FIX_MISSPELL        .VAR 0          ;Fix "BOUNS" -> "BONUS"
+USE_FIX_MISSPELL        .VAR 1          ;Fix "BOUNS" -> "BONUS"
 
 ;
 ; **** ZP ABSOLUTE ADRESSES ****
@@ -533,12 +533,12 @@ _L00    STA $D400,Y                     ;Voice 1: Frequency Control - Low-Byte
 
         ; Scroll down 15 rows with a small delay betwen each
         LDX #15
-_L01    STX ZP_LEVEL_IDX       ;Overloaded ZP_LEVEL_IDX
+_L01    STX ZP_LEVEL_IDX                ;Overloaded ZP_LEVEL_IDX
         JSR DRAW_ROAD_TOP_ROW
         JSR SCROLL_DOWN
         LDY #$01
         JSR DELAY_01
-        LDX ZP_LEVEL_IDX       ;Overloaded ZP_LEVEL_IDX
+        LDX ZP_LEVEL_IDX                ;Overloaded ZP_LEVEL_IDX
         DEX
         BPL _L01
 
@@ -551,7 +551,7 @@ _L01    STX ZP_LEVEL_IDX       ;Overloaded ZP_LEVEL_IDX
         ; Do the initial scroll down, where the car
         ; goes up, and the START banner appears with the traffic lights
         LDX #250                        ;The loop goes from 250 to 187
-_L02    STX ZP_LEVEL_IDX       ;Overloaded ZP_LEVEL_IDX
+_L02    STX ZP_LEVEL_IDX                ;Overloaded ZP_LEVEL_IDX
         CPX #202
         BEQ _PRINT_START_TOP
         CPX #201
@@ -752,7 +752,7 @@ PRINT_TITLE_SCREEN
 _L00    STX ZP_LEVEL_IDX
         JSR DRAW_ROAD_TOP_ROW
 
-        LDX ZP_LEVEL_IDX               ;Index of row to print
+        LDX ZP_LEVEL_IDX                ;Index of row to print
         LDY TITLE_ROWS_TBL,X            ;Choose which row to print
         LDX #$00
 _L01    LDA TITLE_MSG,Y
@@ -2200,10 +2200,10 @@ _L00    LDY #$01
 
         ; Enable the enemy cars as more points are added
         ; Enemy cars should appear at points: 2000,5000,20000,40000
-_L01    STY ZP_ENABLE_ENEMY_CAR0+3                       ;Score is 40xx ?
-_L02    STY ZP_ENABLE_ENEMY_CAR0+2                       ;Score is 20xx ?
-_L03    STY ZP_ENABLE_ENEMY_CAR0+1                       ;Score is 05xx ?
-_L04    STY ZP_ENABLE_ENEMY_CAR0+0                       ;Score is 02xx ?
+_L01    STY ZP_ENABLE_ENEMY_CAR0+3      ;Score is 40xx ?
+_L02    STY ZP_ENABLE_ENEMY_CAR0+2      ;Score is 20xx ?
+_L03    STY ZP_ENABLE_ENEMY_CAR0+1      ;Score is 05xx ?
+_L04    STY ZP_ENABLE_ENEMY_CAR0+0      ;Score is 02xx ?
 _L05    RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
