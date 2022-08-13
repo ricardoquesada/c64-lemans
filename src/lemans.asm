@@ -1885,7 +1885,12 @@ _L08    LDA ZP_PADDLE_1_VALUE_INV
 
         ; Move Hero to the left
         DEC $D00E    ;Sprite 7 X Pos
-        JMP _L10
+        LDA $D00E
+        CMP #49                         ;Do not let car move out of the shoulder
+        BCS _L10
+        LDA #49
+        STA $D00E
+        BNE _L10
 
 _TEST_RIGHT
         LDA ZP_PADDLE_1_VALUE_INV
@@ -2232,13 +2237,13 @@ _L00
         LDA $D419                       ;Analog/Digital Converter: Game Paddle 1
         STA ZP_PADDLE_1_VALUE
 
-        CMP #188
-        BCC _L01
-
-        LDA #$BC
+        CMP #188                        ;Don't allow to move further that a certain
+        BCC _L01                        ; horizontal position. 236-188 = 48.
+                                        ; 48 is the minimum that sprite can go to the left
+        LDA #188
         STA ZP_PADDLE_1_VALUE
 
-_L01    LDA #$EC
+_L01    LDA #236
         SEC
         SBC ZP_PADDLE_1_VALUE
         STA ZP_PADDLE_1_VALUE_INV
@@ -2248,7 +2253,7 @@ _L01    LDA #$EC
 .ELSE
         LDA $DC01
         STA ZP_PADDLE_1_VALUE_INV
-        JMP _TEST_BUTTON
+        ; Fallthrough
 .ENDIF
 
 _TEST_BUTTON
