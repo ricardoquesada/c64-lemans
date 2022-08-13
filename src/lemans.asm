@@ -186,14 +186,13 @@ HI_SCORE_OFFSET = SCREEN_RAM + 40 * 8 + 32
 
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; It is an 8Kb Ultimax cartridge.
 ; Starting address:
 .IF USE_PRG == 0
-        * = $E000
+        * = $E000                       ;It is an 8Kb Ultimax cartridge.
 .ELSE
         * = $0801
-        .WORD (+), 2019                 ;pointer, line number
-        .NULL $9E, FORMAT("%d", START)  ;will be sys START
+        .WORD (+), 2022                 ;pointer, line number
+        .NULL $9E, FORMAT("%4d", START) ;will be "sys ${START}"
 +       .WORD 0                         ;basic line end
 .ENDIF
 
@@ -968,7 +967,7 @@ _L03    LDA SCORE_MSG,Y
         LDA #>SCREEN_RAM
         STA ZP_TMP_PTR_HI
 
-        LDX #$18                        ;x=24
+        LDX #24                         ;x=24
 _L04    LDY #$03                        ;y=3
 _L05    CPY #$00
         BNE _L06
@@ -1068,6 +1067,7 @@ SPEED_MSG
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 SCROLL_DOWN
+        ; Scroll down screen
         LDY #31
 _L00
         ; Screen RAM
@@ -1086,6 +1086,7 @@ _L00
         BMI _L01
         JMP _L00
 
+        ; Scroll down "ROW" properties
 _L01    LDY #23
 _L02    LDA ZP_ROAD_X_LEFT_ROW_TBL,Y
         STA ZP_ROAD_X_LEFT_ROW_TBL+1,Y
@@ -1095,6 +1096,7 @@ _L02    LDA ZP_ROAD_X_LEFT_ROW_TBL,Y
         STA ZP_ROAD_STATE_ROW_TBL+1,Y
         DEY
         BPL _L02
+
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -1240,8 +1242,9 @@ _L01    CLC
 _L02    INY                             ;Update char pointer
         RTS
 
-        ; Unused ?
-        .BYTE $70,$E6,$60,$04,$04,$05
+        ; Unused ? addresses ?
+        .ADDR $E670,$0460,$0504
+;        .BYTE $70,$E6,$60,$04,$04,$05
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 PRINT_SPEED
@@ -1658,11 +1661,9 @@ _L03    DEY
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ROAD_COLOR_TBL
-        .BYTE $0D,$09,$08,$0D,$0D,$0A,$0B,$0C
-        .BYTE $0C
+        .BYTE $0D,$09,$08,$0D,$0D,$0A,$0B,$0C,$0C
 ROAD_COLOR2_TBL
-        .BYTE $0E,$09,$08,$0E,$0E,$0E,$0E,$0E
-        .BYTE $0E
+        .BYTE $0E,$09,$08,$0E,$0E,$0E,$0E,$0E,$0E
 
         ; Each of these patterns consist of 4 rows. Each row has 4 chars.
         ;
@@ -2951,7 +2952,7 @@ CAR_SPEED_CONVERTION_TBL
         .BYTE $00,$0A,$14,$1E
 
         .BYTE $FE,$FD,$FB,$F7           ;Unk (Unused?)
-        .BYTE $01,$02,$04,$08           ;Unk (Unused?)
+        .BYTE $01,$02,$04,$08           ;Unk (Unused?) Inverse of the top one
 
         ; Valid position when in Split Screen
 ENEMY_CAR_INITIAL_X_TBL
