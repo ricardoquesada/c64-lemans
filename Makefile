@@ -13,6 +13,9 @@ lemans.prg: src/lemans.asm src/charset-f800-f97f.bin src/sprites-f980-f9ff.bin s
 	64tass -Wall -Werror --cbm-prg -o bin/lemans.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/lemans.asm
 	md5sum bin/lemans.prg orig/lemans.prg
 
+lemans_lia.prg: src/lemans.asm src/charset-f800-f97f.bin src/sprites-f980-f9ff.bin src/charset-fa00-fcbf.bin src/sprites-fcc0-ffbf.bin
+	64tass -Wall -Werror --cbm-prg -D USE_JOYSTICK:=1 -D USE_PRG:=1 -D USE_FIX_MISSPELL:=1 -o bin/lemans_lia.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/lemans.asm
+
 crt: lemans.prg
 	dd if=bin/lemans.prg of=bin/lemans.bin skip=2 bs=1
 	cat orig/crt_header_ultimax.bin bin/lemans.bin > bin/lemans.crt
@@ -21,8 +24,8 @@ crt: lemans.prg
 run: crt
 	$(X64) -verbose -moncommands bin/labels.txt bin/lemans.crt
 
-lemans.exo: lemans.prg
-	exomizer sfx sys -x1 -Di_line_number=2019 bin/lemans.prg -o bin/lemans.exo.prg
+lemans.exo: lemans_lia.prg
+	exomizer sfx sys -x1 -Di_line_number=2019 bin/lemans_lia.prg -o bin/lemans.exo.prg
 
 runprg: lemans.prg
 	$(X64) -verbose -moncommands bin/labels.txt bin/lemans.prg

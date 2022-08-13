@@ -8,12 +8,12 @@
 
 ; Compile-time variables
 ; To compile the unmodified original game, all values must be 0
-USE_JOYSTICK            .VAR 0          ;Set it to 1 to use Joystick  instead of Paddle
+USE_JOYSTICK            :?= 0           ;Set it to 1 to use Joystick  instead of Paddle
                                         ; By enabling Joystick support, it also enables
                                         ; Gamepad Rumble support
-USE_PRG                 .VAR 0          ;Generate a .prg instead of a .crt
+USE_PRG                 :?= 0           ;Generate a .prg instead of a .crt
                                         ; Original is cartridge
-USE_FIX_MISSPELL        .VAR 0          ;Fix "BOUNS" -> "BONUS"
+USE_FIX_MISSPELL        :?= 0           ;Fix "BOUNS" -> "BONUS"
 
 ;
 ; **** ZP ABSOLUTE ADRESSES ****
