@@ -11,13 +11,14 @@
 USE_LEMANS_LIA :?= 0
 .IF USE_LEMANS_LIA==1
         USE_JOYSTICK := 1
+        USE_RUMBLE := 1
         USE_PRG := 1
         USE_FIX_MISSPELL := 1
 .ENDIF
 
 USE_JOYSTICK            :?= 0           ;Set it to 1 to use Joystick  instead of Paddle
-                                        ; By enabling Joystick support, it also enables
-                                        ; Gamepad Rumble support
+USE_RUMBLE              :?= 0           ;Set it to 1 to enable Rumble when car
+                                        ; hits the shoulder
 USE_PRG                 :?= 0           ;Generate a .prg instead of a .crt
                                         ; Original is cartridge
 USE_FIX_MISSPELL        :?= 0           ;Fix "BOUNS" -> "BONUS"
@@ -1807,7 +1808,7 @@ _L02    JSR DRAW_ROAD_TOP_ROW
         LDA #$05
         STA ZP_PIXELS_TO_MOVE_CAR
 
-.if USE_JOYSTICK == 1
+.if USE_RUMBLE == 1
         LDA #%00111110                  ;Disable rumble in both joysticks
         STA $DC00
 .endif
@@ -1819,7 +1820,7 @@ _L02    JSR DRAW_ROAD_TOP_ROW
         ; Car is colliding with shoulder,
         ; but this is not a crash yet, just warning.
 _L03
-.if USE_JOYSTICK == 1
+.if USE_RUMBLE == 1
         LDA #%01111110                  ;Enable rumble in J1
         STA $DC00
 .endif
@@ -2004,6 +2005,12 @@ DO_COLLISION
         STY $D017                       ;Sprites Expand 2x Vertical (Y)
         STY $D01D                       ;Sprites Expand 2x Horizontal (X)
         STY ZP_HEADLIGHT_DURATION
+
+.if USE_RUMBLE == 1
+        LDA #%00111110                  ;Disable rumble in both joysticks
+        STA $DC00                       ; to prevent having it enabled while
+                                        ; the car moves from right to left
+.endif
 
         ; Turn off headlights sprites
         ; And turn on "Flames" sprites
