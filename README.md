@@ -13,7 +13,10 @@ Lemans for the C64.
 
 ## Source code
 
-Original cartridge was fully disassembled.
+Based on original cartridge.
+
+- Game was fully disassembled, includes my own comments.
+
 
 Includes optional patches like:
 
