@@ -67,10 +67,12 @@ _wait_loop
 _l0     cmp $d012
         bne _l0
 
-        dec _delay                      ;Counter expired?
-        beq _exit                       ; Yes, exit
+        dec _delay_lo                   ;Counter expired?
+        bne _l1                         ; Yes, exit
+        dec _delay_hi
+        beq _exit
 
-
+_l1
         lda $dc00                       ;User press fired?
         and $dc01                       ; either in joy#1
         and #%00010000                  ; or joy#2
@@ -82,7 +84,8 @@ _exit
         jmp end_intro
 
 
-_delay   .byte $ff
+_delay_lo       .byte $ff
+_delay_hi       .byte $03
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 nmi_handler
@@ -120,6 +123,7 @@ _crunched_byte_hi = * + 2
         inc _crunched_byte_hi
 _byte_skip_hi:
         inc $01                         ;RAM/IO/RAM
+        dec $d020
         inc $d020
         dec $01                         ;All RAM
         rts
