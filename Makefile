@@ -48,16 +48,8 @@ d64: intro-exo
 	$(C1541) $(D64_IMAGE) -write bin/intro-exo.prg "lemans"
 	$(C1541) $(D64_IMAGE) -list
 
-release: d64
-	-rm lemans-lia.zip
-	-rm lemans-lia/*
-	-rmdir lemans-lia
-	mkdir lemans-lia
-	cp res/file_id.diz lemans-lia/
-	cp res/LIA.nfo lemans-lia/
-	cp $(D64_IMAGE) lemans-lia/
-	zip -r lemans-lia.zip lemans-lia
-
+run: d64
+	$(X64) $(D64_IMAGE)
 
 debug: lemans-lia-exo
 	$(DEBUGGER) -d64 $(D64_IMAGE) -symbols bin/labels.txt
