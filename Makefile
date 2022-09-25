@@ -1,7 +1,7 @@
 .INTERMEDIATE: lemans.prg lemans.exo
 .PHONY: all clean run
 
-D64_IMAGE = "bin/lemans.d64"
+D64_IMAGE = "bin/lemans-lia.d64"
 X64 = x64
 AS = 64tass
 DEBUGGER = c64debugger
@@ -43,13 +43,24 @@ intro-exo: intro
 runintro: intro-exo
 	$(X64) -verbose -moncommands bin/labels.txt bin/intro-exo.prg
 
-d64: lemans-lia-exo
+d64: intro-exo
 	$(C1541) -format "lemans ,rq" d64 $(D64_IMAGE)
-	$(C1541) $(D64_IMAGE) -write bin/lemans.exo.prg "lemans"
+	$(C1541) $(D64_IMAGE) -write bin/intro-exo.prg "lemans"
 	$(C1541) $(D64_IMAGE) -list
 
-debug: lemans-exo
-	$(DEBUGGER) -d64 bin/lemans.d64 -symbols bin/labels.txt
+release: d64
+	-rm lemans-lia.zip
+	-rm lemans-lia/*
+	-rmdir lemans-lia
+	mkdir lemans-lia
+	cp res/file_id.diz lemans-lia/
+	cp res/LIA.nfo lemans-lia/
+	cp $(D64_IMAGE) lemans-lia/
+	zip -r lemans-lia.zip lemans-lia
+
+
+debug: lemans-lia-exo
+	$(DEBUGGER) -d64 $(D64_IMAGE) -symbols bin/labels.txt
 
 clean:
 	-rm $(D64_IMAGE)
