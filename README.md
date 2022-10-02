@@ -31,7 +31,7 @@ Includes optional patches like:
 - Latest binary: [lemans-lia.d64]
 - CSDB entry: https://csdb.dk/release/index.php?id=224027
 
-[rambo-lia.d64]: bin/lemans-lia.d64
+[lemans-lia.d64]: bin/lemans-lia.d64
 
 ## Rumble support
 
